@@ -344,6 +344,9 @@ window.addEventListener('load', () => {
     
     window.addEventListener('resize', () => app.onResize());
     window.app = app;
+
+window.ConstructionOS = ConstructionOS;
+console.log('✅ ACTUAL CONSTRUCTION OS جاهز للإستخدام');
 });
 
 
