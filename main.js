@@ -2,6 +2,7 @@
 // ACTUAL CONSTRUCTION OS - MAIN ENTRY POINT
 // =======================================
 // منصة متكاملة لتصميم وإدارة المشاريع الهندسية
+// الإصدار: 3.0.0 - محرك Reality-BIM
 // =======================================
 
 import * as THREE from 'three';
@@ -14,6 +15,23 @@ import { ProjectManager } from './core/ProjectManager.js';
 import { GlobalEntitySystem } from './core/global/GlobalEntitySystem.js';
 import { SceneConnector } from './core/global/SceneConnector.js';
 import { CoordinateTransformer } from './core/global/CoordinateTransformer.js';
+import { StorageManager } from './core/storage/StorageManager.js';
+import { SceneGraph } from './core/bridge/SceneGraph.js';
+
+// ========== REALITY BRIDGE SYSTEMS ==========
+import { RealityBridge } from './core/bridge/RealityBridge.js';
+import { SceneAnchor } from './core/bridge/SceneAnchor.js';
+import { EntityMarker } from './core/bridge/EntityMarker.js';
+import { SceneLink } from './core/bridge/SceneLink.js';
+import { SyncManager } from './core/bridge/SyncManager.js';
+
+// ========== LOADING SYSTEMS ==========
+import { IntegratedLoader } from './core/loading/IntegratedLoader.js';
+import { LazySceneLoader } from './core/loading/LazySceneLoader.js';
+import { SegmentedSceneLoader } from './core/loading/SegmentedSceneLoader.js';
+import { LODManager } from './core/loading/LODManager.js';
+import { TileLODManager } from './core/loading/TileLODManager.js';
+import { PriorityQueue } from './core/loading/PriorityQueue.js';
 
 // ========== ARCHITECTURE MODULES ==========
 import { Wall } from './modules/Architecture/Wall.js';
@@ -101,14 +119,21 @@ import { GlobalEntitiesPanel } from './ui/global/GlobalEntitiesPanel.js';
 import { SceneConnectorUI } from './ui/global/SceneConnectorUI.js';
 import { CalibrationUI } from './ui/cad/CalibrationUI.js';
 
+// ========== DEBUG & ANALYTICS ==========
+import { DebugLayer } from './core/debug/DebugLayer.js';
+import { AnalyticsDebugger } from './core/debug/AnalyticsDebugger.js';
+
+// ========== RENDERING ==========
+import { HybridRenderer } from './core/rendering/HybridRenderer.js';
+
 // =======================================
 // 🎯 MAIN CONSTRUCTION OS CLASS
 // =======================================
 
 class ActualConstructionOS {
     constructor() {
-        console.log('🚀 بدء تشغيل ACTUAL CONSTRUCTION OS...');
-        console.log('🏗️ منصة متكاملة لتصميم وإدارة المشاريع الهندسية');
+        console.log('%c🚀 ACTUAL CONSTRUCTION OS v3.0.0', 'color: #88aaff; font-size: 16px; font-weight: bold;');
+        console.log('%c🏗️ محرك Reality-BIM المتكامل', 'color: #ffaa44; font-size: 14px;');
         
         // ===== THREE.JS SETUP =====
         this.initThree();
@@ -116,11 +141,20 @@ class ActualConstructionOS {
         // ===== CORE SYSTEMS =====
         this.initCore();
         
+        // ===== LOADING SYSTEMS =====
+        this.initLoadingSystems();
+        
+        // ===== BRIDGE SYSTEMS =====
+        this.initBridgeSystems();
+        
         // ===== TOOLS =====
         this.initTools();
         
         // ===== UI =====
         this.initUI();
+        
+        // ===== DEBUG & ANALYTICS =====
+        this.initDebugSystems();
         
         // ===== SETUP =====
         this.setupLights();
@@ -130,8 +164,11 @@ class ActualConstructionOS {
         // بدء الحركة
         this.animate();
         
-        console.log('✅ ACTUAL CONSTRUCTION OS جاهز للتشغيل');
+        console.log('%c✅ ACTUAL CONSTRUCTION OS جاهز', 'color: #44ff44; font-size: 14px;');
+        console.log('📊 المشروع جاهز لاستقبال البيانات');
     }
+
+    // ==================== تهيئة Three.js ====================
 
     initThree() {
         // المشهد
@@ -143,19 +180,17 @@ class ActualConstructionOS {
         this.camera.position.set(30, 20, 30);
         this.camera.lookAt(0, 5, 0);
         
-        // الرندر
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('container').appendChild(this.renderer.domElement);
+        // الرندر الهجين
+        this.renderer = new HybridRenderer('container');
         
         // التحكم
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls = new OrbitControls(this.camera, this.renderer.webglRenderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.maxPolarAngle = Math.PI / 2;
     }
+
+    // ==================== تهيئة الأنظمة الأساسية ====================
 
     initCore() {
         // نظم الإحداثيات
@@ -165,9 +200,17 @@ class ActualConstructionOS {
         this.sceneManager = new SceneManager(this);
         this.projectManager = new ProjectManager();
         
+        // الرسم البياني للمشاهد
+        this.sceneGraph = new SceneGraph();
+        
+        // مدير التخزين
+        this.storage = new StorageManager();
+        
         // الأنظمة العالمية
         this.globalSystem = new GlobalEntitySystem(this.geoRef);
-        this.sceneConnector = new SceneConnector(this.globalSystem);
+        this.sceneConnector = new SceneConnector(this.geoRef);
+        this.sceneConnector.setGlobalSystem(this.globalSystem);
+        
         this.coordTransformer = new CoordinateTransformer(this.geoRef, this.sceneConnector);
         
         // BOQ
@@ -181,12 +224,55 @@ class ActualConstructionOS {
         
         // مكتبة المواد
         this.materialLibrary = new MaterialLibrary();
-        
-        // تعريف الأنظمة للوصول العام
-        window.constructionOS = this;
-        window.globalSystem = this.globalSystem;
-        window.sceneConnector = this.sceneConnector;
     }
+
+    // ==================== تهيئة أنظمة التحميل ====================
+
+    initLoadingSystems() {
+        // أنظمة التحميل الفردية
+        this.lazyLoader = new LazySceneLoader(this.sceneGraph, this.storage);
+        this.segmentedLoader = new SegmentedSceneLoader();
+        this.lodManager = new LODManager(this.camera);
+        this.tileLODManager = new TileLODManager(this.camera);
+        this.priorityQueue = new PriorityQueue();
+        
+        // المحمل المتكامل
+        this.loader = new IntegratedLoader(
+            this.sceneGraph,
+            this.storage,
+            this.camera,
+            null // سيتم ربط analytics لاحقاً
+        );
+    }
+
+    // ==================== تهيئة Reality Bridge ====================
+
+    initBridgeSystems() {
+        this.realityBridge = new RealityBridge(this.globalSystem, this.sceneConnector, this.sceneGraph);
+        this.syncManager = new SyncManager(this.realityBridge);
+        
+        // ربط المحمل بالـ Bridge
+        this.realityBridge.setLoader(this.loader);
+        
+        // إنشاء مشاهد افتراضية للتجربة
+        this.setupDemoScenes();
+    }
+
+    setupDemoScenes() {
+        // إضافة مشاهد مع إحداثيات افتراضية
+        this.sceneConnector.addScene('scene_001', { x: 0, y: 0, z: 0 }, 0);
+        this.sceneConnector.addScene('scene_002', { x: 20, y: 0, z: 0 }, 0);
+        this.sceneConnector.addScene('scene_003', { x: 40, y: 0, z: 10 }, 0);
+        
+        // ربط المشاهد
+        this.realityBridge.createLink('scene_001', 'scene_002', { x: 10, y: 0, z: 0 }, 'door');
+        this.realityBridge.createLink('scene_002', 'scene_003', { x: 30, y: 0, z: 5 }, 'hallway');
+        
+        // بناء الرسم البياني
+        this.sceneGraph.buildFromScenes();
+    }
+
+    // ==================== تهيئة الأدوات ====================
 
     initTools() {
         // أدوات CAD
@@ -205,6 +291,8 @@ class ActualConstructionOS {
         this.globalDataExporter = new GlobalDataExporter(this);
     }
 
+    // ==================== تهيئة واجهة المستخدم ====================
+
     initUI() {
         // واجهة المستخدم الرئيسية
         this.dashboard = new Dashboard(this);
@@ -216,6 +304,25 @@ class ActualConstructionOS {
         this.sceneConnectorUI = new SceneConnectorUI(this);
         this.calibrationUI = new CalibrationUI(this, this.calibrationWizard);
     }
+
+    // ==================== تهيئة أنظمة التصحيح ====================
+
+    initDebugSystems() {
+        // محلل الأداء
+        this.analytics = new AnalyticsDebugger(this.loader, this.realityBridge);
+        
+        // ربط analytics بالمحمل
+        this.loader.analytics = this.analytics;
+        
+        // طبقة التصحيح
+        this.debugLayer = new DebugLayer(this.sceneGraph, this.realityBridge, this.loader, this.lodManager);
+        this.debugLayer.setupKeyboardShortcut();
+        
+        // بدء التتبع
+        this.analytics.startTracking();
+    }
+
+    // ==================== الإضاءة ====================
 
     setupLights() {
         // إضاءة محيطية
@@ -242,6 +349,8 @@ class ActualConstructionOS {
         this.scene.add(backLight);
     }
 
+    // ==================== الشبكة الأرضية ====================
+
     setupGrid() {
         // شبكة رئيسية
         const gridHelper = new THREE.GridHelper(200, 40, 0x88aaff, 0x335588);
@@ -253,12 +362,14 @@ class ActualConstructionOS {
         this.scene.add(axesHelper);
     }
 
+    // ==================== الأحداث ====================
+
     setupEvents() {
         window.addEventListener('resize', () => this.onResize());
         
         // أحداث الفأرة
-        this.renderer.domElement.addEventListener('click', (e) => this.onClick(e));
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        this.renderer.webglRenderer.domElement.addEventListener('click', (e) => this.onClick(e));
+        this.renderer.webglRenderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
         
         // لوحة المفاتيح
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
@@ -278,8 +389,8 @@ class ActualConstructionOS {
     handleCalibrationClick(e) {
         // حساب نقطة التقاطع مع الشبكة
         const mouse = new THREE.Vector2();
-        mouse.x = (e.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(e.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
+        mouse.x = (e.clientX / this.renderer.webglRenderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(e.clientY / this.renderer.webglRenderer.domElement.clientHeight) * 2 + 1;
 
         const raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(mouse, this.camera);
@@ -306,6 +417,12 @@ class ActualConstructionOS {
                 this.distanceTool?.deactivate();
                 this.areaTool?.deactivate();
                 break;
+            case 'F2':
+                this.debugLayer?.toggle();
+                break;
+            case 'F3':
+                this.analytics?.toggle();
+                break;
             case 'c':
                 if (e.ctrlKey) {
                     this.calibrationUI.show();
@@ -317,17 +434,29 @@ class ActualConstructionOS {
     onResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.resize(window.innerWidth, window.innerHeight);
     }
+
+    // ==================== حلقة الحركة ====================
 
     animate() {
         requestAnimationFrame(() => this.animate());
         
         this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+        
+        // اختيار الريندرر المناسب
+        if (this.loader.currentScene) {
+            this.renderer.renderWebGL(this.scene, this.camera);
+        } else {
+            this.renderer.renderCSS('default.jpg', []);
+        }
+        
+        // تحديث LOD
+        this.lodManager.update();
+        this.tileLODManager.update();
     }
 
-    // ===== دوال مساعدة =====
+    // ==================== دوال مساعدة ====================
     
     createGlobalWall(options) {
         const wall = new GlobalWall(this.globalSystem, this.sceneConnector, options);
@@ -359,7 +488,24 @@ class ActualConstructionOS {
         return electrical;
     }
 
-    // ===== دوال التصدير =====
+    // ==================== تحميل مشهد ====================
+
+    async loadScene(sceneId) {
+        try {
+            const sceneData = await this.loader.loadScene(sceneId, {
+                viewport: { x: this.camera.position.x, y: this.camera.position.z }
+            });
+            
+            this.loader.setCurrentScene(sceneId);
+            console.log(`✅ تم تحميل المشهد ${sceneId}`);
+            
+            return sceneData;
+        } catch (error) {
+            console.error(`❌ فشل تحميل المشهد ${sceneId}:`, error);
+        }
+    }
+
+    // ==================== دوال التصدير ====================
     
     exportToActualViewStudio() {
         return this.constructionExporter.export();
@@ -368,13 +514,35 @@ class ActualConstructionOS {
     generateGlobalReport() {
         return this.globalReporter.generateFullReport();
     }
-}
 
+    getSystemStatus() {
+        return {
+            version: '3.0.0',
+            name: 'ACTUAL CONSTRUCTION OS',
+            type: 'Reality-BIM Engine',
+            stats: {
+                loader: this.loader.getDetailedStats(),
+                bridge: {
+                    anchors: this.realityBridge.anchors.size,
+                    markers: this.realityBridge.markers.size,
+                    links: this.realityBridge.links.size
+                },
+                graph: {
+                    nodes: this.sceneGraph.nodes.size,
+                    edges: this.sceneGraph.edges.length
+                },
+                analytics: this.analytics.getPerformanceReport()
+            }
+        };
+    }
+}
 // =======================================
 // 🚀 تشغيل التطبيق
 // =======================================
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    console.log('%c🌟 ACTUAL CONSTRUCTION OS - Reality-BIM Engine', 'color: #ffaa44; font-size: 18px; font-weight: bold;');
+    
     // إخفاء شاشة التحميل
     const loader = document.getElementById('loader');
     if (loader) {
@@ -387,9 +555,21 @@ window.addEventListener('load', () => {
     // إنشاء التطبيق
     window.app = new ActualConstructionOS();
     
-    console.log('🌟 ACTUAL CONSTRUCTION OS جاهز للاستخدام');
-    console.log('📊 يمكنك البدء في تصميم مشروعك الآن');
+    // تحميل أول مشهد تجريبي
+    setTimeout(() => {
+        app.loadScene('scene_001');
+    }, 2000);
+    
+    console.log('📊 يمكنك استخدام window.app للوصول إلى التطبيق');
+    console.log('🔧 F2: إظهار/إخفاء Debug Layer');
+    console.log('🔧 F3: إظهار/إخفاء Analytics');
 });
 
 // للوصول من Console
 window.ActualConstructionOS = ActualConstructionOS;
+// =======================================
+// 🚀 تشغيل التطبيق
+// =======================================
+
+window.addEventListener('load', async () => {
+    console.log('%c🌟 ACTUAL CONSTRUCTION OS - Reality-BIM Engine', 'color: #ffaa44; font-size: 18px;
