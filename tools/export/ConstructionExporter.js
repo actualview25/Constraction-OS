@@ -1,329 +1,352 @@
 // =======================================
-// ACTUAL CONSTRUCTION OS - CALIBRATION WIZARD
+// ACTUAL CONSTRUCTION OS - CONSTRUCTION EXPORTER
 // =======================================
 
-export class CalibrationWizard {
-    constructor(geoRef, sceneConnector) {
-        this.geoRef = geoRef;
-        this.sceneConnector = sceneConnector;
-        this.step = 1;
-        this.calibrationPoints = [];
-        this.knownDistance = 0;
-        this.totalStationData = [];
-        this.gpsData = [];
-        this.method = 'manual'; // manual, totalStation, gps
+export class ConstructionExporter {
+    constructor(app) {
+        this.app = app;
+        this.zip = new JSZip();
+        this.format = 'actual-view'; // actual-view, ifc, obj
     }
 
-    // بدء المعالج
-    start(method = 'manual') {
-        this.method = method;
-        this.step = 1;
-        this.calibrationPoints = [];
+    // تصدير المشروع كاملاً
+    async export(projectName, format = 'actual-view') {
+        this.format = format;
+        console.log(`📦 بدء تصدير المشروع: ${projectName} (${format})`);
         
-        console.log(`📏 بدء معالج المعايرة - الطريقة: ${method}`);
+        const folder = this.zip.folder(projectName);
+        
+        // تصدير حسب الصيغة
+        switch (format) {
+            case 'actual-view':
+                await this.exportForActualView(folder);
+                break;
+            case 'ifc':
+                await this.exportAsIFC(folder);
+                break;
+            case 'obj':
+                await this.exportAsOBJ(folder);
+                break;
+            default:
+                throw new Error('صيغة غير معروفة');
+        }
+
+        // إنشاء ملف ZIP
+        const content = await this.zip.generateAsync({ type: 'blob' });
+        saveAs(content, `${projectName}.zip`);
+        
+        console.log(`✅ تم تصدير المشروع بنجاح: ${projectName}.zip`);
+    }
+
+    // تصدير لـ ACTUAL VIEW STUDIO
+    async exportForActualView(folder) {
+        // إنشاء manifest
+        const manifest = this.createManifest();
+        folder.file('manifest.json', JSON.stringify(manifest, null, 2));
+        
+        // تصدير المشاهد
+        await this.exportScenes(folder);
+        
+        // تصدير الكيانات العالمية
+        const globalData = this.exportGlobalEntities();
+        folder.file('global-entities.json', JSON.stringify(globalData, null, 2));
+        
+        // تصدير الإحداثيات
+        const geoData = this.exportGeoReferencing();
+        folder.file('georeferencing.json', JSON.stringify(geoData, null, 2));
+        
+        // إنشاء نقاط انتقال تلقائية
+        const hotspots = this.generateHotspots();
+        folder.file('hotspots.json', JSON.stringify(hotspots, null, 2));
+        
+        console.log(`📋 تم إنشاء manifest مع ${manifest.scenes.length} مشهد`);
+    }
+
+    // إنشاء manifest
+    createManifest() {
+        const scenes = this.app.sceneManager?.scenes || [];
         
         return {
-            step: 1,
-            method: method,
-            message: 'اختر النقطة الأولى في المخطط',
-            instruction: 'انقر على نقطة معروفة في المشهد'
+            project: {
+                name: this.app.projectManager?.currentProject?.name || 'مشروع جديد',
+                date: new Date().toISOString(),
+                version: '2.0',
+                scenesCount: scenes.length
+            },
+            scenes: scenes.map((scene, index) => ({
+                id: scene.id,
+                index: index,
+                name: scene.name,
+                image: `scenes/scene-${index}.jpg`,
+                data: `scenes/scene-${index}.json`,
+                hotspotsCount: scene.hotspots?.length || 0,
+                hasPaths: (scene.paths?.length > 0),
+                hasMeasurements: (scene.measurements?.length > 0),
+                realWorldPosition: this.getScenePosition(scene.id)
+            })),
+            georeferencing: {
+                enabled: this.app.geoRef?.gcp?.length > 0,
+                coordinateSystem: this.app.geoRef?.coordinateSystem,
+                datum: this.app.geoRef?.datum
+            }
         };
     }
 
-    // إضافة نقطة
-    addPoint(point) {
-        this.calibrationPoints.push({ ...point });
+    // الحصول على موقع المشهد في العالم الحقيقي
+    getScenePosition(sceneId) {
+        if (!this.app.sceneConnector) return null;
         
-        if (this.method === 'manual') {
-            return this.handleManualPoint();
-        } else if (this.method === 'totalStation') {
-            return this.handleTotalStationPoint();
-        } else if (this.method === 'gps') {
-            return this.handleGPSPoint();
-        }
+        const position = this.app.sceneConnector.getScenePosition(sceneId);
+        if (!position) return null;
+        
+        return {
+            x: position.x,
+            y: position.y,
+            z: position.z,
+            latitude: position.latitude,
+            longitude: position.longitude
+        };
     }
 
-    // معالجة النقاط في الطريقة اليدوية
-    handleManualPoint() {
-        if (this.step === 1 && this.calibrationPoints.length === 1) {
-            this.step = 2;
-            return {
-                step: 2,
-                message: 'اختر النقطة الثانية',
-                instruction: 'انقر على النقطة الثانية (مسافة معروفة)'
-            };
-        }
+    // تصدير المشاهد
+    async exportScenes(folder) {
+        const scenes = this.app.sceneManager?.scenes || [];
+        const imagesFolder = folder.folder('images');
+        const scenesFolder = folder.folder('scenes');
         
-        if (this.step === 2 && this.calibrationPoints.length === 2) {
-            this.step = 3;
-            return {
-                step: 3,
-                message: 'أدخل المسافة الحقيقية',
-                instruction: 'أدخل المسافة بين النقطتين بالمتر'
-            };
-        }
-        
-        return null;
-    }
-
-    // معالجة نقاط Total Station
-    handleTotalStationPoint() {
-        if (this.calibrationPoints.length <= this.totalStationData.length) {
-            const point = this.totalStationData[this.calibrationPoints.length - 1];
+        for (let i = 0; i < scenes.length; i++) {
+            const scene = scenes[i];
             
-            this.geoRef.addGCP(
-                this.calibrationPoints[this.calibrationPoints.length - 1],
-                {
-                    x: point.easting,
-                    y: point.northing,
-                    z: point.elevation
+            // تصدير الصورة
+            if (scene.originalImage) {
+                const imageData = scene.originalImage.split(',')[1];
+                if (imageData) {
+                    imagesFolder.file(`scene-${i}.jpg`, imageData, { base64: true });
                 }
-            );
-            
-            if (this.calibrationPoints.length === this.totalStationData.length) {
-                this.step = 4;
-                return {
-                    step: 4,
-                    message: 'اكتملت المعايرة',
-                    instruction: 'تمت إضافة جميع نقاط التحكم'
-                };
             }
             
-            return {
-                step: 2,
-                message: `أضف نقطة ${this.calibrationPoints.length + 1}`,
-                instruction: `انقر على النقطة المقابلة للنقطة ${this.totalStationData[this.calibrationPoints.length].id}`
-            };
+            // تصدير بيانات المشهد
+            const sceneData = this.prepareSceneData(scene, i);
+            scenesFolder.file(`scene-${i}.json`, JSON.stringify(sceneData, null, 2));
         }
-        
-        return null;
     }
 
-    // معالجة نقاط GPS
-    handleGPSPoint() {
-        // مشابه لـ Total Station
-        return this.handleTotalStationPoint();
-    }
-
-    // تعيين المسافة الحقيقية
-    setKnownDistance(distance) {
-        this.knownDistance = parseFloat(distance);
-        
-        if (this.calibrationPoints.length >= 2 && this.knownDistance > 0) {
-            return this.calculateScale();
-        }
-        
-        return null;
-    }
-
-    // حساب المقياس
-    calculateScale() {
-        if (this.calibrationPoints.length < 2) {
-            throw new Error('تحتاج إلى نقطتين للمعايرة');
-        }
-
-        const point1 = this.calibrationPoints[0];
-        const point2 = this.calibrationPoints[1];
-        
-        // المسافة في النموذج
-        const modelDistance = Math.sqrt(
-            Math.pow(point2.x - point1.x, 2) +
-            Math.pow(point2.y - point1.y, 2) +
-            Math.pow(point2.z - point1.z, 2)
-        );
-
-        if (modelDistance === 0) {
-            throw new Error('المسافة بين النقطتين صفر');
-        }
-
-        // حساب المقياس
-        const scale = this.knownDistance / modelDistance;
-        
-        this.geoRef.setScale(scale);
-        
-        console.log(`📐 تمت المعايرة: ${modelDistance.toFixed(4)} وحدة = ${this.knownDistance} متر`);
-        console.log(`📏 المقياس: 1 وحدة = ${scale.toFixed(4)} متر`);
-
+    // تجهيز بيانات مشهد واحد
+    prepareSceneData(scene, index) {
         return {
-            step: 4,
-            message: 'تمت المعايرة بنجاح',
-            modelDistance: modelDistance.toFixed(4),
-            realDistance: this.knownDistance,
-            scale: scale.toFixed(4),
-            completed: true
-        };
-    }
-
-    // استيراد بيانات من Total Station
-    importTotalStationData(csvData) {
-        const lines = csvData.split('\n');
-        this.totalStationData = [];
-        
-        lines.forEach((line, index) => {
-            if (index === 0 || !line.trim()) return; // تخطي الرأس
-            
-            const [id, easting, northing, elevation, desc] = line.split(',');
-            this.totalStationData.push({
-                id: id.trim(),
-                easting: parseFloat(easting),
-                northing: parseFloat(northing),
-                elevation: parseFloat(elevation),
-                description: desc?.trim() || ''
-            });
-        });
-        
-        console.log(`📡 تم استيراد ${this.totalStationData.length} نقطة من Total Station`);
-        return this.totalStationData;
-    }
-
-    // استيراد بيانات GPS
-    importGPSData(csvData) {
-        const lines = csvData.split('\n');
-        this.gpsData = [];
-        
-        lines.forEach((line, index) => {
-            if (index === 0 || !line.trim()) return;
-            
-            const [id, lat, lon, alt, desc] = line.split(',');
-            this.gpsData.push({
-                id: id.trim(),
-                latitude: parseFloat(lat),
-                longitude: parseFloat(lon),
-                altitude: parseFloat(alt),
-                description: desc?.trim() || ''
-            });
-        });
-        
-        console.log(`🛰️ تم استيراد ${this.gpsData.length} نقطة GPS`);
-        return this.gpsData;
-    }
-
-    // ربط نقطة في الصورة مع نقطة من Total Station
-    matchWithTotalStation(photoPoint, stationIndex) {
-        const stationPoint = this.totalStationData[stationIndex];
-        if (!stationPoint) return false;
-        
-        this.geoRef.addGCP(photoPoint, {
-            x: stationPoint.easting,
-            y: stationPoint.northing,
-            z: stationPoint.elevation
-        });
-        
-        console.log(`✅ تم ربط نقطة الصورة مع نقطة المساح ${stationPoint.id}`);
-        return true;
-    }
-
-    // ربط نقطة في الصورة مع نقطة GPS
-    matchWithGPS(photoPoint, gpsIndex) {
-        const gpsPoint = this.gpsData[gpsIndex];
-        if (!gpsPoint) return false;
-        
-        // تحويل GPS إلى UTM
-        const utm = this.geoRef.wgs84ToUtm(gpsPoint.latitude, gpsPoint.longitude);
-        
-        this.geoRef.addGCP(photoPoint, {
-            x: utm.easting,
-            y: utm.northing,
-            z: gpsPoint.altitude
-        });
-        
-        console.log(`✅ تم ربط نقطة الصورة مع نقطة GPS ${gpsPoint.id}`);
-        return true;
-    }
-
-    // التحقق من صحة المعايرة
-    validateCalibration() {
-        const errors = [];
-        
-        if (this.calibrationPoints.length < 2) {
-            errors.push('تحتاج إلى نقطتين للمعايرة على الأقل');
-        }
-        
-        if (this.knownDistance <= 0) {
-            errors.push('المسافة الحقيقية يجب أن تكون أكبر من صفر');
-        }
-        
-        if (this.geoRef.gcp.length < 3) {
-            errors.push('يفضل استخدام 3 نقاط تحكم على الأقل للحصول على دقة أفضل');
-        }
-        
-        return {
-            valid: errors.length === 0,
-            errors: errors
-        };
-    }
-
-    // الحصول على تقرير المعايرة
-    getCalibrationReport() {
-        const report = {
-            method: this.method,
-            points: this.calibrationPoints.map((p, i) => ({
-                number: i + 1,
-                x: p.x.toFixed(2),
-                y: p.y.toFixed(2),
-                z: p.z.toFixed(2)
+            id: scene.id,
+            index: index,
+            name: scene.name,
+            image: `images/scene-${index}.jpg`,
+            realWorldPosition: this.getScenePosition(scene.id),
+            paths: (scene.paths || []).map(p => ({
+                type: p.type || 'unknown',
+                color: p.color || '#ffaa44',
+                points: (p.points || []).map(pt => ({
+                    x: pt.x || 0,
+                    y: pt.y || 0,
+                    z: pt.z || 0
+                }))
             })),
-            gcps: this.geoRef.gcp.length,
-            totalStationPoints: this.totalStationData.length,
-            gpsPoints: this.gpsData.length
+            hotspots: (scene.hotspots || []).map(h => ({
+                id: h.id,
+                type: h.type,
+                position: h.position,
+                data: h.data || {}
+            })),
+            measurements: (scene.measurements || []).map(m => ({
+                length: m.length,
+                height: m.height,
+                start: m.start,
+                end: m.end
+            })),
+            globalEntities: this.getSceneGlobalEntities(scene.id)
         };
+    }
 
-        if (this.calibrationPoints.length >= 2 && this.knownDistance > 0) {
-            const p1 = this.calibrationPoints[0];
-            const p2 = this.calibrationPoints[1];
-            const modelDistance = Math.sqrt(
-                Math.pow(p2.x - p1.x, 2) +
-                Math.pow(p2.y - p1.y, 2) +
-                Math.pow(p2.z - p1.z, 2)
-            );
+    // الحصول على الكيانات العالمية في المشهد
+    getSceneGlobalEntities(sceneId) {
+        if (!this.app.sceneConnector) return [];
+        
+        const entityIds = this.app.sceneConnector.getGlobalEntitiesInScene(sceneId);
+        
+        return entityIds.map(id => {
+            const entity = this.app.globalSystem?.getCompleteEntity(id);
+            if (!entity) return null;
             
-            report.modelDistance = modelDistance.toFixed(4);
-            report.realDistance = this.knownDistance;
-            report.scale = (this.knownDistance / modelDistance).toFixed(4);
+            return {
+                id: entity.id,
+                type: entity.type,
+                segment: entity.segments?.get(sceneId)
+            };
+        }).filter(e => e !== null);
+    }
+
+    // تصدير الكيانات العالمية
+    exportGlobalEntities() {
+        if (!this.app.globalSystem) return { entities: [] };
+        
+        const exportData = this.app.globalSystem.exportEntities();
+        
+        // إضافة معلومات الإحداثيات
+        exportData.entities.forEach(entity => {
+            entity.geoReferenced = this.app.geoRef?.gcp?.length > 0;
+        });
+        
+        return exportData;
+    }
+
+    // تصدير معلومات الإحداثيات
+    exportGeoReferencing() {
+        if (!this.app.geoRef) return null;
+        
+        return this.app.geoRef.exportForViewer();
+    }
+
+    // إنشاء نقاط انتقال تلقائية
+    generateHotspots() {
+        if (!this.app.sceneConnector) return [];
+        
+        const hotspots = this.app.sceneConnector.createAutomaticHotspots(15);
+        
+        // توزيع النقاط على المشاهد
+        const sceneHotspots = {};
+        
+        hotspots.forEach(hotspot => {
+            const targetId = hotspot.data.targetSceneId;
+            
+            if (!sceneHotspots[targetId]) {
+                sceneHotspots[targetId] = [];
+            }
+            
+            sceneHotspots[targetId].push(hotspot);
+        });
+        
+        return sceneHotspots;
+    }
+
+    // تصدير بصيغة IFC (للتكامل مع برامج BIM)
+    async exportAsIFC(folder) {
+        // إنشاء ملف IFC أساسي
+        let ifcContent = this.generateIFCHeader();
+        
+        // إضافة الكيانات
+        ifcContent += this.generateIFCEntities();
+        
+        folder.file('model.ifc', ifcContent);
+        console.log('🏗️ تم تصدير نموذج IFC');
+    }
+
+    generateIFCHeader() {
+        const date = new Date();
+        const timeStamp = Math.floor(date.getTime() / 1000);
+        
+        return `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('ViewDefinition [DesignTransferView]'),'2;1');
+FILE_NAME('model.ifc','${date.toISOString()}',('User'),('Company'),' ',' ','Unknown');
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+`;
+    }
+
+    generateIFCEntities() {
+        let entities = '';
+        
+        // إضافة الكيانات من النظام العالمي
+        if (this.app.globalSystem) {
+            this.app.globalSystem.entities.forEach(entity => {
+                entities += this.entityToIFC(entity);
+            });
         }
-
-        return report;
+        
+        entities += 'ENDSEC;\nEND-ISO-10303-21;';
+        return entities;
     }
 
-    // إعادة تعيين
-    reset() {
-        this.step = 1;
-        this.calibrationPoints = [];
-        this.knownDistance = 0;
-        this.totalStationData = [];
-        this.gpsData = [];
-        console.log('🔄 إعادة تعيين معالج المعايرة');
+    entityToIFC(entity) {
+        // تحويل كيان إلى IFC - دالة مبسطة
+        return `#${entity.id}=IFCBUILDINGELEMENTPROXY('${entity.id}',#1,'${entity.type}','',$,#100,$,$);\n`;
     }
 
-    // إنشاء واجهة المستخدم
-    createUI() {
-        const container = document.createElement('div');
-        container.className = 'calibration-wizard';
-        container.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 300px;
-            background: rgba(20,30,40,0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid #4a6c8f;
-            border-radius: 12px;
-            color: white;
-            padding: 15px;
-            z-index: 1000;
-            direction: rtl;
-        `;
+    // تصدير بصيغة OBJ (للنمذجة ثلاثية الأبعاد)
+    async exportAsOBJ(folder) {
+        let objContent = '# ACTUAL CONSTRUCTION OS Export\n';
+        let mtlContent = this.generateMTL();
+        
+        // إضافة الكيانات
+        objContent += this.generateOBJEntities();
+        
+        folder.file('model.obj', objContent);
+        folder.file('model.mtl', mtlContent);
+        
+        console.log('📐 تم تصدير نموذج OBJ');
+    }
 
-        container.innerHTML = `
-            <h3 style="color: #88aaff; margin-top: 0;">📏 معالج المعايرة</h3>
-            <div style="margin: 10px 0;" id="calibration-status"></div>
-            <div style="margin: 10px 0;" id="calibration-points"></div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button id="calibration-cancel" style="background: #c0392b; color: white; border: none; padding: 5px 10px; border-radius: 4px;">إلغاء</button>
-                <button id="calibration-next" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px;">التالي</button>
-            </div>
-        `;
+    generateMTL() {
+        return `# Material Library
+newmtl default
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 0.5 0.5 0.5
+Ns 10
 
-        return container;
+newmtl concrete
+Ka 0.2 0.2 0.2
+Kd 0.5 0.5 0.5
+Ks 0.3 0.3 0.3
+Ns 5
+
+newmtl steel
+Ka 0.1 0.1 0.1
+Kd 0.6 0.6 0.6
+Ks 0.8 0.8 0.8
+Ns 50
+`;
+    }
+
+    generateOBJEntities() {
+        let obj = '';
+        let vertexIndex = 1;
+        
+        if (this.app.globalSystem) {
+            this.app.globalSystem.entities.forEach(entity => {
+                obj += this.entityToOBJ(entity, vertexIndex);
+                vertexIndex += 1000; // تباعد بسيط
+            });
+        }
+        
+        return obj;
+    }
+
+    entityToOBJ(entity, startIndex) {
+        // دالة مبسطة لتحويل كيان إلى OBJ
+        return `# ${entity.type} - ${entity.id}\n`;
+    }
+
+    // تصدير تقرير الكميات
+    exportBOQ() {
+        if (!this.app.globalBOQ) return null;
+        
+        const boq = this.app.globalBOQ.calculateAll();
+        const report = this.app.globalReporter?.generateFullReport();
+        
+        return {
+            summary: boq.grandTotals,
+            details: boq,
+            report: report
+        };
+    }
+
+    // الحصول على إحصائيات التصدير
+    getExportStats() {
+        return {
+            scenes: this.app.sceneManager?.scenes?.length || 0,
+            globalEntities: this.app.globalSystem?.entities?.size || 0,
+            georeferenced: this.app.geoRef?.gcp?.length > 0,
+            totalStationPoints: this.app.calibrationWizard?.totalStationData?.length || 0,
+            gpsPoints: this.app.calibrationWizard?.gpsData?.length || 0
+        };
     }
 }
