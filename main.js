@@ -155,54 +155,83 @@ import { HybridRenderer } from './core/rendering/HybridRenderer.js';
 // 🎯 MAIN CONSTRUCTION OS CLASS
 // =======================================
 
-class ActualConstructionOS {
-    constructor() {
-        console.log('%c🚀 ACTUAL CONSTRUCTION OS v3.0.0', 'color: #88aaff; font-size: 16px; font-weight: bold;');
-        console.log('%c🏗️ محرك Reality-BIM المتكامل', 'color: #ffaa44; font-size: 14px;');
+class ActualConstructionOS
+{constructor() {
+    console.log('%c🚀 ACTUAL CONSTRUCTION OS v3.0.0', 'color: #88aaff; font-size: 16px; font-weight: bold;');
+    console.log('%c🏗️ محرك Reality-BIM المتكامل', 'color: #ffaa44; font-size: 14px;');
+    
+    // ===== THREE.JS SETUP =====
+    this.initThree();
+    
+    // ===== CORE SYSTEMS =====
+    this.initCore();
+    
+    // ===== LOADING SYSTEMS =====
+    this.initLoadingSystems();
+    
+    // ===== UNIVERSAL SYSTEMS =====
+    this.initUniversalSystems();
+    
+    // ===== CLASH DETECTION =====
+    this.initClashDetection();
+    
+    // ===== FLOOR SYSTEMS =====
+    this.initFloorSystems();
+    
+    // ===== BRIDGE SYSTEMS =====
+    this.initBridgeSystems();
+    
+    // ===== TOOLS =====
+    this.initTools();
+    
+    // ===== UI =====
+    this.initUI();
+    
+    // ===== DEBUG & ANALYTICS =====
+    this.initDebugSystems();
+    
+    // ===== WORKER MODES (اختياري) =====
+    this.initWorkerModes();
+    
+    // ===== SETUP =====
+    this.setupLights();
+    this.setupGrid();
+    this.setupEvents();
+    
+    // ✅ إضافة مكعب اختبار فوراً
+    this.addTestCube();
+    
+    // بدء الحركة
+    this.animate();
+    
+    console.log('%c✅ ACTUAL CONSTRUCTION OS جاهز', 'color: #44ff44; font-size: 14px;');
+}
+
+// ✅ دالة جديدة لإضافة مكعب الاختبار
+addTestCube() {
+    try {
+        console.log('🧪 إضافة مكعب اختبار...');
         
-        // ===== THREE.JS SETUP =====
-        this.initThree();
+        // مكعب
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xffaa44,
+            emissive: 0x442200
+        });
+        this.testCube = new THREE.Mesh(geometry, material);
+        this.testCube.position.set(0, 1, 0);
+        this.scene.add(this.testCube);
         
-        // ===== CORE SYSTEMS =====
-        this.initCore();
+        // إضاءة
+        const light = new THREE.PointLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        this.scene.add(light);
         
-        // ===== LOADING SYSTEMS =====
-        this.initLoadingSystems();
-        
-        // ===== UNIVERSAL SYSTEMS =====
-        this.initUniversalSystems(); // ✅ جديد
-        
-        // ===== CLASH DETECTION =====
-        this.initClashDetection(); // ✅ جديد
-        
-        // ===== FLOOR SYSTEMS =====
-        this.initFloorSystems(); // ✅ جديد
-        
-        // ===== BRIDGE SYSTEMS =====
-        this.initBridgeSystems();
-        
-        // ===== TOOLS =====
-        this.initTools();
-        
-        // ===== UI =====
-        this.initUI();
-        
-        // ===== DEBUG & ANALYTICS =====
-        this.initDebugSystems();
-        
-        // ===== WORKER MODES (اختياري) =====
-        this.initWorkerModes(); // ✅ جديد
-        
-        // ===== SETUP =====
-        this.setupLights();
-        this.setupGrid();
-        this.setupEvents();
-        
-        // بدء الحركة
-        this.animate();
-        
-        console.log('%c✅ ACTUAL CONSTRUCTION OS جاهز', 'color: #44ff44; font-size: 14px;');
+        console.log('✅ تم إضافة مكعب الاختبار');
+    } catch (error) {
+        console.error('❌ فشل إضافة مكعب الاختبار:', error);
     }
+}
 
     // ==================== تهيئة Three.js ====================
 
