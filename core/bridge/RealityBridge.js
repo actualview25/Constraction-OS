@@ -1,50 +1,70 @@
 // =======================================
 // ACTUAL CONSTRUCTION OS - REALITY BRIDGE
 // =======================================
-// الجسر بين العالمين: التصميم والعرض
-// Single Source of Truth للكيانات العالمية
+// ربط المشاهد بالكيانات العالمية
 
 export class RealityBridge {
-    constructor(globalSystem, sceneConnector) {
-        this.globalSystem = globalSystem;     // مصدر الحقيقة للكيانات
-        this.sceneConnector = sceneConnector; // ربط المشاهد
+    constructor(globalSystem, sceneConnector, sceneGraph) {
+        this.globalSystem = globalSystem;
+        this.sceneConnector = sceneConnector;
+        this.sceneGraph = sceneGraph;
         
-        this.sceneAnchors = new Map();        // مرتكزات المشاهد
-        this.entityMarkers = new Map();       // علامات الكيانات
-        this.sceneLinks = [];                  // روابط المشاهد
+        this.anchors = new Map();      // SceneAnchor
+        this.markers = new Map();       // EntityMarker
+        this.links = new Map();         // SceneLink
         
         this.syncManager = new SyncManager(this);
+        this.loader = null; // سيتم ربط LazyLoader لاحقاً
         
-        console.log('🌉 RealityBridge جاهز - مصدر الحقيقة الموحد');
+        console.log('🌉 RealityBridge جاهز');
     }
 
-    // ربط كيان عالمي بمشهد
-    anchorGlobalEntity(entityId, sceneId, localPosition) {
-        const entity = this.globalSystem.getCompleteEntity(entityId);
-        if (!entity) {
-            console.error('❌ كيان غير موجود:', entityId);
-            return null;
-        }
+    // ربط LazyLoader
+    setLoader(loader) {
+        this.loader = loader;
+    }
 
-        // إنشاء مرتكز للمشهد
-        const anchor = new SceneAnchor(entity, sceneId, localPosition);
-        this.sceneAnchors.set(`${entityId}_${sceneId}`, anchor);
-
-        // إنشاء علامة للكيان
-        const marker = new EntityMarker(entity, sceneId, localPosition);
-        this.entityMarkers.set(`${entityId}_${sceneId}`, marker);
-
-        // ربط الكيان بالمشهد في SceneConnector
-        this.sceneConnector.addGlobalEntityToScene(sceneId, entityId);
-
-        console.log(`🔗 تم ربط الكيان ${entityId} بالمشهد ${sceneId}`);
+    // إنشاء مرتكز لكيان في مشهد
+    createAnchor(entityId, sceneId, localPosition) {
+        const anchor = new SceneAnchor(entityId, sceneId, localPosition);
+        const id = `${entityId}_${sceneId}`;
+        
+        this.anchors.set(id, anchor);
+        
+        // إنشاء علامة تلقائياً
+        this.createMarker(entityId, sceneId, localPosition);
+        
+        // تحديث الرسم البياني
+        this.sceneGraph.addEntityToScene(sceneId, entityId);
+        
+        console.log(`🔗 تم إنشاء مرتكز: ${id}`);
         return anchor;
     }
 
+    // إنشاء علامة لكيان في مشهد
+    createMarker(entityId, sceneId, localPosition) {
+        const marker = new EntityMarker(entityId, sceneId, localPosition);
+        const id = `${entityId}_${sceneId}`;
+        
+        this.markers.set(id, marker);
+        
+        // ربط بالتحميل
+        if (this.loader) {
+            this.loader.registerMarker(sceneId, marker);
+        }
+        
+        return marker;
+    }
+
     // إنشاء رابط بين مشهدين
-    createSceneLink(fromSceneId, toSceneId, connectionPoint, type = 'door') {
+    createLink(fromSceneId, toSceneId, connectionPoint, type = 'door') {
         const link = new SceneLink(fromSceneId, toSceneId, connectionPoint, type);
-        this.sceneLinks.push(link);
+        const id = `${fromSceneId}_${toSceneId}`;
+        
+        this.links.set(id, link);
+        
+        // تحديث الرسم البياني
+        this.sceneGraph.addEdge(fromSceneId, toSceneId, link.getDistance(), type);
         
         // إنشاء نقاط انتقال تلقائية
         this.createHotspotsFromLink(link);
@@ -54,128 +74,132 @@ export class RealityBridge {
 
     // إنشاء نقاط انتقال من الرابط
     createHotspotsFromLink(link) {
-        const fromScene = this.sceneConnector.scenes.get(link.fromSceneId);
-        const toScene = this.sceneConnector.scenes.get(link.toSceneId);
+        const fromPos = this.sceneGraph.scenePositions.get(link.fromSceneId);
+        const toPos = this.sceneGraph.scenePositions.get(link.toSceneId);
         
-        if (!fromScene || !toScene) return;
+        if (!fromPos || !toPos) return;
 
-        // نقطة انتقال من المشهد الأول إلى الثاني
+        // نقطة انتقال من الأول إلى الثاني
         const hotspot1 = {
             id: `hotspot_${link.id}_to_${link.toSceneId}`,
             type: 'SCENE',
-            position: link.point,
-            localPosition: this.sceneConnector.worldToLocal(link.fromSceneId, link.point),
+            position: link.connectionPoint,
             data: {
                 targetSceneId: link.toSceneId,
                 targetSceneName: `المشهد ${link.toSceneId}`,
-                description: link.description || 'انتقال'
+                description: `انتقال عبر ${link.type}`
             }
         };
 
-        // نقطة انتقال من المشهد الثاني إلى الأول
+        // نقطة انتقال من الثاني إلى الأول
         const hotspot2 = {
             id: `hotspot_${link.id}_to_${link.fromSceneId}`,
             type: 'SCENE',
-            position: link.point,
-            localPosition: this.sceneConnector.worldToLocal(link.toSceneId, link.point),
+            position: link.connectionPoint,
             data: {
                 targetSceneId: link.fromSceneId,
                 targetSceneName: `المشهد ${link.fromSceneId}`,
-                description: link.description || 'انتقال'
+                description: `انتقال عبر ${link.type}`
             }
         };
 
-        // إضافة النقاط إلى المشاهد
-        if (!fromScene.hotspots) fromScene.hotspots = [];
-        if (!toScene.hotspots) toScene.hotspots = [];
-        
-        fromScene.hotspots.push(hotspot1);
-        toScene.hotspots.push(hotspot2);
+        // إضافة النقاط للمشاهد
+        this.addHotspotToScene(link.fromSceneId, hotspot1);
+        this.addHotspotToScene(link.toSceneId, hotspot2);
     }
 
-    // مزامنة كيان عبر جميع المشاهد
-    syncEntityAcrossScenes(entityId) {
+    // إضافة نقطة لمشهد
+    addHotspotToScene(sceneId, hotspot) {
+        const scene = this.sceneConnector.scenes.get(sceneId);
+        if (!scene) return;
+
+        if (!scene.hotspots) scene.hotspots = [];
+        scene.hotspots.push(hotspot);
+        
+        // تحديث الرسم البياني
+        this.sceneGraph.addHotspot(sceneId, hotspot);
+    }
+
+    // مزامنة كيان مع جميع المشاهد
+    async syncEntity(entityId) {
         const entity = this.globalSystem.getCompleteEntity(entityId);
         if (!entity) return;
 
-        // تحديث جميع أجزاء الكيان في المشاهد
+        // مزامنة جميع المرتكزات
         entity.segments.forEach((segment, sceneId) => {
-            const marker = this.entityMarkers.get(`${entityId}_${sceneId}`);
-            if (marker) {
-                marker.updateFromEntity(entity);
+            const id = `${entityId}_${sceneId}`;
+            const anchor = this.anchors.get(id);
+            
+            if (anchor) {
+                anchor.updateFromEntity(entity);
             }
         });
 
-        console.log(`🔄 تمت مزامنة الكيان ${entityId} عبر ${entity.segments.size} مشاهد`);
+        // مزامنة مع SyncManager
+        await this.syncManager.syncEntity(entityId);
     }
 
-    // الحصول على كيان كامل بمعلوماته في جميع المشاهد
-    getCompleteEntityView(entityId) {
-        const entity = this.globalSystem.getCompleteEntity(entityId);
-        if (!entity) return null;
-
-        const view = {
-            entity: entity,
-            anchors: [],
-            markers: [],
-            scenes: []
-        };
-
-        // جمع معلومات من جميع المشاهد
-        entity.segments.forEach((_, sceneId) => {
-            const anchor = this.sceneAnchors.get(`${entityId}_${sceneId}`);
-            const marker = this.entityMarkers.get(`${entityId}_${sceneId}`);
-            const scene = this.sceneConnector.scenes.get(sceneId);
-
-            if (anchor) view.anchors.push(anchor);
-            if (marker) view.markers.push(marker);
-            if (scene) view.scenes.push(scene);
-        });
-
-        return view;
-    }
-
-    // تصدير للاستخدام في ACTUAL VIEW STUDIO
-    exportForViewer() {
-        const exportData = {
-            scenes: [],
-            globalEntities: [],
-            links: this.sceneLinks.map(l => l.toJSON()),
-            hotspots: []
-        };
-
-        // تجميع كل المشاهد مع نقاطها
-        this.sceneConnector.scenes.forEach((scene, sceneId) => {
-            const sceneData = {
-                id: sceneId,
-                position: scene.realWorldPosition,
-                rotation: scene.rotation,
-                hotspots: scene.hotspots || [],
-                globalEntities: []
-            };
-
-            // إضافة الكيانات العالمية في هذا المشهد
-            scene.globalEntities.forEach(entityId => {
-                const marker = this.entityMarkers.get(`${entityId}_${sceneId}`);
-                if (marker) {
-                    sceneData.globalEntities.push(marker.toJSON());
-                }
-            });
-
-            exportData.scenes.push(sceneData);
-        });
-
-        return exportData;
-    }
-
-    // الحصول على تقرير شامل
-    getBridgeReport() {
+    // الحصول على كيان في مشهد معين
+    getEntityInScene(entityId, sceneId) {
+        const id = `${entityId}_${sceneId}`;
         return {
-            totalEntities: this.globalSystem.entities.size,
-            totalScenes: this.sceneConnector.scenes.size,
-            totalAnchors: this.sceneAnchors.size,
-            totalMarkers: this.entityMarkers.size,
-            totalLinks: this.sceneLinks.length,
+            anchor: this.anchors.get(id),
+            marker: this.markers.get(id)
+        };
+    }
+
+    // الحصول على جميع الكيانات في مشهد
+    getEntitiesInScene(sceneId) {
+        const entities = [];
+        
+        this.anchors.forEach((anchor, id) => {
+            if (id.endsWith(`_${sceneId}`)) {
+                entities.push({
+                    entityId: anchor.entityId,
+                    anchor: anchor,
+                    marker: this.markers.get(id)
+                });
+            }
+        });
+        
+        return entities;
+    }
+
+    // تحديث موقع كيان
+    updateEntityPosition(entityId, sceneId, newPosition) {
+        const id = `${entityId}_${sceneId}`;
+        const anchor = this.anchors.get(id);
+        const marker = this.markers.get(id);
+        
+        if (anchor) {
+            anchor.updatePosition(newPosition, this.sceneConnector);
+        }
+        
+        if (marker) {
+            marker.updatePosition(newPosition, this.sceneConnector);
+        }
+        
+        // طلب مزامنة
+        this.syncManager.queueSync(entityId);
+    }
+
+    // حذف كيان من مشهد
+    removeEntityFromScene(entityId, sceneId) {
+        const id = `${entityId}_${sceneId}`;
+        
+        this.anchors.delete(id);
+        this.markers.delete(id);
+        this.sceneGraph.removeEntityFromScene(sceneId, entityId);
+        
+        console.log(`🗑️ تم حذف الكيان ${entityId} من المشهد ${sceneId}`);
+    }
+
+    // تصدير للعرض
+    exportForViewer() {
+        return {
+            anchors: Array.from(this.anchors.values()).map(a => a.toJSON()),
+            markers: Array.from(this.markers.values()).map(m => m.toJSON()),
+            links: Array.from(this.links.values()).map(l => l.toJSON()),
             syncStatus: this.syncManager.getStatus()
         };
     }
