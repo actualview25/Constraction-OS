@@ -1,7 +1,7 @@
 // =======================================
 // ACTUAL CONSTRUCTION OS - MAIN ENTRY POINT
 // =======================================
-// الإصدار: 3.0.0
+// الإصدار: 3.0.0 - النسخة الكاملة
 // =======================================
 
 import * as THREE from 'three';
@@ -19,9 +19,7 @@ import { GlobalEntitySystem } from './core/global/GlobalEntitySystem.js';
 import { SceneConnector } from './core/global/SceneConnector.js';
 import { CoordinateTransformer } from './core/global/CoordinateTransformer.js';
 import { SceneGraph } from './core/bridge/SceneGraph.js';
-
-// ملاحظة: StorageManager مؤقتاً غير موجود - سنستخدم localStorage بديلاً
-// import { StorageManager } from './core/storage/StorageManager.js';
+import { StorageManager } from './core/storage/StorageManager.js'; // ✅ أضيفت
 
 // ========== REALITY BRIDGE SYSTEMS ==========
 import { RealityBridge } from './core/bridge/RealityBridge.js';
@@ -34,9 +32,23 @@ import { SyncManager } from './core/bridge/SyncManager.js';
 import { IntegratedLoader } from './core/loading/IntegratedLoader.js';
 import { LazySceneLoader } from './core/loading/LazySceneLoader.js';
 import { SegmentedSceneLoader } from './core/loading/SegmentedSceneLoader.js';
-import { LODManager } from './core/loading/LODManager.js';
+import { LODManager } from './core/rendering/LODManager.js'; // ✅ تم التصحيح من loading إلى rendering
 import { TileLODManager } from './core/loading/TileLODManager.js';
 import { PriorityQueue } from './core/loading/PriorityQueue.js';
+import { LoadingStrategy } from './core/loading/LoadingStrategy.js'; // ✅ أضيفت
+
+// ========== UNIVERSAL SYSTEMS ========== // ✅ قسم جديد
+import { UniversalElement } from './core/elements/UniversalElement.js';
+import { UniversalImporter } from './core/import/UniversalImporter.js';
+
+// ========== CLASH DETECTION ========== // ✅ قسم جديد
+import { ClashDetection } from './core/clash/ClashDetection.js';
+import { AdvancedClashDetection } from './core/clash/AdvancedClashDetection.js';
+
+// ========== FLOOR SYSTEMS ========== // ✅ قسم جديد
+import { FloorConnector } from './core/floors/FloorConnector.js';
+import { FloorCopySystem } from './core/floors/FloorCopySystem.js';
+import { FloorNavigation } from './core/floors/FloorNavigation.js';
 
 // ========== ARCHITECTURE MODULES ==========
 import { Wall } from './modules/Architecture/Wall.js';
@@ -97,6 +109,7 @@ import { BOQExporter } from './modules/BOQ/Exporter.js';
 // ========== BOQ GLOBAL MODULES ==========
 import { GlobalBOQCalculator } from './modules/BOQ/global/GlobalBOQCalculator.js';
 import { GlobalReporter } from './modules/BOQ/global/GlobalReporter.js';
+import { GlobalEarthworksBOQ } from './modules/BOQ/global/GlobalEarthworksBOQ.js'; // ✅ أضيفت
 
 // ========== CAD TOOLS ==========
 import { CADImporter } from './tools/cad/CADImporter.js';
@@ -123,6 +136,13 @@ import { Toolbar } from './ui/Toolbar.js';
 import { GlobalEntitiesPanel } from './ui/global/GlobalEntitiesPanel.js';
 import { SceneConnectorUI } from './ui/global/SceneConnectorUI.js';
 import { CalibrationUI } from './ui/cad/CalibrationUI.js';
+import { UniversalPropertiesPanel } from './ui/UniversalPropertiesPanel.js'; // ✅ أضيفت
+
+// ========== WORKER MODES ========== // ✅ قسم جديد (اختياري - يمكن حذفه إذا لا تريده)
+import { WorkerMode } from './player/WorkerMode.js';
+import { ForemanMode } from './player/ForemanMode.js';
+import { MobileWorkerMode } from './player/MobileWorkerMode.js';
+import { WorkerMarkers } from './player/WorkerMarkers.js';
 
 // ========== DEBUG & ANALYTICS ==========
 import { DebugLayer } from './core/debug/DebugLayer.js';
@@ -149,6 +169,15 @@ class ActualConstructionOS {
         // ===== LOADING SYSTEMS =====
         this.initLoadingSystems();
         
+        // ===== UNIVERSAL SYSTEMS =====
+        this.initUniversalSystems(); // ✅ جديد
+        
+        // ===== CLASH DETECTION =====
+        this.initClashDetection(); // ✅ جديد
+        
+        // ===== FLOOR SYSTEMS =====
+        this.initFloorSystems(); // ✅ جديد
+        
         // ===== BRIDGE SYSTEMS =====
         this.initBridgeSystems();
         
@@ -160,6 +189,9 @@ class ActualConstructionOS {
         
         // ===== DEBUG & ANALYTICS =====
         this.initDebugSystems();
+        
+        // ===== WORKER MODES (اختياري) =====
+        this.initWorkerModes(); // ✅ جديد
         
         // ===== SETUP =====
         this.setupLights();
@@ -205,23 +237,8 @@ class ActualConstructionOS {
             this.projectManager = new ProjectManager();
             this.sceneGraph = new SceneGraph();
             
-            // تخزين مؤقت باستخدام localStorage
-            this.storage = {
-                save: (key, data) => {
-                    try {
-                        localStorage.setItem(key, JSON.stringify(data));
-                    } catch (e) {
-                        console.warn('⚠️ فشل حفظ:', key);
-                    }
-                },
-                load: (key) => {
-                    try {
-                        return JSON.parse(localStorage.getItem(key));
-                    } catch {
-                        return null;
-                    }
-                }
-            };
+            // تخزين باستخدام StorageManager
+            this.storage = new StorageManager(); // ✅ استخدام StorageManager بدلاً من localStorage البسيط
             
             this.globalSystem = new GlobalEntitySystem(this.geoRef);
             this.sceneConnector = new SceneConnector(this.geoRef);
@@ -244,7 +261,7 @@ class ActualConstructionOS {
         }
     }
 
-// ==================== تهيئة أنظمة التحميل ====================
+    // ==================== تهيئة أنظمة التحميل ====================
 
     initLoadingSystems() {
         try {
@@ -253,6 +270,7 @@ class ActualConstructionOS {
             this.lodManager = new LODManager(this.camera);
             this.tileLODManager = new TileLODManager(this.camera);
             this.priorityQueue = new PriorityQueue(this);
+            this.loadingStrategy = new LoadingStrategy(this.sceneGraph); // ✅ جديد
             
             this.loader = new IntegratedLoader(
                 this.sceneGraph,
@@ -264,6 +282,43 @@ class ActualConstructionOS {
             console.log('✅ Loading systems initialized');
         } catch (error) {
             console.error('❌ فشل تهيئة Loading systems:', error);
+        }
+    }
+
+
+// ==================== تهيئة الأنظمة العالمية ====================
+
+    initUniversalSystems() {
+        try {
+            this.universalImporter = new UniversalImporter(this.globalSystem, this.cadImporter);
+            console.log('✅ Universal systems initialized');
+        } catch (error) {
+            console.error('❌ فشل تهيئة Universal systems:', error);
+        }
+    }
+
+    // ==================== تهيئة كشف التعارضات ====================
+
+    initClashDetection() {
+        try {
+            this.clashDetection = new ClashDetection(this.globalSystem, this.sceneConnector);
+            this.advancedClashDetection = new AdvancedClashDetection(this.globalSystem, this.sceneConnector);
+            console.log('✅ Clash detection initialized');
+        } catch (error) {
+            console.error('❌ فشل تهيئة Clash detection:', error);
+        }
+    }
+
+    // ==================== تهيئة أنظمة الطوابق ====================
+
+    initFloorSystems() {
+        try {
+            this.floorConnector = new FloorConnector(this.globalSystem, this.sceneConnector);
+            this.floorCopySystem = new FloorCopySystem(this.globalSystem, this.sceneConnector);
+            this.floorNavigation = new FloorNavigation(this.floorConnector);
+            console.log('✅ Floor systems initialized');
+        } catch (error) {
+            console.error('❌ فشل تهيئة Floor systems:', error);
         }
     }
 
@@ -330,6 +385,7 @@ class ActualConstructionOS {
             this.dashboard = new Dashboard(this);
             this.propertiesPanel = new PropertiesPanel(this);
             this.toolbar = new Toolbar(this);
+            this.universalPropertiesPanel = new UniversalPropertiesPanel(); // ✅ جديد
             
             this.globalEntitiesPanel = new GlobalEntitiesPanel(this);
             this.sceneConnectorUI = new SceneConnectorUI(this);
@@ -356,6 +412,21 @@ class ActualConstructionOS {
             console.log('✅ Debug systems initialized');
         } catch (error) {
             console.error('❌ فشل تهيئة Debug systems:', error);
+        }
+    }
+
+    // ==================== تهيئة أوضاع العمال (اختياري) ====================
+
+    initWorkerModes() {
+        try {
+            // هذه اختيارية - يمكن تفعيلها عند الحاجة
+            // this.workerMode = new WorkerMode(this);
+            // this.foremanMode = new ForemanMode(this);
+            // this.mobileWorkerMode = new MobileWorkerMode(this);
+            // this.workerMarkers = new WorkerMarkers(this.scene);
+            console.log('✅ Worker modes (optional) ready');
+        } catch (error) {
+            console.warn('⚠️ فشل تهيئة Worker modes:', error);
         }
     }
 
@@ -466,7 +537,7 @@ class ActualConstructionOS {
         }
     }
 
-onResize() {
+    onResize() {
         if (this.camera) {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
@@ -501,7 +572,7 @@ onResize() {
         }
     }
 
-    // ==================== دوال مساعدة ====================
+// ==================== دوال مساعدة ====================
     
     createGlobalWall(options) {
         try {
@@ -553,6 +624,46 @@ onResize() {
             return new GlobalElectrical(this.globalSystem, this.sceneConnector, options);
         } catch (error) {
             console.error('❌ فشل إنشاء نظام كهربائي عالمي:', error);
+            return null;
+        }
+    }
+
+    // إنشاء عنصر عالمي باستخدام النظام الموحد
+    createUniversalElement(type, options) {
+        try {
+            return new UniversalElement(this.globalSystem, this.sceneConnector, type, options);
+        } catch (error) {
+            console.error(`❌ فشل إنشاء عنصر ${type}:`, error);
+            return null;
+        }
+    }
+
+    // استيراد عناصر من CAD
+    async importFromCAD(cadFile) {
+        try {
+            return await this.universalImporter.importFromCAD(cadFile);
+        } catch (error) {
+            console.error('❌ فشل استيراد من CAD:', error);
+            return null;
+        }
+    }
+
+    // كشف التعارضات
+    detectClashes(sceneId) {
+        try {
+            return this.clashDetection.detectInScene(sceneId);
+        } catch (error) {
+            console.error('❌ فشل كشف التعارضات:', error);
+            return [];
+        }
+    }
+
+    // نسخ طابق
+    async duplicateFloor(sourceFloor, targetFloor, heightChange) {
+        try {
+            return await this.floorCopySystem.duplicateFloor(sourceFloor, targetFloor, heightChange);
+        } catch (error) {
+            console.error('❌ فشل نسخ الطابق:', error);
             return null;
         }
     }
@@ -626,7 +737,7 @@ onResize() {
 }
 
 // =======================================
-// 🚀 تشغيل التطبيق (نسخة واحدة فقط)
+// 🚀 تشغيل التطبيق
 // =======================================
 
 window.addEventListener('load', async () => {
@@ -670,6 +781,9 @@ window.addEventListener('load', async () => {
         console.log('   • app.getSystemStatus() - حالة النظام');
         console.log('   • app.loadScene(id) - تحميل مشهد');
         console.log('   • app.generateGlobalReport() - تقرير شامل');
+        console.log('   • app.detectClashes(sceneId) - كشف تعارضات');
+        console.log('   • app.duplicateFloor() - نسخ طابق');
+        console.log('   • app.importFromCAD(file) - استيراد من CAD');
         console.log('');
         console.log('🔧 اختصارات لوحة المفاتيح:');
         console.log('   • F2 - إظهار/إخفاء Debug Layer');
