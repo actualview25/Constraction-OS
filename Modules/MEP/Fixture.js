@@ -154,4 +154,98 @@ export class Fixture {
             emissive: 0x442200,
             emissiveIntensity: 0.5
         });
-        const bulb = new THREE.Mesh(bulb
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.y = 0.1;
+        group.add(bulb);
+
+        // إضاءة
+        const light = new THREE.PointLight(0xffaa00, 1, 5);
+        light.position.y = 0.1;
+        group.add(light);
+    }
+
+    createSocket(group) {
+        // قاعدة البريزة
+        const baseGeo = new THREE.BoxGeometry(0.08, 0.08, 0.03);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        group.add(base);
+
+        // فتحات
+        const holeGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.02, 8);
+        const holeMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        
+        const hole1 = new THREE.Mesh(holeGeo, holeMat);
+        hole1.position.set(0.02, 0.02, 0.02);
+        group.add(hole1);
+        
+        const hole2 = new THREE.Mesh(holeGeo, holeMat);
+        hole2.position.set(-0.02, -0.02, 0.02);
+        group.add(hole2);
+    }
+
+    createACUnit(group) {
+        // جسم المكيف
+        const bodyGeo = new THREE.BoxGeometry(0.8, 0.3, 0.2);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        group.add(body);
+
+        // فتحات التهوية
+        const ventGeo = new THREE.BoxGeometry(0.6, 0.1, 0.05);
+        const ventMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+        const vent = new THREE.Mesh(ventGeo, ventMat);
+        vent.position.set(0, 0, 0.11);
+        group.add(vent);
+
+        // شعار
+        const logoGeo = new THREE.BoxGeometry(0.1, 0.1, 0.02);
+        const logoMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const logo = new THREE.Mesh(logoGeo, logoMat);
+        logo.position.set(0.3, 0.1, 0.11);
+        group.add(logo);
+    }
+
+    getSpecs() {
+        const specs = {
+            sink: {
+                waterConsumption: '6 L/min',
+                material: 'ceramic',
+                warranty: '5 years'
+            },
+            toilet: {
+                waterConsumption: '4.5 L/flush',
+                material: 'ceramic',
+                type: 'dual flush'
+            },
+            shower: {
+                waterConsumption: '9 L/min',
+                material: 'chrome',
+                headType: 'rain'
+            },
+            light: {
+                power: '10W',
+                lumens: '800 lm',
+                colorTemp: '3000K'
+            },
+            socket: {
+                voltage: '220V',
+                current: '16A',
+                type: 'Type G'
+            }
+        };
+
+        return specs[this.type] || {};
+    }
+
+    getBOQ() {
+        const specs = this.getSpecs();
+        
+        return {
+            type: this.type,
+            system: this.system,
+            quantity: 1,
+            specs: Object.entries(specs).map(([k, v]) => `${k}: ${v}`).join(', ')
+        };
+    }
+}
