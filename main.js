@@ -1,13 +1,13 @@
 // =======================================
 // ACTUAL CONSTRUCTION OS - MAIN ENTRY POINT
 // =======================================
-// منصة متكاملة لتصميم وإدارة المشاريع الهندسية
-// الإصدار: 3.0.0 - محرك Reality-BIM
-// =======================================
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+console.log('🚀 بدء تشغيل ACTUAL CONSTRUCTION OS...');
+console.log('THREE loaded:', !!THREE);
+console.log('OrbitControls loaded:', !!OrbitControls);
 // ========== CORE SYSTEMS ==========
 import { GeoReferencing } from './core/Georeferencing.js';
 import { SceneManager } from './core/SceneManager.js';
