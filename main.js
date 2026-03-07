@@ -572,4 +572,124 @@ window.ActualConstructionOS = ActualConstructionOS;
 // =======================================
 
 window.addEventListener('load', async () => {
-    console.log('%c🌟 ACTUAL CONSTRUCTION OS - Reality-BIM Engine', 'color: #ffaa44; font-size: 18px;
+    console.log('%c🌟 ACTUAL CONSTRUCTION OS - Reality-BIM Engine v3.0', 'color: #ffaa44; font-size: 18px; font-weight: bold;');
+    console.log('%c🏗️ منصة متكاملة لتصميم وإدارة المشاريع الهندسية', 'color: #88aaff; font-size: 14px;');
+    
+    // إخفاء شاشة التحميل
+    const loader = document.getElementById('loader');
+    if (loader) {
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                if (loader.parentNode) {
+                    loader.parentNode.removeChild(loader);
+                }
+            }, 500);
+        }, 1500);
+    } else {
+        console.log('⚠️ لا توجد شاشة تحميل');
+    }
+
+    try {
+        // إنشاء التطبيق
+        console.log('🔄 جاري إنشاء التطبيق...');
+        window.app = new ActualConstructionOS();
+        
+        // التحقق من نجاح الإنشاء
+        if (!window.app) {
+            throw new Error('فشل إنشاء التطبيق');
+        }
+        
+        console.log('✅ تم إنشاء التطبيق بنجاح');
+        
+        // تحميل أول مشهد تجريبي بعد ثانيتين
+        setTimeout(() => {
+            if (window.app && typeof window.app.loadScene === 'function') {
+                console.log('🔄 تحميل المشهد التجريبي...');
+                window.app.loadScene('scene_001').catch(err => {
+                    console.warn('⚠️ فشل تحميل المشهد التجريبي:', err.message);
+                });
+            } else {
+                console.log('ℹ️ المشاهد التجريبية غير مفعلة');
+            }
+        }, 2000);
+        
+        // عرض معلومات المساعدة
+        console.log('📊 يمكنك استخدام window.app للوصول إلى التطبيق');
+        console.log('📌 الأوامر المتاحة:');
+        console.log('   • app.getSystemStatus() - حالة النظام');
+        console.log('   • app.loadScene(id) - تحميل مشهد');
+        console.log('   • app.generateGlobalReport() - تقرير شامل');
+        console.log('');
+        console.log('🔧 اختصارات لوحة المفاتيح:');
+        console.log('   • F2 - إظهار/إخفاء Debug Layer');
+        console.log('   • F3 - إظهار/إخفاء Analytics');
+        console.log('   • Ctrl+C - فتح معالج المعايرة');
+        
+    } catch (error) {
+        console.error('❌ فشل تشغيل التطبيق:', error);
+        
+        // عرض رسالة خطأ للمستخدم
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(200, 50, 50, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            font-family: monospace;
+            direction: ltr;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 2px solid #ff8888;
+        `;
+        errorDiv.innerHTML = `
+            <h2 style="margin-top:0;">❌ خطأ في تشغيل التطبيق</h2>
+            <p>${error.message}</p>
+            <p style="font-size:12px; opacity:0.8;">تأكد من تحميل جميع الملفات بشكل صحيح</p>
+            <button onclick="this.parentElement.remove()" style="
+                background: white;
+                color: black;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 10px;
+            ">إغلاق</button>
+        `;
+        document.body.appendChild(errorDiv);
+    }
+});
+
+// دالة مساعدة لإعادة التشغيل (يمكن استدعاؤها من Console)
+window.restartApp = function() {
+    console.log('🔄 إعادة تشغيل التطبيق...');
+    if (window.app) {
+        // تنظيف الموارد إذا لزم الأمر
+        if (window.app.dispose) {
+            window.app.dispose();
+        }
+        delete window.app;
+    }
+    // إعادة التحميل
+    location.reload();
+};
+
+// دالة للحصول على معلومات النظام
+window.getSystemInfo = function() {
+    return {
+        version: '3.0.0',
+        name: 'ACTUAL CONSTRUCTION OS',
+        type: 'Reality-BIM Engine',
+        browser: navigator.userAgent,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+    };
+};
+
+console.log('📌 يمكنك استخدام window.restartApp() لإعادة تشغيل التطبيق');
+console.log('📌 يمكنك استخدام window.getSystemInfo() لعرض معلومات النظام');
