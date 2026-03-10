@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ACTUAL CONSTRUCTION OS - منصة إدارة المشاريع الهندسية</title>
     
-    <!-- ===== تصحيح المسارات المتقدم ===== -->
+    <!-- ===== تصحيح المسارات الأساسي ===== -->
     <script>
-        (function fixAllPaths() {
-            console.log('🔧 بدء تشخيص وتصحيح المسارات...');
+        (function fixBasePaths() {
+            console.log('🔧 بدء تصحيح المسارات الأساسية...');
             
-            // 1. تصحيح اسم المستودع (Constraction → Construction)
+            // تصحيح اسم المستودع (Constraction → Construction)
             const wrongBase = 'Constraction-OS/';
             const correctBase = 'Construction-OS/';
             
-            // 2. تصحيح حالة الأحرف (modules → Modules)
+            // تصحيح حالة الأحرف (modules → Modules)
             const wrongModules = '/Construction-OS/modules/';
             const correctModules = '/Construction-OS/Modules/';
             
@@ -27,13 +27,13 @@
                     // تصحيح اسم المستودع
                     if (fixedUrl.includes(wrongBase)) {
                         fixedUrl = fixedUrl.replace(wrongBase, correctBase);
-                        console.log('📁 تصحيح المستودع:', fixedUrl);
+                        console.log('📁 تم تصحيح المستودع:', fixedUrl);
                     }
                     
-                    // تصحيح modules → Modules (الأهم!)
+                    // تصحيح modules → Modules
                     if (fixedUrl.includes(wrongModules)) {
                         fixedUrl = fixedUrl.replace(wrongModules, correctModules);
-                        console.log('📁 تصحيح Modules:', fixedUrl);
+                        console.log('📁 تم تصحيح Modules:', fixedUrl);
                     }
                     
                     if (fixedUrl !== url) {
@@ -61,42 +61,7 @@
                 };
             }
             
-            // إخفاء أخطاء 404 غير المهمة
-            window.addEventListener('error', function(e) {
-                // أخطاء الملفات غير الأساسية
-                const nonCriticalPaths = [
-                    '/player/',
-                    '/floors/',
-                    '/clash/',
-                    '/global/GlobalElectrical.js',
-                    '/global/GlobalPlumbing.js',
-                    '/global/GlobalHVAC.js'
-                ];
-                
-                if (e.target && e.target.src) {
-                    if (nonCriticalPaths.some(path => e.target.src.includes(path))) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.warn('⚠️ تم تجاهل ملف غير أساسي:', e.target.src);
-                        return false;
-                    }
-                }
-            }, true);
-            
-            // تشخيص المسارات
-            window.checkPath = async function(path) {
-                try {
-                    const res = await fetch(path);
-                    console.log(`🔍 ${path}: ${res.status} ${res.statusText}`);
-                    return res.ok;
-                } catch (e) {
-                    console.error(`❌ ${path}:`, e.message);
-                    return false;
-                }
-            };
-            
             console.log('✅ نظام تصحيح المسارات جاهز');
-            console.log('📝 استخدم window.checkPath("/path/to/file.js") للتشخيص');
         })();
     </script>
     
@@ -105,6 +70,17 @@
     
     <!-- أيقونة الموقع -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏗️</text></svg>">
+    
+    <!-- وصف الموقع لمحركات البحث -->
+    <meta name="description" content="منصة متكاملة لتصميم وإدارة المشاريع الهندسية - ACTUAL CONSTRUCTION OS">
+    <meta name="keywords" content="هندسة, بناء, مشاريع, خرسانة, حديد, تشطيبات">
+    <meta name="author" content="مهندس سوداني">
+    
+    <!-- دعم اللغة العربية -->
+    <meta name="language" content="ar">
+    
+    <!-- ألوان الواجهة للمتصفحات الحديثة -->
+    <meta name="theme-color" content="#111122">
     
     <!-- إعدادات Three.js -->
     <script type="importmap">
@@ -117,6 +93,7 @@
     </script>
     
     <style>
+        /* أنماط أساسية */
         * {
             margin: 0;
             padding: 0;
@@ -132,20 +109,25 @@
         #container {
             width: 100vw;
             height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
+        /* شاشة التحميل */
         #loading {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: #111122;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10000;
             transition: opacity 0.5s;
+            pointer-events: none;
         }
         
         .loader {
@@ -165,18 +147,186 @@
             animation: pulse 1.5s infinite;
         }
         
+        /* شريط الحالة */
         .status-bar {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            background: rgba(20, 30, 40, 0.6);
-            backdrop-filter: blur(5px);
+            background: rgba(20, 30, 40, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: white;
             padding: 8px 16px;
             border-radius: 30px;
             font-size: 12px;
             border: 1px solid #4a6c8f;
             z-index: 900;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* شريط الأدوات العلوي */
+        .main-toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 40, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #4a6c8f;
+            border-radius: 50px;
+            padding: 8px 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toolbar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toolbar-btn:hover {
+            background: rgba(74, 108, 143, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .toolbar-btn.active {
+            background: #4a6c8f;
+            box-shadow: 0 0 15px #88aaff;
+        }
+        
+        /* لوحة التحكم الجانبية */
+        #control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 30, 40, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #4a6c8f;
+            z-index: 1000;
+            width: 280px;
+            direction: rtl;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-header {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #4a6c8f;
+            padding-bottom: 10px;
+        }
+        
+        .panel-header h2 {
+            color: #88aaff;
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .panel-section {
+            margin-bottom: 20px;
+        }
+        
+        .panel-section h3 {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        /* لوحة الخصائص */
+        .properties-panel {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 280px;
+            background: rgba(20, 30, 40, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #4a6c8f;
+            border-radius: 12px;
+            color: white;
+            z-index: 1000;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .properties-panel h3 {
+            color: #88aaff;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .property-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #1a2a3a;
+            border-radius: 4px;
+        }
+        
+        .property-label {
+            color: #aaa;
+            font-size: 11px;
+        }
+        
+        .property-value {
+            color: white;
+            font-size: 14px;
+        }
+        
+        /* أزرار */
+        .btn {
+            background: #4a6c8f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #5a7c9f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* تحسينات الجوال */
+        @media (max-width: 768px) {
+            .main-toolbar {
+                width: 90%;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+            
+            #control-panel {
+                width: 90%;
+                right: 5%;
+            }
+            
+            .properties-panel {
+                width: 90%;
+                right: 5%;
+                top: auto;
+                bottom: 80px;
+                transform: none;
+            }
         }
         
         @keyframes pulse {
@@ -210,6 +360,28 @@
         ⏳ جاري التحميل...
     </div>
     
+    <!-- شريط الأدوات العلوي -->
+    <div class="main-toolbar" id="mainToolbar">
+        <button class="toolbar-btn" onclick="window.createWall()" title="إضافة جدار">🧱</button>
+        <button class="toolbar-btn" onclick="window.createDoor()" title="إضافة باب">🚪</button>
+        <button class="toolbar-btn" onclick="window.createWindow()" title="إضافة شباك">🪟</button>
+        <button class="toolbar-btn" onclick="window.createColumn()" title="إضافة عمود">🏛️</button>
+        <button class="toolbar-btn" onclick="window.createBeam()" title="إضافة كمرة">📐</button>
+        <button class="toolbar-btn" onclick="window.createSlab()" title="إضافة سقف">🏢</button>
+        <button class="toolbar-btn" onclick="window.importImage()" title="استيراد صورة 360">📷</button>
+        <button class="toolbar-btn" onclick="window.showBOQ()" title="جدول الكميات">📊</button>
+        <button class="toolbar-btn" onclick="window.resetCamera()" title="إعادة ضبط الكاميرا">🎯</button>
+    </div>
+    
+    <!-- لوحة الخصائص -->
+    <div class="properties-panel" id="propertiesPanel">
+        <h3>📋 الخصائص</h3>
+        <div id="propertiesContent">
+            <p style="color: #aaa; text-align: center;">اختر عنصراً لعرض خصائصه</p>
+        </div>
+    </div>
+    
+    <!-- إخفاء شاشة التحميل بعد تحميل الصفحة -->
     <script>
         // تحديث شريط الحالة
         window.updateStatus = function(message, type = 'info') {
@@ -222,302 +394,47 @@
                     error: '❌'
                 };
                 bar.innerHTML = `${icons[type] || 'ℹ️'} ${message}`;
+                
+                // العودة للحالة الافتراضية بعد 5 ثوان
+                setTimeout(() => {
+                    bar.innerHTML = '✅ النظام جاهز';
+                }, 5000);
             }
         };
         
-        // إخفاء شاشة التحميل بعد تحميل الصفحة
+        // إخفاء شاشة التحميل
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                }, 500);
-            }, 2000);
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.opacity = '0';
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 500);
+                }
+                window.updateStatus('✅ النظام جاهز', 'success');
+            }, 2500);
         });
         
-        // تشخيص سريع بعد 3 ثوان
-        setTimeout(() => {
-            console.log('🔍 تشخيص سريع للمسارات:');
-            checkPath('/Construction-OS/Modules/Architecture/Wall.js');
-            checkPath('/Construction-OS/Modules/Architecture/Door.js');
-        }, 3000);
+        // معالج الأخطاء العام
+        window.addEventListener('error', (e) => {
+            console.error('خطأ في التحميل:', e.message);
+            window.updateStatus('⚠️ خطأ في تحميل بعض الملفات', 'warning');
+        }, true);
+        
+        // دوال مساعدة للواجهة (سيتم استبدالها من main.js)
+        window.createWall = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.createDoor = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.createWindow = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.createColumn = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.createBeam = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.createSlab = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.importImage = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.showBOQ = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.resetCamera = () => window.updateStatus('جاري تحميل النظام...', 'info');
     </script>
     
-    <!-- استيراد الملف الرئيسي -->
+    <!-- استيراد الملف الرئيسي (يجب أن يكون في النهاية) -->
     <script type="module" src="./main.js"></script>
-<!-- واجهة المستخدم الأساسية -->
-<div class="main-toolbar" id="mainToolbar">
-    <button class="toolbar-btn" onclick="createWall()" title="إضافة جدار">🧱</button>
-    <button class="toolbar-btn" onclick="createDoor()" title="إضافة باب">🚪</button>
-    <button class="toolbar-btn" onclick="createWindow()" title="إضافة شباك">🪟</button>
-    <button class="toolbar-btn" onclick="createColumn()" title="إضافة عمود">🏛️</button>
-    <button class="toolbar-btn" onclick="createBeam()" title="إضافة كمرة">📐</button>
-    <button class="toolbar-btn" onclick="showBOQ()" title="جدول الكميات">📊</button>
-    <button class="toolbar-btn" onclick="resetCamera()" title="إعادة ضبط الكاميرا">🎯</button>
-</div>
-
-<!-- لوحة الخصائص -->
-<div class="properties-panel" id="propertiesPanel">
-    <h3>📋 الخصائص</h3>
-    <div id="propertiesContent">
-        <p>اختر عنصراً لعرض خصائصه</p>
-    </div>
-</div>
-
-<script>
-// ===== دوال واجهة المستخدم =====
-window.createWall = async function() {
-    try {
-        // استيراد كلاس Wall
-        const module = await import('/Construction-OS/Modules/Architecture/Wall.js');
-        const Wall = module.Wall;
-        
-        // إنشاء جدار عشوائي
-        const wall = new Wall({
-            start: { x: -3, y: 0, z: 0 },
-            end: { x: 3, y: 0, z: 0 },
-            height: 3,
-            thickness: 0.2
-        });
-        
-        const mesh = wall.createMesh();
-        window.app.scene.add(mesh);
-        
-        // حفظ معلومات الجدار
-        mesh.userData = { type: 'wall', data: wall };
-        
-        updateStatus('✅ تم إضافة جدار', 'success');
-    } catch (e) {
-        console.error(e);
-        updateStatus('❌ فشل إضافة جدار', 'error');
-    }
-};
-
-window.createDoor = async function() {
-    try {
-        const module = await import('/Construction-OS/Modules/Architecture/Door.js');
-        const Door = module.Door;
-        
-        const door = new Door({
-            width: 0.9,
-            height: 2.1,
-            position: { x: 0, y: 0, z: 2 }
-        });
-        
-        const mesh = door.createMesh();
-        window.app.scene.add(mesh);
-        
-        mesh.userData = { type: 'door', data: door };
-        updateStatus('✅ تم إضافة باب', 'success');
-    } catch (e) {
-        updateStatus('❌ فشل إضافة باب', 'error');
-    }
-};
-
-window.createColumn = async function() {
-    try {
-        const module = await import('/Construction-OS/Modules/Concrete/Column.js');
-        const Column = module.Column;
-        
-        const column = new Column({
-            height: 4,
-            width: 0.4,
-            depth: 0.4,
-            position: { x: 2, y: 0, z: 2 }
-        });
-        
-        const mesh = column.createMesh();
-        window.app.scene.add(mesh);
-        
-        mesh.userData = { type: 'column', data: column };
-        updateStatus('✅ تم إضافة عمود', 'success');
-    } catch (e) {
-        updateStatus('❌ فشل إضافة عمود', 'error');
-    }
-};
-
-window.showBOQ = function() {
-    // حساب الكميات للعناصر في المشهد
-    let items = [];
-    window.app.scene.children.forEach(child => {
-        if (child.userData && child.userData.data) {
-            items.push(child.userData.data);
-        }
-    });
-    
-    let report = '📊 جدول الكميات\n';
-    report += '══════════════════\n';
-    
-    items.forEach((item, i) => {
-        if (item.getBOQ) {
-            const boq = item.getBOQ();
-            report += `\n${i+1}. ${boq.نوع || 'عنصر'}:\n`;
-            Object.keys(boq).forEach(key => {
-                report += `   ${key}: ${boq[key]}\n`;
-            });
-        }
-    });
-    
-    report += '\n══════════════════';
-    alert(report);
-};
-
-window.resetCamera = function() {
-    if (window.app) {
-        window.app.camera.position.set(5, 5, 10);
-        window.app.camera.lookAt(0, 0, 0);
-        window.app.controls.target.set(0, 0, 0);
-        window.app.controls.update();
-        updateStatus('🎯 تم إعادة ضبط الكاميرا', 'info');
-    }
-};
-
-window.updateStatus = function(message, type = 'info') {
-    const bar = document.getElementById('statusBar');
-    if (bar) {
-        const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
-        bar.innerHTML = `${icons[type]} ${message}`;
-        
-        // إخفاء الرسالة بعد 3 ثوان
-        setTimeout(() => {
-            bar.innerHTML = '✅ النظام جاهز';
-        }, 3000);
-    }
-};
-
-// تفعيل النقر على العناصر
-window.setupSelection = function() {
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    
-    window.app.renderer.domElement.addEventListener('click', (event) => {
-        // حساب موقع النقر
-        mouse.x = (event.clientX / window.app.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.app.renderer.domElement.clientHeight) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, window.app.camera);
-        
-        // فحص العناصر
-        const intersects = raycaster.intersectObjects(window.app.scene.children);
-        
-        if (intersects.length > 0) {
-            const selected = intersects[0].object;
-            
-            if (selected.userData && selected.userData.data) {
-                // عرض الخصائص
-                const data = selected.userData.data;
-                const boq = data.getBOQ ? data.getBOQ() : {};
-                
-                let html = '<table style="width:100%">';
-                Object.keys(boq).forEach(key => {
-                    html += `<tr><td><strong>${key}</strong></td><td>${boq[key]}</td></tr>`;
-                });
-                html += '</table>';
-                
-                document.getElementById('propertiesContent').innerHTML = html;
-            }
-        }
-    });
-};
-
-// تفعيل بعد تحميل التطبيق
-setTimeout(() => {
-    if (window.app) {
-        window.setupSelection();
-        console.log('✅ واجهة المستخدم جاهزة');
-    }
-}, 5000);
-</script>
-
-<!-- إضافة بعض الأنماط للواجهة -->
-<style>
-.main-toolbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(20, 30, 40, 0.8);
-    backdrop-filter: blur(10px);
-    border: 1px solid #4a6c8f;
-    border-radius: 50px;
-    padding: 10px;
-    display: flex;
-    gap: 10px;
-    z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.toolbar-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toolbar-btn:hover {
-    background: rgba(74, 108, 143, 0.5);
-    transform: scale(1.1);
-}
-
-.properties-panel {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 250px;
-    background: rgba(20, 30, 40, 0.8);
-    backdrop-filter: blur(10px);
-    border: 1px solid #4a6c8f;
-    border-radius: 12px;
-    color: white;
-    padding: 15px;
-    z-index: 1000;
-}
-
-.properties-panel h3 {
-    color: #88aaff;
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    text-align: center;
-}
-
-#propertiesContent {
-    font-size: 12px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-#propertiesContent table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#propertiesContent td {
-    padding: 5px;
-    border-bottom: 1px solid #4a6c8f;
-}
-
-.status-bar {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(20, 30, 40, 0.6);
-    backdrop-filter: blur(5px);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 12px;
-    border: 1px solid #4a6c8f;
-    z-index: 900;
-}
-</style>
 </body>
 </html>
