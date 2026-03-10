@@ -1,7 +1,7 @@
 // =======================================
 // ACTUAL CONSTRUCTION OS - MAIN ENTRY POINT
 // =======================================
-// الإصدار: 3.0.0 - النسخة الكاملة
+// الإصدار: 3.0.0 - النسخة الكاملة مع تصحيح المسارات
 // =======================================
 
 import * as THREE from 'three';
@@ -42,65 +42,65 @@ import { UniversalElement } from '/Construction-OS/core/elements/UniversalElemen
 import { UniversalImporter } from '/Construction-OS/core/import/UniversalImporter.js';
 
 // ========== ARCHITECTURE MODULES ==========
-import { Wall } from '/Construction-OS/modules/Architecture/Wall.js';
-import { Door } from '/Construction-OS/modules/Architecture/Door.js';
-import { Window } from '/Construction-OS/modules/Architecture/Window.js';
-import { Floor } from '/Construction-OS/modules/Architecture/Floor.js';
-import { Finish } from '/Construction-OS/modules/Architecture/Finish.js';
-import { Opening } from '/Construction-OS/modules/Architecture/Opening.js';
-import { BuildingMaterial } from '/Construction-OS/modules/Architecture/Material.js';
+import { Wall } from '/Construction-OS/Modules/Architecture/Wall.js';
+import { Door } from '/Construction-OS/Modules/Architecture/Door.js';
+import { Window } from '/Construction-OS/Modules/Architecture/Window.js';
+import { Floor } from '/Construction-OS/Modules/Architecture/Floor.js';
+import { Finish } from '/Construction-OS/Modules/Architecture/Finish.js';
+import { Opening } from '/Construction-OS/Modules/Architecture/Opening.js';
+import { BuildingMaterial } from '/Construction-OS/Modules/Architecture/Material.js';
 
 // ========== ARCHITECTURE GLOBAL MODULES ==========
-import { GlobalWall } from '/Construction-OS/modules/Architecture/global/GlobalWall.js';
-import { GlobalFloor } from '/Construction-OS/modules/Architecture/global/GlobalFloor.js';
+import { GlobalWall } from '/Construction-OS/Modules/Architecture/global/GlobalWall.js';
+import { GlobalFloor } from '/Construction-OS/Modules/Architecture/global/GlobalFloor.js';
 
 // ========== CONCRETE MODULES ==========
-import { Foundation } from '/Construction-OS/modules/Concrete/Foundation.js';
-import { Column } from '/Construction-OS/modules/Concrete/Column.js';
-import { Beam } from '/Construction-OS/modules/Concrete/Beam.js';
-import { Slab } from '/Construction-OS/modules/Concrete/Slab.js';
-import { Rebar, RebarLayout } from '/Construction-OS/modules/Concrete/Rebar.js';
-import { ConcreteMaterial } from '/Construction-OS/modules/Concrete/ConcreteMaterial.js';
+import { Foundation } from '/Construction-OS/Modules/Concrete/Foundation.js';
+import { Column } from '/Construction-OS/Modules/Concrete/Column.js';
+import { Beam } from '/Construction-OS/Modules/Concrete/Beam.js';
+import { Slab } from '/Construction-OS/Modules/Concrete/Slab.js';
+import { Rebar, RebarLayout } from '/Construction-OS/Modules/Concrete/Rebar.js';
+import { ConcreteMaterial } from '/Construction-OS/Modules/Concrete/ConcreteMaterial.js';
 
 // ========== CONCRETE GLOBAL MODULES ==========
-import { GlobalBeam } from '/Construction-OS/modules/Concrete/global/GlobalBeam.js';
-import { GlobalColumn } from '/Construction-OS/modules/Concrete/global/GlobalColumn.js';
-import { GlobalSlab } from '/Construction-OS/modules/Concrete/global/GlobalSlab.js';
+import { GlobalBeam } from '/Construction-OS/Modules/Concrete/global/GlobalBeam.js';
+import { GlobalColumn } from '/Construction-OS/Modules/Concrete/global/GlobalColumn.js';
+import { GlobalSlab } from '/Construction-OS/Modules/Concrete/global/GlobalSlab.js';
 
 // ========== EARTHWORKS MODULES ==========
-import { Excavation } from '/Construction-OS/modules/Earthworks/Excavation.js';
-import { Compaction } from '/Construction-OS/modules/Earthworks/Compaction.js';
-import { Layer } from '/Construction-OS/modules/Earthworks/Layer.js';
-import { SoilMaterial } from '/Construction-OS/modules/Earthworks/SoilMaterial.js';
+import { Excavation } from '/Construction-OS/Modules/Earthworks/Excavation.js';
+import { Compaction } from '/Construction-OS/Modules/Earthworks/Compaction.js';
+import { Layer } from '/Construction-OS/Modules/Earthworks/Layer.js';
+import { SoilMaterial } from '/Construction-OS/Modules/Earthworks/SoilMaterial.js';
 
 // ========== EARTHWORKS GLOBAL MODULES ==========
-import { GlobalExcavation } from '/Construction-OS/modules/Earthworks/global/GlobalExcavation.js';
-import { GlobalCompaction } from '/Construction-OS/modules/Earthworks/global/GlobalCompaction.js';
+import { GlobalExcavation } from '/Construction-OS/Modules/Earthworks/global/GlobalExcavation.js';
+import { GlobalCompaction } from '/Construction-OS/Modules/Earthworks/global/GlobalCompaction.js';
 
 // ========== MEP MODULES ==========
-import { ElectricalCircuit } from '/Construction-OS/modules/MEP/Electrical.js';
-import { PlumbingSystem } from '/Construction-OS/modules/MEP/Plumbing.js';
-import { HVACSystem } from '/Construction-OS/modules/MEP/HVAC.js';
-import { DrainageSystem } from '/Construction-OS/modules/MEP/Drainage.js';
-import { Pipe } from '/Construction-OS/modules/MEP/Pipe.js';
-import { Cable } from '/Construction-OS/modules/MEP/Cable.js';
-import { Fixture } from '/Construction-OS/modules/MEP/Fixture.js';
-import { MEPMaterial } from '/Construction-OS/modules/MEP/Material.js';
+import { ElectricalCircuit } from '/Construction-OS/Modules/MEP/Electrical.js';
+import { PlumbingSystem } from '/Construction-OS/Modules/MEP/Plumbing.js';
+import { HVACSystem } from '/Construction-OS/Modules/MEP/HVAC.js';
+import { DrainageSystem } from '/Construction-OS/Modules/MEP/Drainage.js';
+import { Pipe } from '/Construction-OS/Modules/MEP/Pipe.js';
+import { Cable } from '/Construction-OS/Modules/MEP/Cable.js';
+import { Fixture } from '/Construction-OS/Modules/MEP/Fixture.js';
+import { MEPMaterial } from '/Construction-OS/Modules/MEP/Material.js';
 
 // ========== MEP GLOBAL MODULES ==========
-import { GlobalElectrical } from '/Construction-OS/modules/MEP/global/GlobalElectrical.js';
-import { GlobalPlumbing } from '/Construction-OS/modules/MEP/global/GlobalPlumbing.js';
-import { GlobalHVAC } from '/Construction-OS/modules/MEP/global/GlobalHVAC.js';
+import { GlobalElectrical } from '/Construction-OS/Modules/MEP/global/GlobalElectrical.js';
+import { GlobalPlumbing } from '/Construction-OS/Modules/MEP/global/GlobalPlumbing.js';
+import { GlobalHVAC } from '/Construction-OS/Modules/MEP/global/GlobalHVAC.js';
 
 // ========== BOQ MODULES ==========
-import { BOQCalculator } from '/Construction-OS/modules/BOQ/Calculator.js';
-import { BOQReporter } from '/Construction-OS/modules/BOQ/Reporter.js';
-import { BOQExporter } from '/Construction-OS/modules/BOQ/Exporter.js';
+import { BOQCalculator } from '/Construction-OS/Modules/BOQ/Calculator.js';
+import { BOQReporter } from '/Construction-OS/Modules/BOQ/Reporter.js';
+import { BOQExporter } from '/Construction-OS/Modules/BOQ/Exporter.js';
 
 // ========== BOQ GLOBAL MODULES ==========
-import { GlobalBOQCalculator } from '/Construction-OS/modules/BOQ/global/GlobalBOQCalculator.js';
-import { GlobalReporter } from '/Construction-OS/modules/BOQ/global/GlobalReporter.js';
-import { GlobalEarthworksBOQ } from '/Construction-OS/modules/BOQ/global/GlobalEarthworksBOQ.js';
+import { GlobalBOQCalculator } from '/Construction-OS/Modules/BOQ/global/GlobalBOQCalculator.js';
+import { GlobalReporter } from '/Construction-OS/Modules/BOQ/global/GlobalReporter.js';
+import { GlobalEarthworksBOQ } from '/Construction-OS/Modules/BOQ/global/GlobalEarthworksBOQ.js';
 
 // ========== CAD TOOLS ==========
 import { CADImporter } from '/Construction-OS/tools/cad/CADImporter.js';
@@ -209,7 +209,7 @@ class ActualConstructionOS {
         }
     }
 
-    // ==================== تهيئة Three.js ====================
+// ==================== تهيئة Three.js ====================
 
     initThree() {
         try {
@@ -266,7 +266,7 @@ class ActualConstructionOS {
         }
     }
 
-// ==================== تهيئة أنظمة التحميل ====================
+    // ==================== تهيئة أنظمة التحميل ====================
 
     initLoadingSystems() {
         try {
