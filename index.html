@@ -5,57 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ACTUAL CONSTRUCTION OS - منصة إدارة المشاريع الهندسية</title>
     
-    <!-- ===== تصحيح المسارات ===== -->
+    <!-- ===== تصحيح المسارات المتقدم ===== -->
     <script>
-        // تصحيح المسار الأساسي (Constraction-OS → Construction-OS)
-        (function fixBasePath() {
+        (function fixAllPaths() {
+            console.log('🔧 بدء تشخيص وتصحيح المسارات...');
+            
+            // 1. تصحيح اسم المستودع (Constraction → Construction)
             const wrongBase = 'Constraction-OS/';
             const correctBase = 'Construction-OS/';
             
-            // اعتراض جميع طلبات الملفات
+            // 2. تصحيح حالة الأحرف (modules → Modules)
+            const wrongModules = '/Construction-OS/modules/';
+            const correctModules = '/Construction-OS/Modules/';
+            
+            // اعتراض جميع طلبات fetch
             const originalFetch = window.fetch;
             window.fetch = function(url, options) {
-                if (typeof url === 'string' && url.includes(wrongBase)) {
-                    url = url.replace(wrongBase, correctBase);
-                    console.log('✅ تم تصحيح المسار:', url);
+                if (typeof url === 'string') {
+                    let fixedUrl = url;
+                    
+                    // تصحيح اسم المستودع
+                    if (fixedUrl.includes(wrongBase)) {
+                        fixedUrl = fixedUrl.replace(wrongBase, correctBase);
+                        console.log('📁 تصحيح المستودع:', fixedUrl);
+                    }
+                    
+                    // تصحيح modules → Modules (الأهم!)
+                    if (fixedUrl.includes(wrongModules)) {
+                        fixedUrl = fixedUrl.replace(wrongModules, correctModules);
+                        console.log('📁 تصحيح Modules:', fixedUrl);
+                    }
+                    
+                    if (fixedUrl !== url) {
+                        return originalFetch.call(this, fixedUrl, options);
+                    }
                 }
                 return originalFetch.call(this, url, options);
             };
             
-            // اعتراض import
+            // اعتراض import الديناميكي
             const originalImport = window.import;
             if (originalImport) {
                 window.import = function(url) {
-                    if (typeof url === 'string' && url.includes(wrongBase)) {
-                        url = url.replace(wrongBase, correctBase);
+                    if (typeof url === 'string') {
+                        let fixedUrl = url;
+                        if (fixedUrl.includes(wrongBase)) {
+                            fixedUrl = fixedUrl.replace(wrongBase, correctBase);
+                        }
+                        if (fixedUrl.includes(wrongModules)) {
+                            fixedUrl = fixedUrl.replace(wrongModules, correctModules);
+                        }
+                        return originalImport.call(this, fixedUrl);
                     }
                     return originalImport.call(this, url);
                 };
             }
             
-            // إخفاء أخطاء الملفات المفقودة مؤقتاً
+            // إخفاء أخطاء 404 غير المهمة
             window.addEventListener('error', function(e) {
-                if (e.message && e.message.includes('Loading chunk') || 
-                    (e.target && e.target.src && e.target.src.includes('Constraction-OS'))) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
+                // أخطاء الملفات غير الأساسية
+                const nonCriticalPaths = [
+                    '/player/',
+                    '/floors/',
+                    '/clash/',
+                    '/global/GlobalElectrical.js',
+                    '/global/GlobalPlumbing.js',
+                    '/global/GlobalHVAC.js'
+                ];
                 
-                // إخفاء أخطاء 404 للملفات غير المهمة
-                if (e.target && e.target.src && (
-                    e.target.src.includes('/player/') ||
-                    e.target.src.includes('/floors/') ||
-                    e.target.src.includes('/clash/')
-                )) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.warn('⚠️ تم تجاهل ملف غير أساسي:', e.target.src);
-                    return false;
+                if (e.target && e.target.src) {
+                    if (nonCriticalPaths.some(path => e.target.src.includes(path))) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.warn('⚠️ تم تجاهل ملف غير أساسي:', e.target.src);
+                        return false;
+                    }
                 }
             }, true);
             
-            console.log('🌟 نظام تصحيح المسارات نشط');
+            // تشخيص المسارات
+            window.checkPath = async function(path) {
+                try {
+                    const res = await fetch(path);
+                    console.log(`🔍 ${path}: ${res.status} ${res.statusText}`);
+                    return res.ok;
+                } catch (e) {
+                    console.error(`❌ ${path}:`, e.message);
+                    return false;
+                }
+            };
+            
+            console.log('✅ نظام تصحيح المسارات جاهز');
+            console.log('📝 استخدم window.checkPath("/path/to/file.js") للتشخيص');
         })();
     </script>
     
@@ -64,17 +105,6 @@
     
     <!-- أيقونة الموقع -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏗️</text></svg>">
-    
-    <!-- وصف الموقع لمحركات البحث -->
-    <meta name="description" content="منصة متكاملة لتصميم وإدارة المشاريع الهندسية - ACTUAL CONSTRUCTION OS">
-    <meta name="keywords" content="هندسة, بناء, مشاريع, خرسانة, حديد, تشطيبات">
-    <meta name="author" content="مهندس سوداني">
-    
-    <!-- دعم اللغة العربية -->
-    <meta name="language" content="ar">
-    
-    <!-- ألوان الواجهة للمتصفحات الحديثة -->
-    <meta name="theme-color" content="#111122">
     
     <!-- إعدادات Three.js -->
     <script type="importmap">
@@ -87,13 +117,29 @@
     </script>
     
     <style>
-        /* أنماط احتياطية أثناء تحميل CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #111122;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+        }
+        
         #loading {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: #111122;
             display: flex;
             align-items: center;
@@ -111,6 +157,7 @@
             color: #88aaff;
             margin-bottom: 20px;
             font-size: 2.5em;
+            animation: glow 2s infinite;
         }
         
         .loader p {
@@ -118,54 +165,40 @@
             animation: pulse 1.5s infinite;
         }
         
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 30, 40, 0.6);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            border: 1px solid #4a6c8f;
+            z-index: 900;
+        }
+        
         @keyframes pulse {
             0% { opacity: 0.6; }
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+        
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #88aaff; }
+            50% { text-shadow: 0 0 30px #88aaff; }
+            100% { text-shadow: 0 0 10px #88aaff; }
+        }
     </style>
 </head>
-<script>
-    (function fixPaths() {
-        console.log('🔧 بدء تصحيح المسارات...');
-        
-        // اعتراض جميع طلبات الملفات
-        const originalFetch = window.fetch;
-        window.fetch = function(url, options) {
-            if (typeof url === 'string') {
-                // قائمة بالمسارات الخاطئة المحتملة
-                const fixes = {
-                    '/modules/Architecture/': '/modules/architecture/',
-                    '/modules/Concrete/': '/modules/concrete/',
-                    '/modules/Earthworks/': '/modules/earthworks/',
-                    '/modules/MEP/': '/modules/mep/',
-                    '/modules/BOQ/': '/modules/boq/'
-                };
-                
-                let fixedUrl = url;
-                for (let [wrong, correct] of Object.entries(fixes)) {
-                    if (url.includes(wrong)) {
-                        fixedUrl = url.replace(wrong, correct);
-                        console.log('✅ تم تصحيح المسار:', fixedUrl);
-                        break;
-                    }
-                }
-                return originalFetch.call(this, fixedUrl, options);
-            }
-            return originalFetch.call(this, url, options);
-        };
-        
-        console.log('✅ نظام تصحيح المسارات جاهز');
-    })();
-</script>
-    
 <body>
     <!-- شاشة التحميل -->
     <div id="loading">
         <div class="loader">
             <h1>🏗️ ACTUAL CONSTRUCTION OS</h1>
             <p>جاري تحميل المنصة المتكاملة...</p>
-            <p style="font-size: 12px; margin-top: 20px;">الإصدار 1.0 | منصة إدارة المشاريع الهندسية</p>
+            <p style="font-size: 12px; margin-top: 20px;">الإصدار 3.0 | منصة إدارة المشاريع الهندسية</p>
         </div>
     </div>
     
@@ -174,20 +207,40 @@
     
     <!-- شريط الحالة -->
     <div class="status-bar" id="statusBar">
-        ✅ النظام جاهز
+        ⏳ جاري التحميل...
     </div>
     
-    <!-- إخفاء شريط التحميل بعد تحميل الصفحة -->
     <script>
-        // إخفاء شاشة التحميل بعد 2 ثانية أو عند تحميل الصفحة
+        // تحديث شريط الحالة
+        window.updateStatus = function(message, type = 'info') {
+            const bar = document.getElementById('statusBar');
+            if (bar) {
+                const icons = {
+                    info: 'ℹ️',
+                    success: '✅',
+                    warning: '⚠️',
+                    error: '❌'
+                };
+                bar.innerHTML = `${icons[type] || 'ℹ️'} ${message}`;
+            }
+        };
+        
+        // إخفاء شاشة التحميل بعد تحميل الصفحة
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.getElementById('loading').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
                 }, 500);
-            }, 1500);
+            }, 2000);
         });
+        
+        // تشخيص سريع بعد 3 ثوان
+        setTimeout(() => {
+            console.log('🔍 تشخيص سريع للمسارات:');
+            checkPath('/Construction-OS/Modules/Architecture/Wall.js');
+            checkPath('/Construction-OS/Modules/Architecture/Door.js');
+        }, 3000);
     </script>
     
     <!-- استيراد الملف الرئيسي -->
