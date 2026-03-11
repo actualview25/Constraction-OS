@@ -1,41 +1,67 @@
 // =======================================
-// ACTUAL CONSTRUCTION OS - APPLICATION LAYER
-// =======================================
-// الإصدار: 3.0.0 - منصة Reality-BIM المتكاملة
+// ACTUAL VIEW CONSTRUCTION OS - MAIN ENTRY POINT
+// الإصدار: 3.0.0 - النسخة الكاملة المتكاملة
 // =======================================
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-console.log('%c🏗️ ACTUAL CONSTRUCTION OS - Reality BIM Engine', 'color: #88aaff; font-size: 20px; font-weight: bold;');
-console.log('%c📐 منصة متكاملة لربط صور 360 بالمخططات الهندسية', 'color: #ffaa44; font-size: 14px;');
+console.log('%c🏗️ ACTUAL VIEW CONSTRUCTION OS - النسخة الكاملة', 'color: #ffaa44; font-size: 20px; font-weight: bold;');
+console.log('%c📐 منصة متكاملة لربط صور 360 بالمخططات الهندسية', 'color: #88aaff; font-size: 14px;');
 
-// ========== استيراد جميع الأنظمة (ENGINE LAYER) ==========
+// ========== CORE SYSTEMS ==========
 import { GeoReferencing } from './core/Georeferencing.js';
 import { SceneManager } from './core/SceneManager.js';
 import { ProjectManager } from './core/ProjectManager.js';
+import { StorageManager } from './core/storage/StorageManager.js';
+
+// ========== GLOBAL SYSTEMS ==========
 import { GlobalEntitySystem } from './core/global/GlobalEntitySystem.js';
 import { SceneConnector } from './core/global/SceneConnector.js';
 import { CoordinateTransformer } from './core/global/CoordinateTransformer.js';
-import { SceneGraph } from './core/bridge/SceneGraph.js';
-import { StorageManager } from './core/storage/StorageManager.js';
 
-// Reality Bridge
+// ========== REALITY BRIDGE ==========
 import { RealityBridge } from './core/bridge/RealityBridge.js';
 import { SceneAnchor } from './core/bridge/SceneAnchor.js';
-import { EntityMarker } from './core/bridge/EntityMarker.js';
+import { SceneGraph } from './core/bridge/SceneGraph.js';
 import { SceneLink } from './core/bridge/SceneLink.js';
 import { SyncManager } from './core/bridge/SyncManager.js';
+import { EntityMarker } from './core/bridge/EntityMarker.js';
 
-// Loading Systems
+// ========== LOADING SYSTEMS ==========
 import { IntegratedLoader } from './core/loading/IntegratedLoader.js';
 import { LazySceneLoader } from './core/loading/LazySceneLoader.js';
-import { LODManager } from './core/rendering/LODManager.js';
-import { TileLODManager } from './core/loading/TileLODManager.js';
+import { SegmentedSceneLoader } from './core/loading/SegmentedSceneLoader.js';
+import { LoadingStrategy } from './core/loading/LoadingStrategy.js';
 import { PriorityQueue } from './core/loading/PriorityQueue.js';
+import { TileLODManager } from './core/loading/TileLODManager.js';
 
-// Architecture Modules
+// ========== RENDERING SYSTEMS ==========
+import { HybridRenderer } from './core/rendering/HybridRenderer.js';
+import { LODManager } from './core/rendering/LODManager.js';
+
+// ========== CLASH DETECTION ==========
+import { ClashDetection } from './core/clash/ClashDetection.js';
+import { AdvancedClashDetection } from './core/clash/AdvancedClashDetection.js';
+
+// ========== FLOOR SYSTEMS ==========
+import { FloorConnector } from './core/floors/FloorConnector.js';
+import { FloorCopySystem } from './core/floors/FloorCopySystem.js';
+import { FloorNavigation } from './core/floors/FloorNavigation.js';
+
+// ========== UNIVERSAL SYSTEMS ==========
+import { UniversalElement } from './core/elements/UniversalElement.js';
+import { UniversalImporter } from './core/import/UniversalImporter.js';
+
+// ========== DEBUG & ANALYTICS ==========
+import { DebugLayer } from './core/debug/DebugLayer.js';
+import { AnalyticsDebugger } from './core/debug/AnalyticsDebugger.js';
+
+// ========== ARCHITECTURE MODULES ==========
 import { Wall } from './Modules/Architecture/Wall.js';
 import { Door } from './Modules/Architecture/Door.js';
 import { Window } from './Modules/Architecture/Window.js';
@@ -44,11 +70,11 @@ import { Finish } from './Modules/Architecture/Finish.js';
 import { Opening } from './Modules/Architecture/Opening.js';
 import { BuildingMaterial } from './Modules/Architecture/Material.js';
 
-// Architecture Global
+// ========== ARCHITECTURE GLOBAL ==========
 import { GlobalWall } from './Modules/Architecture/global/GlobalWall.js';
 import { GlobalFloor } from './Modules/Architecture/global/GlobalFloor.js';
 
-// Concrete Modules
+// ========== CONCRETE MODULES ==========
 import { Foundation } from './Modules/Concrete/Foundation.js';
 import { Column } from './Modules/Concrete/Column.js';
 import { Beam } from './Modules/Concrete/Beam.js';
@@ -56,22 +82,22 @@ import { Slab } from './Modules/Concrete/Slab.js';
 import { Rebar, RebarLayout } from './Modules/Concrete/Rebar.js';
 import { ConcreteMaterial } from './Modules/Concrete/ConcreteMaterial.js';
 
-// Concrete Global
+// ========== CONCRETE GLOBAL ==========
 import { GlobalBeam } from './Modules/Concrete/global/GlobalBeam.js';
 import { GlobalColumn } from './Modules/Concrete/global/GlobalColumn.js';
 import { GlobalSlab } from './Modules/Concrete/global/GlobalSlab.js';
 
-// Earthworks
+// ========== EARTHWORKS MODULES ==========
 import { Excavation } from './Modules/Earthworks/Excavation.js';
 import { Compaction } from './Modules/Earthworks/Compaction.js';
 import { Layer } from './Modules/Earthworks/Layer.js';
 import { SoilMaterial } from './Modules/Earthworks/SoilMaterial.js';
 
-// Earthworks Global
+// ========== EARTHWORKS GLOBAL ==========
 import { GlobalExcavation } from './Modules/Earthworks/global/GlobalExcavation.js';
 import { GlobalCompaction } from './Modules/Earthworks/global/GlobalCompaction.js';
 
-// MEP Modules
+// ========== MEP MODULES ==========
 import { ElectricalCircuit } from './Modules/MEP/Electrical.js';
 import { PlumbingSystem } from './Modules/MEP/Plumbing.js';
 import { HVACSystem } from './Modules/MEP/HVAC.js';
@@ -81,659 +107,629 @@ import { Cable } from './Modules/MEP/Cable.js';
 import { Fixture } from './Modules/MEP/Fixture.js';
 import { MEPMaterial } from './Modules/MEP/Material.js';
 
-// MEP Global
+// ========== MEP GLOBAL ==========
 import { GlobalElectrical } from './Modules/MEP/global/GlobalElectrical.js';
 import { GlobalPlumbing } from './Modules/MEP/global/GlobalPlumbing.js';
 import { GlobalHVAC } from './Modules/MEP/global/GlobalHVAC.js';
 
-// BOQ Modules
+// ========== BOQ MODULES ==========
 import { BOQCalculator } from './Modules/BOQ/Calculator.js';
 import { BOQReporter } from './Modules/BOQ/Reporter.js';
 import { BOQExporter } from './Modules/BOQ/Exporter.js';
 
-// BOQ Global
+// ========== BOQ GLOBAL ==========
 import { GlobalBOQCalculator } from './Modules/BOQ/global/GlobalBOQCalculator.js';
 import { GlobalReporter } from './Modules/BOQ/global/GlobalReporter.js';
 import { GlobalEarthworksBOQ } from './Modules/BOQ/global/GlobalEarthworksBOQ.js';
 
-// CAD Tools
+// ========== CAD TOOLS ==========
 import { CADImporter } from './tools/cad/CADImporter.js';
 import { CalibrationWizard } from './tools/cad/CalibrationWizard.js';
 import { DWGParser } from './tools/cad/DWGParser.js';
 import { DXFParser } from './tools/cad/DXFParser.js';
 
-// Measurement Tools
+// ========== MEASUREMENT TOOLS ==========
 import { DistanceTool } from './tools/measurement/DistanceTool.js';
 import { AreaTool } from './tools/measurement/AreaTool.js';
 import { VolumeTool } from './tools/measurement/VolumeTool.js';
 
-// Export Tools
+// ========== EXPORT TOOLS ==========
 import { ConstructionExporter } from './tools/export/ConstructionExporter.js';
 import { GlobalDataExporter } from './tools/export/GlobalDataExporter.js';
 
-// Materials Library
+// ========== MATERIALS LIBRARY ==========
 import { MaterialLibrary } from './materials/MaterialLibrary.js';
 
-// UI Modules
+// ========== UI MODULES ==========
 import { Dashboard } from './ui/Dashboard.js';
 import { PropertiesPanel } from './ui/PropertiesPanel.js';
 import { Toolbar } from './ui/Toolbar.js';
+import { UniversalPropertiesPanel } from './ui/UniversalPropertiesPanel.js';
 import { GlobalEntitiesPanel } from './ui/global/GlobalEntitiesPanel.js';
 import { SceneConnectorUI } from './ui/global/SceneConnectorUI.js';
 import { CalibrationUI } from './ui/cad/CalibrationUI.js';
-import { UniversalPropertiesPanel } from './ui/UniversalPropertiesPanel.js';
 
-// Debug & Analytics
-import { DebugLayer } from './core/debug/DebugLayer.js';
-import { AnalyticsDebugger } from './core/debug/AnalyticsDebugger.js';
-
-// Rendering
-import { HybridRenderer } from './core/rendering/HybridRenderer.js';
+// ========== WORKER MODES ==========
+import { WorkerMode } from './player/WorkerMode.js';
+import { ForemanMode } from './player/ForemanMode.js';
+import { MobileWorkerMode } from './player/MobileWorkerMode.js';
+import { WorkerMarkers } from './player/WorkerMarkers.js';
 
 // =======================================
-// 🎯 APPLICATION LAYER
+// 🎯 MAIN CLASS - ACTUAL VIEW CONSTRUCTION OS
 // =======================================
 
-class ActualConstructionOS {
+class ActualViewConstructionOS {
     constructor() {
-        console.log('%c========================================', 'color: #88aaff');
-        console.log('%c🚀 بدء تشغيل Application Layer', 'color: #88aaff');
-        console.log('%c========================================', 'color: #88aaff');
+        console.log('%c========================================', 'color: #ffaa44');
+        console.log('%c🚀 ACTUAL VIEW CONSTRUCTION OS v3.0.0', 'color: #ffaa44; font-size: 18px; font-weight: bold;');
+        console.log('%c📐 جميع الأنظمة مفعلة - النسخة الكاملة', 'color: #88aaff; font-size: 14px;');
+        console.log('%c========================================', 'color: #ffaa44');
         
-        // ===== ENGINE LAYER (الأنظمة الأساسية) =====
-        this.engine = {
-            scene: null,
-            camera: null,
-            renderer: null,
-            controls: null,
-            geoRef: null,
-            sceneManager: null,
-            projectManager: null,
-            globalSystem: null,
-            sceneConnector: null,
-            realityBridge: null,
-            sceneGraph: null,
-            storage: null,
-            loader: null,
-            lodManager: null,
-            cadImporter: null,
-            calibrationWizard: null,
-            boqCalculator: null,
-            boqReporter: null,
-            materialLibrary: null
-        };
-
-        // ===== APPLICATION STATE =====
+        // ===== تهيئة الحاوية =====
+        this.engine = {};
         this.state = {
-            currentWorkflowStep: 1,        // 1-7
-            currentViewMode: 'plan',        // plan, reality, construction
+            currentWorkflowStep: 1,
+            currentViewMode: 'plan',
             currentScene: null,
             selectedElement: null,
             drawingMode: null,
             calibrationPoints: [],
-            projectData: null,
             scenes: new Map(),
-            elements: []
+            elements: [],
+            clashes: [],
+            indicatorRotation: 0
         };
         
-        // ===== UI REFERENCES (سيتم ربطها من index.html) =====
-        this.ui = {
-            sceneTree: document.getElementById('sceneTree'),
-            propertiesGrid: document.getElementById('propertiesGrid'),
-            statusMessage: document.getElementById('statusMessage'),
-            calibrationPointsList: document.getElementById('calibrationPointsList')
-        };
-        
-        // ===== بدء تشغيل المحرك =====
-        this.initEngine();
-        
-        // ===== بدء تشغيل واجهة المستخدم =====
+        // ===== تهيئة جميع الأنظمة =====
+        this.initThree();
+        this.initCore();
+        this.initGlobalSystems();
+        this.initRealityBridge();
+        this.initLoadingSystems();
+        this.initClashDetection();
+        this.initFloorSystems();
+        this.initUniversalSystems();
+        this.initCADTools();
+        this.initMeasurementTools();
+        this.initExportTools();
+        this.initBOQ();
+        this.initMaterials();
         this.initUI();
+        this.initDebugSystems();
+        this.initWorkerModes();
         
-        // ===== ربط دوال الواجهة =====
-        this.bindUI();
+        // ===== تجهيز المشهد الأساسي مع الأرضية والكرة =====
+        this.setupScene();
         
-        console.log('%c✅ Application Layer جاهز', 'color: #44ff44');
+        // ===== بدء الحركة =====
+        this.animate();
+        
+        console.log('%c✅ ACTUAL VIEW CONSTRUCTION OS جاهز', 'color: #44ff44; font-size: 16px;');
+        console.log('📊 جميع الأنظمة:', Object.keys(this.engine).length);
     }
 
-  // ========== ENGINE INITIALIZATION ==========
-initEngine() {
-    try {
-        // المشهد الأساسي
-        this.engine.scene = new THREE.Scene();
-        this.engine.scene.background = new THREE.Color(0x111122);
-        this.engine.scene.fog = new THREE.Fog(0x111122, 50, 200);
-        
-        // الكاميرا
-        this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-        this.engine.camera.position.set(15, 10, 20);
-        this.engine.camera.lookAt(0, 0, 0);
-        
-        // الريندرر
-        this.engine.renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            powerPreference: "high-performance"
-        });
-        this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.engine.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        this.engine.renderer.shadowMap.enabled = true;
-        this.engine.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.engine.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.engine.renderer.toneMappingExposure = 1.2;
-        document.getElementById('container').appendChild(this.engine.renderer.domElement);
-        
-        // التحكم
-        this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
-        this.engine.controls.enableDamping = true;
-        this.engine.controls.dampingFactor = 0.05;
-        this.engine.controls.screenSpacePanning = true;
-        this.engine.controls.maxPolarAngle = Math.PI / 2;
-        this.engine.controls.minDistance = 5;
-        this.engine.controls.maxDistance = 200;
-        this.engine.controls.target.set(0, 1.6, 0);
-        
-        // ===== الإضاءة المتقدمة =====
-        
-        // إضاءة محيطة
-        const ambientLight = new THREE.AmbientLight(0x404060, 0.8);
-        this.engine.scene.add(ambientLight);
-        
-        // إضاءة شمسية رئيسية
-        const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.5);
-        sunLight.position.set(20, 30, 20);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.near = 0.5;
-        sunLight.shadow.camera.far = 100;
-        sunLight.shadow.camera.left = -30;
-        sunLight.shadow.camera.right = 30;
-        sunLight.shadow.camera.top = 30;
-        sunLight.shadow.camera.bottom = -30;
-        sunLight.shadow.bias = -0.0001;
-        this.engine.scene.add(sunLight);
-        
-        // إضاءة خلفية
-        const backLight = new THREE.DirectionalLight(0x446688, 0.5);
-        backLight.position.set(-20, 10, -20);
-        this.engine.scene.add(backLight);
-        
-        // إضاءة نقطية للمساعدة
-        const fillLight = new THREE.PointLight(0x88aaff, 0.3);
-        fillLight.position.set(0, 10, 0);
-        this.engine.scene.add(fillLight);
-        
-        // ===== الأرضية والشبكة (المهمة جداً) =====
-        
-        // شبكة أرضية رئيسية واضحة
-        const mainGrid = new THREE.GridHelper(200, 40, 0x88aaff, 0x335588);
-        mainGrid.position.y = 0;
-        mainGrid.name = "mainGrid";
-        this.engine.scene.add(mainGrid);
-        
-        // شبكة ثانوية دقيقة للتفاصيل
-        const detailGrid = new THREE.GridHelper(100, 50, 0x44aaff, 0x224466);
-        detailGrid.position.y = 0.01; // ارتفاع طفيف لتجنب التداخل
-        detailGrid.name = "detailGrid";
-        this.engine.scene.add(detailGrid);
-        
-        // أرضية شبه شفافة لاستقبال الظلال
-        const floorGeometry = new THREE.CircleGeometry(150, 64);
-        const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0x1a1a2a,
-            transparent: true,
-            opacity: 0.2,
-            side: THREE.DoubleSide
-        });
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = 0;
-        floor.receiveShadow = true;
-        floor.name = "shadowFloor";
-        this.engine.scene.add(floor);
-        
-        // محاور الإحداثيات
-        const axesHelper = new THREE.AxesHelper(20);
-        axesHelper.name = "axesHelper";
-        this.engine.scene.add(axesHelper);
-        
-        // نقاط مرجعية على الأرضية
-        this.addReferencePoints();
-        
-        // ===== تهيئة الأنظمة الأساسية =====
-        
-        // نظام الإسناد الجغرافي
-        this.engine.geoRef = new GeoReferencing();
-        this.engine.geoRef.setCoordinateSystem('utm');
-        this.engine.geoRef.setOrigin(0, 0, 0);
-        this.engine.geoRef.setScale(1.0);
-        
-        // مدير المشهد
-        this.engine.sceneManager = new SceneManager(this);
-        
-        // مدير المشروع
-        this.engine.projectManager = new ProjectManager();
-        this.engine.projectManager.createProject('ACTUAL Project', 'Reality BIM Platform');
-        
-        // الرسم البياني للمشاهد
-        this.engine.sceneGraph = new SceneGraph();
-        
-        // نظام التخزين
-        this.engine.storage = new StorageManager();
-        this.engine.storage.init();
-        
-        // النظام العالمي للكيانات
-        this.engine.globalSystem = new GlobalEntitySystem(this.engine.geoRef);
-        
-        // موصل المشاهد
-        this.engine.sceneConnector = new SceneConnector(this.engine.geoRef);
-        this.engine.sceneConnector.setGlobalSystem(this.engine.globalSystem);
-        
-        // محول الإحداثيات
-        this.engine.coordTransformer = new CoordinateTransformer(
-            this.engine.geoRef, 
-            this.engine.sceneConnector
-        );
-        
-        // Reality Bridge
-        this.engine.realityBridge = new RealityBridge(
-            this.engine.globalSystem, 
-            this.engine.sceneConnector, 
-            this.engine.sceneGraph
-        );
-        
-        // معالج المعايرة
-        this.engine.calibrationWizard = new CalibrationWizard(
-            this.engine.geoRef, 
-            this.engine.sceneConnector
-        );
-        
-        // مستورد CAD
-        this.engine.cadImporter = new CADImporter(
-            this.engine.geoRef, 
-            this.engine.sceneConnector
-        );
-        
-        // حاسبة الكميات
-        this.engine.boqCalculator = new BOQCalculator(this);
-        this.engine.boqReporter = new BOQReporter(this.engine.boqCalculator);
-        
-        // مكتبة المواد
-        this.engine.materialLibrary = new MaterialLibrary();
-        
-        // محمل متكامل
-        this.engine.loader = new IntegratedLoader(
-            this.engine.sceneGraph,
-            this.engine.storage,
-            this.engine.camera
-        );
-        
-        // LOD Manager
-        this.engine.lodManager = new LODManager(this.engine.camera);
-        
-        // مصحح الأخطاء
-        this.engine.debugLayer = new DebugLayer(
-            this.engine.sceneGraph, 
-            this.engine.realityBridge, 
-            this.engine.loader, 
-            this.engine.lodManager
-        );
-        
-        console.log('✅ Engine initialized with all systems');
-        console.log('   • Scene with enhanced grid and lighting');
-        console.log('   • Reality Bridge ready for 360 images');
-        console.log('   • Calibration Wizard ready for GCP');
-        console.log('   • CAD Importer ready for DXF/DWG');
-        
-    } catch (error) {
-        console.error('❌ Engine initialization failed:', error);
-    }
-}
-
-// ===== دوال مساعدة إضافية =====
-
-addReferencePoints() {
-    // إضافة نقاط مرجعية على الأرضية كل 10 متر
-    const pointMaterial = new THREE.PointsMaterial({ color: 0xffaa44, size: 0.2 });
-    const pointGeometry = new THREE.BufferGeometry();
-    
-    const positions = [];
-    for (let x = -50; x <= 50; x += 10) {
-        for (let z = -50; z <= 50; z += 10) {
-            positions.push(x, 0.05, z);
+    // ========== THREE.JS INIT ==========
+    initThree() {
+        try {
+            // المشهد
+            this.engine.scene = new THREE.Scene();
+            this.engine.scene.background = new THREE.Color(0x111122);
+            
+            // الكاميرا
+            this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+            this.engine.camera.position.set(15, 10, 20);
+            this.engine.camera.lookAt(0, 0, 0);
+            
+            // الريندرر الرئيسي
+            this.engine.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.engine.renderer.shadowMap.enabled = true;
+            document.getElementById('container').appendChild(this.engine.renderer.domElement);
+            
+            // التحكم
+            this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
+            this.engine.controls.enableDamping = true;
+            this.engine.controls.dampingFactor = 0.05;
+            this.engine.controls.screenSpacePanning = true;
+            this.engine.controls.maxPolarAngle = Math.PI / 2;
+            this.engine.controls.target.set(0, 1.6, 0);
+            
+            console.log('✅ Three.js initialized');
+        } catch (error) {
+            console.error('❌ Three.js init failed:', error);
         }
     }
-    
-    pointGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    const points = new THREE.Points(pointGeometry, pointMaterial);
-    points.name = "referencePoints";
-    this.engine.scene.add(points);
-}
 
-toggleGrid(visible) {
-    const mainGrid = this.engine.scene.getObjectByName('mainGrid');
-    const detailGrid = this.engine.scene.getObjectByName('detailGrid');
-    
-    if (mainGrid) mainGrid.visible = visible;
-    if (detailGrid) detailGrid.visible = visible;
-}
+    // ========== CORE SYSTEMS ==========
+    initCore() {
+        try {
+            this.engine.geoRef = new GeoReferencing();
+            this.engine.geoRef.setCoordinateSystem('utm');
+            this.engine.geoRef.setOrigin(0, 0, 0);
+            this.engine.geoRef.setScale(1.0);
+            
+            this.engine.sceneManager = new SceneManager(this);
+            this.engine.projectManager = new ProjectManager();
+            this.engine.projectManager.createProject('ACTUAL Project', 'Reality BIM Platform');
+            
+            this.engine.sceneGraph = new SceneGraph();
+            this.engine.storage = new StorageManager();
+            this.engine.storage.init();
+            
+            console.log('✅ Core systems initialized');
+        } catch (error) {
+            console.error('❌ Core init failed:', error);
+        }
+    }
 
-toggleAxes(visible) {
-    const axes = this.engine.scene.getObjectByName('axesHelper');
-    if (axes) axes.visible = visible;
-}
-    // ========== UI INITIALIZATION ==========
+    // ========== GLOBAL SYSTEMS ==========
+    initGlobalSystems() {
+        try {
+            this.engine.globalSystem = new GlobalEntitySystem(this.engine.geoRef);
+            this.engine.sceneConnector = new SceneConnector(this.engine.geoRef);
+            this.engine.sceneConnector.setGlobalSystem(this.engine.globalSystem);
+            this.engine.coordTransformer = new CoordinateTransformer(this.engine.geoRef, this.engine.sceneConnector);
+            
+            console.log('✅ Global systems initialized');
+        } catch (error) {
+            console.error('❌ Global systems init failed:', error);
+        }
+    }
+
+    // ========== REALITY BRIDGE ==========
+    initRealityBridge() {
+        try {
+            this.engine.realityBridge = new RealityBridge(
+                this.engine.globalSystem, 
+                this.engine.sceneConnector, 
+                this.engine.sceneGraph
+            );
+            
+            this.engine.syncManager = new SyncManager(this.engine.realityBridge);
+            this.engine.sceneAnchor = new SceneAnchor(this.engine.geoRef, this.engine.sceneConnector);
+            this.engine.entityMarker = new EntityMarker(this.engine.scene);
+            this.engine.sceneLink = new SceneLink(this.engine.realityBridge);
+            
+            console.log('✅ Reality Bridge initialized');
+        } catch (error) {
+            console.error('❌ Reality Bridge init failed:', error);
+        }
+    }
+
+    // ========== LOADING SYSTEMS ==========
+    initLoadingSystems() {
+        try {
+            this.engine.loader = new IntegratedLoader(this.engine.sceneGraph, this.engine.storage, this.engine.camera);
+            this.engine.lazyLoader = new LazySceneLoader(this.engine.sceneGraph, this.engine.storage);
+            this.engine.segmentedLoader = new SegmentedSceneLoader();
+            this.engine.loadingStrategy = new LoadingStrategy(this.engine.sceneGraph);
+            this.engine.priorityQueue = new PriorityQueue(this);
+            this.engine.tileLODManager = new TileLODManager(this.engine.camera);
+            this.engine.lodManager = new LODManager(this.engine.camera);
+            
+            console.log('✅ Loading systems initialized');
+        } catch (error) {
+            console.error('❌ Loading systems init failed:', error);
+        }
+    }
+
+    // ========== CLASH DETECTION ==========
+    initClashDetection() {
+        try {
+            this.engine.clashDetection = new ClashDetection(this.engine.globalSystem, this.engine.sceneConnector);
+            this.engine.advancedClashDetection = new AdvancedClashDetection(this.engine.globalSystem, this.engine.sceneConnector);
+            
+            console.log('✅ Clash detection initialized');
+        } catch (error) {
+            console.error('❌ Clash detection init failed:', error);
+        }
+    }
+
+    // ========== FLOOR SYSTEMS ==========
+    initFloorSystems() {
+        try {
+            this.engine.floorConnector = new FloorConnector(this.engine.globalSystem, this.engine.sceneConnector);
+            this.engine.floorCopySystem = new FloorCopySystem(this.engine.globalSystem, this.engine.sceneConnector);
+            this.engine.floorNavigation = new FloorNavigation(this.engine.floorConnector);
+            
+            console.log('✅ Floor systems initialized');
+        } catch (error) {
+            console.error('❌ Floor systems init failed:', error);
+        }
+    }
+
+    // ========== UNIVERSAL SYSTEMS ==========
+    initUniversalSystems() {
+        try {
+            this.engine.universalElement = new UniversalElement();
+            this.engine.universalImporter = new UniversalImporter(this.engine.globalSystem, this.engine.cadImporter);
+            
+            console.log('✅ Universal systems initialized');
+        } catch (error) {
+            console.error('❌ Universal systems init failed:', error);
+        }
+    }
+
+    // ========== CAD TOOLS ==========
+    initCADTools() {
+        try {
+            this.engine.cadImporter = new CADImporter(this.engine.geoRef, this.engine.sceneConnector);
+            this.engine.calibrationWizard = new CalibrationWizard(this.engine.geoRef, this.engine.sceneConnector);
+            this.engine.dwgParser = new DWGParser();
+            this.engine.dxfParser = new DXFParser();
+            
+            console.log('✅ CAD tools initialized');
+        } catch (error) {
+            console.error('❌ CAD tools init failed:', error);
+        }
+    }
+
+    // ========== MEASUREMENT TOOLS ==========
+    initMeasurementTools() {
+        try {
+            this.engine.distanceTool = new DistanceTool(this);
+            this.engine.areaTool = new AreaTool(this);
+            this.engine.volumeTool = new VolumeTool(this);
+            
+            console.log('✅ Measurement tools initialized');
+        } catch (error) {
+            console.error('❌ Measurement tools init failed:', error);
+        }
+    }
+
+    // ========== EXPORT TOOLS ==========
+    initExportTools() {
+        try {
+            this.engine.constructionExporter = new ConstructionExporter(this);
+            this.engine.globalDataExporter = new GlobalDataExporter(this);
+            
+            console.log('✅ Export tools initialized');
+        } catch (error) {
+            console.error('❌ Export tools init failed:', error);
+        }
+    }
+
+    // ========== BOQ SYSTEMS ==========
+    initBOQ() {
+        try {
+            this.engine.boqCalculator = new BOQCalculator(this);
+            this.engine.boqReporter = new BOQReporter(this.engine.boqCalculator);
+            this.engine.boqExporter = new BOQExporter(this.engine.boqReporter);
+            
+            this.engine.globalBOQ = new GlobalBOQCalculator(this.engine.globalSystem);
+            this.engine.globalReporter = new GlobalReporter(this.engine.globalBOQ);
+            this.engine.globalEarthworksBOQ = new GlobalEarthworksBOQ(this.engine.globalSystem);
+            
+            console.log('✅ BOQ systems initialized');
+        } catch (error) {
+            console.error('❌ BOQ init failed:', error);
+        }
+    }
+
+    // ========== MATERIALS LIBRARY ==========
+    initMaterials() {
+        try {
+            this.engine.materialLibrary = new MaterialLibrary();
+            
+            console.log('✅ Materials library initialized');
+        } catch (error) {
+            console.error('❌ Materials init failed:', error);
+        }
+    }
+
+    // ========== UI SYSTEMS ==========
     initUI() {
         try {
-            // تحديث شريط الحالة
-            this.updateStatus('✅ المحرك جاهز', 'success');
-            this.updateWorkflowStep(1);
-            
-            // إضافة مستمعين للأحداث
-            this.setupEventListeners();
-            
-            console.log('✅ UI initialized');
-            
-        } catch (error) {
-            console.error('❌ UI initialization failed:', error);
-        }
-    }
-
-    // ========== BIND UI FUNCTIONS ==========
-    bindUI() {
-        // ربط الدوال بالـ window لتكون متاحة من الواجهة
-        window.app = this;
-        
-        // دوال استيراد الصور و CAD
-        window.importImage = () => this.importImageFromDialog();
-        window.importCAD = () => this.importCADFromDialog();
-        
-        // دوال إنشاء العناصر
-        window.startDrawWall = () => this.startDrawing('wall');
-        window.startDrawColumn = () => this.startDrawing('column');
-        window.addDoor = () => this.startDrawing('door');
-        window.addWindow = () => this.startDrawing('window');
-        window.addBeam = () => this.startDrawing('beam');
-        window.addSlab = () => this.startDrawing('slab');
-        window.addFoundation = () => this.startDrawing('foundation');
-        window.addPipe = () => this.startDrawing('pipe');
-        
-        // دوال المعايرة
-        window.addCalibrationPoint = () => this.startCalibrationPoint();
-        window.runCalibration = () => this.runCalibration();
-        window.addCalibrationPointToScene = () => this.addCalibrationPoint();
-        
-        // دوال المواد
-        window.selectMaterial = (material) => this.selectMaterial(material);
-        
-        // تحديث شريط الحالة
-        window.updateStatus = (msg, type) => this.updateStatus(msg, type);
-    }
-
-    // ========== WORKFLOW MANAGEMENT ==========
-    updateWorkflowStep(step) {
-        this.state.currentWorkflowStep = step;
-        
-        // تحديث الـ UI
-        const steps = document.querySelectorAll('.workflow-step');
-        steps.forEach((s, i) => {
-            if (i < step) {
-                s.classList.add('active');
-            } else {
-                s.classList.remove('active');
-            }
-        });
-
-        // تحديث شريط الحالة
-        const stepNames = [
-            '',
-            'استيراد مخطط CAD',
-            'رسم المخطط',
-            'استيراد صور 360',
-            'معايرة الصور مع المخطط',
-            'ربط المشاهد',
-            'إضافة العناصر',
-            'استخراج الكميات'
-        ];
-        
-        this.updateStatus(`الخطوة ${step}/7: ${stepNames[step]}`, 'info');
-    }
-
-    updateStatus(message, type = 'info') {
-        const statusEl = document.getElementById('statusMessage');
-        if (statusEl) {
-            statusEl.innerHTML = message;
-        }
-        
-        if (type === 'success') {
-            console.log('✅', message);
-        } else if (type === 'error') {
-            console.error('❌', message);
-        } else {
-            console.log('ℹ️', message);
-        }
-    }
-
-    // ========== EVENT LISTENERS ==========
-    setupEventListeners() {
-        // تغيير حجم النافذة
-        window.addEventListener('resize', () => this.onResize());
-        
-        // النقر على العناصر
-        this.engine.renderer.domElement.addEventListener('click', (e) => this.onClick(e));
-        
-        // تغيير وضع العرض
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const mode = e.target.closest('.view-btn').dataset.mode;
-                this.setViewMode(mode);
-            });
-        });
-    }
-
-    setViewMode(mode) {
-        this.state.currentViewMode = mode;
-        
-        // تحديث الـ UI
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            if (btn.dataset.mode === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        
-        // تحديث المشهد حسب الوضع
-        switch(mode) {
-            case 'plan':
-                this.showPlanMode();
-                break;
-            case 'reality':
-                this.showRealityMode();
-                break;
-            case 'construction':
-                this.showConstructionMode();
-                break;
-        }
-        
-        this.updateStatus(`وضع ${mode}`, 'info');
-    }
-
-    // ========== 360 IMAGE IMPORT ==========
-    importImageFromDialog() {
-        const input = document.getElementById('imageInput');
-        const nameInput = document.getElementById('sceneName');
-        
-        if (input.files.length > 0) {
-            const file = input.files[0];
-            const sceneName = nameInput.value;
-            const url = URL.createObjectURL(file);
-            
-            this.import360Image(url, sceneName);
-            
-            // إخفاء المودال
-            document.getElementById('importImageModal').classList.add('hidden');
-            
-            // التقدم للخطوة التالية
-            this.updateWorkflowStep(4);
-        }
-    }
-
-    async import360Image(imageUrl, sceneName) {
-        try {
-            this.updateStatus(`جاري استيراد الصورة: ${sceneName}...`, 'info');
-            
-            // إنشاء معرف للمشهد
-            const sceneId = `scene-${Date.now()}`;
-            
-            // إضافة المشهد للنظام
-            this.engine.sceneConnector.addScene(sceneId, { x: 0, y: 0, z: 0 }, 0);
-            
-            // تحميل الصورة
-            const texture = await this.loadTexture(imageUrl);
-            
-            // إنشاء كرة 360
-            const geometry = new THREE.SphereGeometry(500, 60, 40);
-            const material = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.BackSide
-            });
-            
-            const sphere = new THREE.Mesh(geometry, material);
-            sphere.userData = {
-                type: '360image',
-                sceneId: sceneId,
-                sceneName: sceneName
+            this.ui = {
+                dashboard: new Dashboard(this),
+                propertiesPanel: new PropertiesPanel(this),
+                toolbar: new Toolbar(this),
+                universalPropertiesPanel: new UniversalPropertiesPanel(),
+                globalEntitiesPanel: new GlobalEntitiesPanel(this),
+                sceneConnectorUI: new SceneConnectorUI(this),
+                calibrationUI: new CalibrationUI(this, this.engine.calibrationWizard)
             };
             
-            // إضافة للمشهد
-            this.engine.scene.add(sphere);
+            console.log('✅ UI systems initialized');
+        } catch (error) {
+            console.error('❌ UI init failed:', error);
+        }
+    }
+
+    // ========== DEBUG SYSTEMS ==========
+    initDebugSystems() {
+        try {
+            this.engine.analytics = new AnalyticsDebugger(this.engine.loader, this.engine.realityBridge);
+            this.engine.loader.analytics = this.engine.analytics;
+            this.engine.debugLayer = new DebugLayer(
+                this.engine.sceneGraph, 
+                this.engine.realityBridge, 
+                this.engine.loader, 
+                this.engine.lodManager
+            );
+            this.engine.debugLayer.setupKeyboardShortcut();
+            this.engine.analytics.startTracking();
             
-            // حفظ بيانات المشهد
-            this.state.scenes.set(sceneId, {
-                id: sceneId,
-                name: sceneName,
-                sphere: sphere,
-                texture: texture,
-                elements: [],
-                anchors: []
+            console.log('✅ Debug systems initialized');
+        } catch (error) {
+            console.error('❌ Debug init failed:', error);
+        }
+    }
+
+    // ========== WORKER MODES ==========
+    initWorkerModes() {
+        try {
+            this.engine.workerMode = new WorkerMode(this);
+            this.engine.foremanMode = new ForemanMode(this);
+            this.engine.mobileWorkerMode = new MobileWorkerMode(this);
+            this.engine.workerMarkers = new WorkerMarkers(this.engine.scene);
+            
+            console.log('✅ Worker modes initialized');
+        } catch (error) {
+            console.warn('⚠️ Worker modes not available');
+        }
+    }
+
+    // ========== SCENE SETUP مع الأرضية والكرة ==========
+    setupScene() {
+        try {
+            // ===== 1. إضاءة محيطة =====
+            const ambientLight = new THREE.AmbientLight(0x404060);
+            this.engine.scene.add(ambientLight);
+            
+            // إضاءة شمسية
+            const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+            sunLight.position.set(20, 30, 20);
+            sunLight.castShadow = true;
+            this.engine.scene.add(sunLight);
+            
+            // ===== 2. الأرضية المربعة الواضحة =====
+            const gridHelper = new THREE.GridHelper(100, 50, 0x88aaff, 0x335588);
+            gridHelper.position.y = 0;
+            gridHelper.name = "mainGrid";
+            this.engine.scene.add(gridHelper);
+            
+            // شبكة ثانوية دقيقة
+            const detailGrid = new THREE.GridHelper(50, 25, 0x44aaff, 0x224466);
+            detailGrid.position.y = 0.01;
+            detailGrid.name = "detailGrid";
+            this.engine.scene.add(detailGrid);
+            
+            // ===== 3. الكرة المركزية (للإشارة إلى مركز المشهد) =====
+            const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const sphereMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffaa44,
+                emissive: 0x442200
             });
+            const centerSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            centerSphere.position.set(0, 0.5, 0);
+            centerSphere.name = "centerSphere";
+            this.engine.scene.add(centerSphere);
             
-            // تحديث Scene Explorer في الواجهة
-            this.updateSceneExplorer();
+            // إضاءة حول الكرة
+            const pointLight = new THREE.PointLight(0xffaa44, 1, 10);
+            pointLight.position.set(0, 1, 0);
+            this.engine.scene.add(pointLight);
             
-            this.updateStatus(`✅ تم استيراد الصورة: ${sceneName}`, 'success');
+            // ===== 4. محاور إحداثية =====
+            const axesHelper = new THREE.AxesHelper(10);
+            axesHelper.name = "axesHelper";
+            this.engine.scene.add(axesHelper);
             
-            return sceneId;
+            // ===== 5. مؤشرات على الأرضية =====
+            const pointsMaterial = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.2 });
+            const pointsGeometry = new THREE.BufferGeometry();
+            const positions = [];
+            for (let x = -20; x <= 20; x += 5) {
+                for (let z = -20; z <= 20; z += 5) {
+                    positions.push(x, 0.05, z);
+                }
+            }
+
+            pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const points = new THREE.Points(pointsGeometry, pointsMaterial);
+            points.name = "referencePoints";
+            this.engine.scene.add(points);
+            
+            // ===== 6. أرضية شفافة للظلال =====
+            const floorGeometry = new THREE.CircleGeometry(100, 64);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a1a, 
+                transparent: true, 
+                opacity: 0.2,
+                side: THREE.DoubleSide
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = 0;
+            floor.receiveShadow = true;
+            floor.name = "shadowFloor";
+            this.engine.scene.add(floor);
+            
+            // ===== 7. مؤشر حركة (يدور) =====
+            this.createMovementIndicator();
+            
+            console.log('✅ Scene setup complete with grid and center sphere');
             
         } catch (error) {
-            this.updateStatus(`❌ فشل استيراد الصورة: ${error.message}`, 'error');
+            console.error('❌ Scene setup failed:', error);
+        }
+    }
+
+    // ===== مؤشر الحركة =====
+    createMovementIndicator() {
+        const indicatorGroup = new THREE.Group();
+        
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const sphereGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44 });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            sphere.position.set(Math.cos(angle) * 4, 0.2, Math.sin(angle) * 4);
+            indicatorGroup.add(sphere);
+        }
+        
+        indicatorGroup.name = "movementIndicator";
+        this.engine.scene.add(indicatorGroup);
+    }
+
+    // ========== ANIMATION LOOP ==========
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        if (this.engine.controls) this.engine.controls.update();
+        if (this.engine.lodManager) this.engine.lodManager.update();
+        if (this.engine.tileLODManager) this.engine.tileLODManager.update();
+        
+        // تدوير مؤشر الحركة
+        if (this.state.indicatorRotation !== undefined) {
+            this.state.indicatorRotation += 0.01;
+            const indicator = this.engine.scene.getObjectByName('movementIndicator');
+            if (indicator) {
+                indicator.rotation.y = this.state.indicatorRotation;
+            }
+        }
+        
+        if (this.engine.renderer && this.engine.scene && this.engine.camera) {
+            this.engine.renderer.render(this.engine.scene, this.engine.camera);
+        }
+    }
+
+    // ========== IMPORT 360 IMAGE ==========
+    async import360Image(url, sceneName) {
+        try {
+            const sceneId = `scene-${Date.now()}`;
+            this.engine.sceneConnector.addScene(sceneId, { x: 0, y: 0, z: 0 }, 0);
+            
+            const texture = await this.loadTexture(url);
+            const geometry = new THREE.SphereGeometry(500, 60, 40);
+            const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.userData = { type: '360image', sceneId, sceneName };
+            
+            this.engine.scene.add(sphere);
+            this.state.scenes.set(sceneId, { id: sceneId, name: sceneName, sphere, texture, elements: [], anchors: [] });
+            
+            this.updateSceneExplorer();
+            console.log(`✅ Imported 360 image: ${sceneName}`);
+            return sceneId;
+        } catch (error) {
+            console.error('❌ Import failed:', error);
             return null;
         }
     }
 
-    loadTexture(imageUrl) {
+    loadTexture(url) {
         return new Promise((resolve, reject) => {
-            const loader = new THREE.TextureLoader();
-            loader.load(imageUrl, resolve, undefined, reject);
+            new THREE.TextureLoader().load(url, resolve, undefined, reject);
         });
     }
 
-    // ========== CAD IMPORT ==========
-    importCADFromDialog() {
-        const input = document.getElementById('cadInput');
-        
-        if (input.files.length > 0) {
-            const file = input.files[0];
-            
-            // استخدام DWGParser أو DXFParser حسب الامتداد
-            const extension = file.name.split('.').pop().toLowerCase();
-            
-            if (extension === 'dxf') {
-                this.importDXF(file);
-            } else if (extension === 'dwg') {
-                this.importDWG(file);
-            }
-            
-            // إخفاء المودال
-            document.getElementById('importCADModal').classList.add('hidden');
-            
-            // التقدم للخطوة التالية
-            this.updateWorkflowStep(2);
-        }
-    }
-
-    importDXF(file) {
-        this.updateStatus('جاري استيراد ملف DXF...', 'info');
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const content = e.target.result;
-            
-            // استخدام DXFParser (مطلوب إنشاؤه)
-            // const parser = new DXFParser();
-            // const entities = parser.parse(content);
-            
-            // رسم العناصر من DXF
-            // this.drawCADEntities(entities);
-            
-            this.updateStatus('✅ تم استيراد ملف DXF', 'success');
-        };
-        reader.readAsText(file);
-    }
-
-    importDWG(file) {
-        this.updateStatus('جاري استيراد ملف DWG...', 'info');
-        
-        // DWG يحتاج إلى مكتبة خاصة
-        // يمكن استخدام AutoCAD API أو تحويل لـ DXF أولاً
-        
-        this.updateStatus('⚠️ استيراد DWG قيد التطوير', 'warning');
+    // ========== IMPORT CAD ==========
+    importCAD(file) {
+        console.log(`📄 Importing CAD: ${file.name}`);
+        // سيتم تنفيذها لاحقاً
     }
 
     // ========== CALIBRATION ==========
     startCalibrationPoint() {
         this.state.drawingMode = 'calibration';
-        this.updateStatus('انقر على الصورة لتحديد نقطة معايرة', 'info');
+        console.log('🔍 Click on image to add calibration point');
     }
 
-    addCalibrationPoint() {
-        const imgX = parseFloat(document.getElementById('imgX').value);
-        const imgY = parseFloat(document.getElementById('imgY').value);
-        const realX = parseFloat(document.getElementById('realX').value);
-        const realY = parseFloat(document.getElementById('realY').value);
-        
-        // إضافة نقطة تحكم
+    addCalibrationPoint(point) {
         this.engine.geoRef.addGCP(
-            { x: imgX, y: imgY, z: 0 },
-            { x: realX, y: realY, z: 0 }
+            { x: point.imageX, y: point.imageY, z: 0 },
+            { x: point.realX, y: point.realY, z: 0 }
         );
-        
-        // حفظ النقطة
-        this.state.calibrationPoints.push({
-            imgX, imgY, realX, realY
-        });
-        
-        // تحديث قائمة نقاط المعايرة في الواجهة
+        this.state.calibrationPoints.push(point);
         this.updateCalibrationPointsList();
         
-        this.updateStatus(`✅ تم إضافة نقطة معايرة (${this.state.calibrationPoints.length})`, 'success');
+        // تحديث عداد GCP في الواجهة
+        const gcpCountEl = document.getElementById('gcpCount');
+        if (gcpCountEl) {
+            gcpCountEl.textContent = this.engine.geoRef.gcp.length;
+        }
+        
+        // تحديث مصفوفة التحويل إذا كان لدينا 3 نقاط أو أكثر
+        if (this.engine.geoRef.gcp.length >= 3) {
+            this.engine.geoRef.calculateTransform();
+            this.updateTransformMatrix();
+        }
+    }
+
+    // دالة جديدة لتحديث مصفوفة التحويل في الواجهة
+    updateTransformMatrix() {
+        const matrixEl = document.getElementById('transformMatrix');
+        if (!matrixEl) return;
+        
+        const matrix = this.engine.geoRef.transformMatrix;
+        if (matrix) {
+            let matrixText = '';
+            matrix.forEach(row => {
+                matrixText += row.map(v => v.toFixed(3)).join('  ') + '\n';
+            });
+            matrixEl.innerHTML = matrixText.replace(/\n/g, '<br>');
+        }
     }
 
     runCalibration() {
         if (this.state.calibrationPoints.length < 3) {
-            this.updateStatus('⚠️ تحتاج إلى 3 نقاط معايرة على الأقل', 'warning');
+            alert('Need at least 3 calibration points');
             return;
         }
-        
-        // حساب مصفوفة التحويل
         this.engine.geoRef.calculateTransform();
-        
-        // الحصول على التقرير
         const report = this.engine.geoRef.getCalibrationReport();
+        console.log('✅ Calibration complete:', report);
         
-        this.updateStatus(`✅ تمت المعايرة - متوسط الخطأ: ${report.averageError}`, 'success');
-        this.updateWorkflowStep(5);
+        // تحديث مصفوفة التحويل
+        this.updateTransformMatrix();
+    }
+
+    // ========== CLASH DETECTION ==========
+    runClashDetection() {
+        if (!this.engine.advancedClashDetection) return;
+        
+        const report = this.engine.advancedClashDetection.runFullCheck(this.state.scenes);
+        this.state.clashes = report.clashes || [];
+        
+        console.log(`🔍 Clash detection: ${this.state.clashes.length} clashes found`);
+        return report;
+    }
+
+    // ========== ELEMENT CREATION ==========
+    startDrawing(type) {
+        if (!this.state.currentScene) {
+            alert('Select a scene first');
+            return;
+        }
+        this.state.drawingMode = type;
+        console.log(`✏️ Drawing mode: ${type}`);
+    }
+
+    // ========== UI UPDATES ==========
+    updateSceneExplorer() {
+        const treeEl = document.getElementById('sceneTree');
+        if (!treeEl) return;
+        
+        let html = '<li class="scene-item active"><i class="fas fa-building"></i><span>Main Project</span></li><ul class="scene-children">';
+        this.state.scenes.forEach((scene, id) => {
+            html += `<li class="scene-item" onclick="window.app.selectScene('${id}')"><i class="fas fa-image"></i><span>${scene.name}</span></li>`;
+        });
+        html += '</ul>';
+        
+        treeEl.innerHTML = html;
+    }
+
+    selectScene(sceneId) {
+        this.state.currentScene = sceneId;
+        const scene = this.state.scenes.get(sceneId);
+        if (scene?.sphere) {
+            this.state.scenes.forEach(s => { if (s.sphere) s.sphere.visible = false; });
+            scene.sphere.visible = true;
+        }
+        console.log(`📌 Selected scene: ${scene.name}`);
     }
 
     updateCalibrationPointsList() {
@@ -741,215 +737,46 @@ toggleAxes(visible) {
         if (!listEl) return;
         
         if (this.state.calibrationPoints.length === 0) {
-            listEl.innerHTML = '<div class="text-muted" style="text-align:center; padding:20px;">لا توجد نقاط معايرة</div>';
+            listEl.innerHTML = '<div class="text-muted" style="text-align:center; padding:20px;">No calibration points</div>';
             return;
         }
         
         let html = '';
         this.state.calibrationPoints.forEach((point, i) => {
-            html += `
-                <div class="property-row">
-                    <span class="property-label">نقطة ${i+1}:</span>
-                    <span class="property-value">(${point.imgX}, ${point.imgY}) → (${point.realX}, ${point.realY})</span>
-                </div>
-            `;
+            html += `<div class="property-row"><span class="property-label">Point ${i+1}:</span><span class="property-value">(${point.imageX},${point.imageY}) → (${point.realX},${point.realY})</span></div>`;
         });
-        
         listEl.innerHTML = html;
     }
 
-    // ========== ELEMENT CREATION ==========
-    startDrawing(type) {
-        // التأكد من وجود مشهد نشط
-        if (!this.state.currentScene) {
-            this.updateStatus('⚠️ اختر مشهداً أولاً', 'warning');
-            return;
-        }
-        
-        this.state.drawingMode = type;
-        this.updateStatus(`ابدأ برسم ${this.getElementName(type)}`, 'info');
+    setViewMode(mode) {
+        this.state.currentViewMode = mode;
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        console.log(`👁️ View mode: ${mode}`);
     }
 
-    getElementName(type) {
-        const names = {
-            'wall': 'جدار',
-            'column': 'عمود',
-            'door': 'باب',
-            'window': 'شباك',
-            'beam': 'كمرة',
-            'slab': 'سقف',
-            'foundation': 'قاعدة',
-            'pipe': 'ماسورة'
+    // ========== STATUS ==========
+    updateStatus(message, type = 'info') {
+        document.getElementById('statusMessage').innerHTML = message;
+        console.log(type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️', message);
+    }
+
+    // ========== GET SYSTEM STATUS ==========
+    getSystemStatus() {
+        return {
+            version: '3.0.0',
+            name: 'ACTUAL VIEW CONSTRUCTION OS',
+            type: 'Reality-BIM Engine',
+            status: 'running',
+            stats: {
+                scenes: this.state.scenes.size,
+                elements: this.state.elements.length,
+                gcps: this.engine.geoRef.gcp.length,
+                clashes: this.state.clashes.length,
+                transformMatrix: this.engine.geoRef.transformMatrix ? 'calculated' : 'not calculated'
+            }
         };
-        return names[type] || type;
-    }
-
-    // ========== SCENE EXPLORER ==========
-    updateSceneExplorer() {
-        const treeEl = document.getElementById('sceneTree');
-        if (!treeEl) return;
-        
-        let html = '<ul class="scene-tree">';
-        
-        // المشروع الرئيسي
-        html += `
-            <li class="scene-item active">
-                <i class="fas fa-building"></i>
-                <span>المشروع الرئيسي</span>
-            </li>
-            <ul class="scene-children">
-        `;
-        
-        // المشاهد
-        this.state.scenes.forEach((scene, id) => {
-            html += `
-                <li class="scene-item" onclick="window.app.selectScene('${id}')">
-                    <i class="fas fa-image"></i>
-                    <span>${scene.name}</span>
-                </li>
-            `;
-        });
-        
-        html += '</ul></ul>';
-        
-        treeEl.innerHTML = html;
-    }
-
-    selectScene(sceneId) {
-        this.state.currentScene = sceneId;
-        
-        // تحديث الـ UI
-        document.querySelectorAll('.scene-item').forEach(el => {
-            el.classList.remove('active');
-        });
-        
-        // إظهار الصورة المرتبطة بالمشهد
-        const scene = this.state.scenes.get(sceneId);
-        if (scene && scene.sphere) {
-            // إخفاء المشاهد الأخرى
-            this.state.scenes.forEach(s => {
-                if (s.sphere) s.sphere.visible = false;
-            });
-            scene.sphere.visible = true;
-        }
-        
-        this.updateStatus(`المشهد: ${scene.name}`, 'info');
-    }
-
-    // ========== PROPERTIES UPDATE ==========
-    updateProperties(element) {
-        const props = {
-            type: element.type || '-',
-            id: element.id || '-',
-            scene: this.state.currentScene || '-',
-            length: element.length || '-',
-            width: element.width || '-',
-            height: element.height || '-',
-            x: element.x || '-',
-            y: element.y || '-',
-            z: element.z || '-'
-        };
-        
-        document.getElementById('propType').textContent = props.type;
-        document.getElementById('propId').textContent = props.id;
-        document.getElementById('propScene').textContent = props.scene;
-        document.getElementById('propLength').textContent = props.length;
-        document.getElementById('propWidth').textContent = props.width;
-        document.getElementById('propHeight').textContent = props.height;
-        document.getElementById('propX').textContent = props.x;
-        document.getElementById('propY').textContent = props.y;
-        document.getElementById('propZ').textContent = props.z;
-    }
-
-    // ========== VIEW MODES ==========
-    showPlanMode() {
-        // إظهار المخطط (خطوط CAD)
-        // إخفاء الصور 360
-        this.state.scenes.forEach(scene => {
-            if (scene.sphere) scene.sphere.visible = false;
-        });
-    }
-
-    showRealityMode() {
-        // إظهار الصور 360
-        if (this.state.currentScene) {
-            const scene = this.state.scenes.get(this.state.currentScene);
-            if (scene && scene.sphere) {
-                scene.sphere.visible = true;
-            }
-        }
-    }
-
-    showConstructionMode() {
-        // إظهار العناصر (جدران - أعمدة)
-        // يمكن إظهار الصور بنصف شفافية
-        this.state.scenes.forEach(scene => {
-            if (scene.sphere) {
-                scene.sphere.material.transparent = true;
-                scene.sphere.material.opacity = 0.5;
-            }
-        });
-    }
-
-    // ========== MATERIAL SELECTION ==========
-    selectMaterial(material) {
-        this.state.currentMaterial = material;
-        this.updateStatus(`تم اختيار مادة: ${material}`, 'success');
-    }
-
-    // ========== EVENT HANDLERS ==========
-    onClick(event) {
-        // حساب موقع النقر
-        const mouse = new THREE.Vector2();
-        mouse.x = (event.clientX / this.engine.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(event.clientY / this.engine.renderer.domElement.clientHeight) * 2 + 1;
-        
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, this.engine.camera);
-        
-        // فحص العناصر
-        const intersects = raycaster.intersectObjects(this.engine.scene.children);
-        
-        if (intersects.length > 0) {
-            const selected = intersects[0].object;
-            
-            // إذا كنا في وضع المعايرة
-            if (this.state.drawingMode === 'calibration') {
-                // تحويل إحداثيات النقر إلى إحداثيات الصورة
-                const point = intersects[0].point;
-                
-                // فتح مودال إضافة نقطة معايرة
-                document.getElementById('imgX').value = point.x.toFixed(2);
-                document.getElementById('imgY').value = point.y.toFixed(2);
-                document.getElementById('calibrationPointModal').classList.remove('hidden');
-                
-                this.state.drawingMode = null;
-            }
-            
-            // تحديث الخصائص
-            if (selected.userData) {
-                this.updateProperties(selected.userData);
-            }
-        }
-    }
-
-    onResize() {
-        this.engine.camera.aspect = window.innerWidth / window.innerHeight;
-        this.engine.camera.updateProjectionMatrix();
-        this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    // ========== ANIMATION LOOP ==========
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        
-        this.engine.controls.update();
-        
-        if (this.engine.lodManager) {
-            this.engine.lodManager.update();
-        }
-        
-        this.engine.renderer.render(this.engine.scene, this.engine.camera);
     }
 }
 
@@ -959,27 +786,78 @@ toggleAxes(visible) {
 
 window.addEventListener('load', () => {
     console.log('%c========================================', 'color: #ffaa44');
-    console.log('%c🌟 ACTUAL CONSTRUCTION OS', 'color: #ffaa44; font-size: 24px;');
-    console.log('%c📐 Reality BIM Platform', 'color: #88aaff; font-size: 16px;');
+    console.log('%c🌟 ACTUAL VIEW CONSTRUCTION OS', 'color: #ffaa44; font-size: 24px;');
+    console.log('%c📐 All systems activated', 'color: #88aaff; font-size: 16px;');
     console.log('%c========================================', 'color: #ffaa44');
     
-    // إنشاء التطبيق
-    window.app = new ActualConstructionOS();
+    window.app = new ActualViewConstructionOS();
     
-    // بدء حلقة الحركة
-    window.app.animate();
+    // ربط دوال الواجهة
+    window.showImportSceneDialog = () => document.getElementById('importImageModal')?.classList.remove('hidden');
+    window.showImportCADDialog = () => document.getElementById('importCADModal')?.classList.remove('hidden');
+    window.hideModal = (id) => document.getElementById(id)?.classList.add('hidden');
     
-    // إظهار رسالة الترحيب
-    setTimeout(() => {
-        window.app.updateStatus('مرحباً بك في منصة ACTUAL CONSTRUCTION OS', 'success');
-    }, 2000);
+    window.importImage = () => {
+        const input = document.getElementById('imageInput');
+        const name = document.getElementById('sceneName').value;
+        if (input.files.length) {
+            window.app.import360Image(URL.createObjectURL(input.files[0]), name);
+            document.getElementById('importImageModal').classList.add('hidden');
+        }
+    };
+    
+    window.importCAD = () => {
+        const input = document.getElementById('cadInput');
+        if (input.files.length) {
+            window.app.importCAD(input.files[0]);
+            document.getElementById('importCADModal').classList.add('hidden');
+        }
+    };
+    
+    window.startDrawWall = () => window.app?.startDrawing('wall');
+    window.startDrawColumn = () => window.app?.startDrawing('column');
+    window.addDoor = () => window.app?.startDrawing('door');
+    window.addWindow = () => window.app?.startDrawing('window');
+    window.addBeam = () => window.app?.startDrawing('beam');
+    window.addSlab = () => window.app?.startDrawing('slab');
+    window.addFoundation = () => window.app?.startDrawing('foundation');
+    window.addPipe = () => window.app?.startDrawing('pipe');
+    
+    window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
+    window.runCalibration = () => window.app?.runCalibration();
+    window.runClashDetection = () => window.app?.runClashDetection();
+    
+    window.addCalibrationPointToScene = () => {
+        window.app?.addCalibrationPoint({
+            imageX: parseFloat(document.getElementById('imgX').value) || 0,
+            imageY: parseFloat(document.getElementById('imgY').value) || 0,
+            realX: parseFloat(document.getElementById('realX').value) || 0,
+            realY: parseFloat(document.getElementById('realY').value) || 0
+        });
+        document.getElementById('calibrationPointModal').classList.add('hidden');
+    };
+    
+    window.selectMaterial = (m) => window.app?.updateStatus(`Selected material: ${m}`, 'success');
+    window.updateStatus = (msg, type) => window.app?.updateStatus(msg, type);
+    window.getSystemStatus = () => window.app?.getSystemStatus();
+    
+    // تحديث workflow step
+    window.updateWorkflow = (step) => {
+        const steps = document.querySelectorAll('.workflow-step');
+        steps.forEach((s, i) => s.classList.toggle('active', i < step));
+        document.getElementById('statusMessage').innerHTML = `Step ${step}/7: ${['','Import CAD','Draw Plan','Import 360','Calibrate','Link','Build','BOQ'][step]}`;
+    };
+    
+    window.updateWorkflow(1);
+    window.app.updateStatus('All systems ready', 'success');
+    
+    console.log('📌 Commands: window.app, getSystemStatus(), updateWorkflow()');
 });
 
-// دوال مساعدة للـ Console
-console.log('📌 الأوامر المتاحة:');
-console.log('  • window.app - الوصول إلى التطبيق');
-console.log('  • window.app.import360Image(url, name) - استيراد صورة 360');
-console.log('  • window.app.startDrawing(type) - بدء رسم عنصر');
-console.log('  • window.app.setViewMode(mode) - تغيير وضع العرض');
+// ===== RESTART FUNCTION =====
+window.restartApp = () => {
+    console.log('🔄 Restarting application...');
+    location.reload();
+};
 
 
