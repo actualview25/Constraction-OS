@@ -241,7 +241,7 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== CORE SYSTEMS ==========
+// ========== CORE SYSTEMS ==========
     initCore() {
         try {
             this.engine.geoRef = new GeoReferencing();
@@ -471,7 +471,7 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== SCENE SETUP مع الأرضية والكرة ==========
+    // ========== SCENE SETUP مع الأرضية المربعة والكرة التوجيهية ==========
     setupScene() {
         try {
             // ===== 1. إضاءة محيطة =====
@@ -484,50 +484,71 @@ class ActualViewConstructionOS {
             sunLight.castShadow = true;
             this.engine.scene.add(sunLight);
             
+            // إضاءة خلفية
+            const backLight = new THREE.DirectionalLight(0x446688, 0.5);
+            backLight.position.set(-20, 10, -20);
+            this.engine.scene.add(backLight);
+            
             // ===== 2. الأرضية المربعة الواضحة =====
+            // شبكة رئيسية كبيرة
             const gridHelper = new THREE.GridHelper(100, 50, 0x88aaff, 0x335588);
             gridHelper.position.y = 0;
             gridHelper.name = "mainGrid";
             this.engine.scene.add(gridHelper);
             
-            // شبكة ثانوية دقيقة
-            const detailGrid = new THREE.GridHelper(50, 25, 0x44aaff, 0x224466);
+            // شبكة ثانوية دقيقة (أكثر كثافة)
+            const detailGrid = new THREE.GridHelper(50, 50, 0x44aaff, 0x224466);
             detailGrid.position.y = 0.01;
             detailGrid.name = "detailGrid";
             this.engine.scene.add(detailGrid);
             
-            // ===== 3. الكرة المركزية (للإشارة إلى مركز المشهد) =====
-            const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            // ===== 3. الكرة التوجيهية في المركز =====
+            // كرة رئيسية
+            const sphereGeometry = new THREE.SphereGeometry(0.8, 32, 32);
             const sphereMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0xffaa44,
-                emissive: 0x442200
+                emissive: 0x442200,
+                transparent: true,
+                opacity: 0.9
             });
             const centerSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            centerSphere.position.set(0, 0.5, 0);
+            centerSphere.position.set(0, 0.8, 0);
             centerSphere.name = "centerSphere";
             this.engine.scene.add(centerSphere);
             
+            // حلقة حول الكرة (Torus)
+            const torusGeometry = new THREE.TorusGeometry(1.2, 0.05, 16, 100);
+            const torusMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffaa44,
+                emissive: 0x442200
+            });
+            const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+            torus.rotation.x = Math.PI / 2;
+            torus.position.set(0, 0.8, 0);
+            torus.name = "centerTorus";
+            this.engine.scene.add(torus);
+            
             // إضاءة حول الكرة
-            const pointLight = new THREE.PointLight(0xffaa44, 1, 10);
+            const pointLight = new THREE.PointLight(0xffaa44, 1, 15);
             pointLight.position.set(0, 1, 0);
             this.engine.scene.add(pointLight);
             
-            // ===== 4. محاور إحداثية =====
-            const axesHelper = new THREE.AxesHelper(10);
+            // ===== 4. محاور إحداثية واضحة =====
+            const axesHelper = new THREE.AxesHelper(15);
             axesHelper.name = "axesHelper";
             this.engine.scene.add(axesHelper);
             
-            // ===== 5. مؤشرات على الأرضية =====
-            const pointsMaterial = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.2 });
+            // ===== 5. نقاط مرجعية على الأرضية =====
+            const pointsMaterial = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.15 });
             const pointsGeometry = new THREE.BufferGeometry();
             const positions = [];
-            for (let x = -20; x <= 20; x += 5) {
-                for (let z = -20; z <= 20; z += 5) {
-                    positions.push(x, 0.05, z);
+            for (let x = -20; x <= 20; x += 2) {
+                for (let z = -20; z <= 20; z += 2) {
+                    positions.push(x, 0.02, z);
                 }
             }
 
-            pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             const points = new THREE.Points(pointsGeometry, pointsMaterial);
             points.name = "referencePoints";
             this.engine.scene.add(points);
@@ -537,7 +558,7 @@ class ActualViewConstructionOS {
             const floorMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x1a1a1a, 
                 transparent: true, 
-                opacity: 0.2,
+                opacity: 0.15,
                 side: THREE.DoubleSide
             });
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -547,26 +568,68 @@ class ActualViewConstructionOS {
             floor.name = "shadowFloor";
             this.engine.scene.add(floor);
             
-            // ===== 7. مؤشر حركة (يدور) =====
+            // ===== 7. مؤشرات اتجاه (أسهم صغيرة) =====
+            this.createDirectionIndicators();
+            
+            // ===== 8. مؤشر حركة (يدور) =====
             this.createMovementIndicator();
             
-            console.log('✅ Scene setup complete with grid and center sphere');
+            console.log('✅ Scene setup complete with grid, center sphere and direction indicators');
             
         } catch (error) {
             console.error('❌ Scene setup failed:', error);
         }
     }
 
-    // ===== مؤشر الحركة =====
+    // ===== مؤشرات الاتجاه (أسهم) =====
+    createDirectionIndicators() {
+        const arrowLength = 2;
+        const arrowColor = 0xffaa44;
+        
+        // سهم اتجاه X (أحمر)
+        const arrowX = new THREE.ArrowHelper(
+            new THREE.Vector3(1, 0, 0), 
+            new THREE.Vector3(5, 0.2, 0), 
+            arrowLength, 
+            0xff3333
+        );
+        arrowX.name = "arrowX";
+        this.engine.scene.add(arrowX);
+        
+        // سهم اتجاه Y (أخضر)
+        const arrowY = new THREE.ArrowHelper(
+            new THREE.Vector3(0, 1, 0), 
+            new THREE.Vector3(0, 2, 0), 
+            arrowLength, 
+            0x33ff33
+        );
+        arrowY.name = "arrowY";
+        this.engine.scene.add(arrowY);
+        
+        // سهم اتجاه Z (أزرق)
+        const arrowZ = new THREE.ArrowHelper(
+            new THREE.Vector3(0, 0, 1), 
+            new THREE.Vector3(0, 0.2, 5), 
+            arrowLength, 
+            0x3333ff
+        );
+        arrowZ.name = "arrowZ";
+        this.engine.scene.add(arrowZ);
+    }
+
+    // ===== مؤشر الحركة (يدور حول المركز) =====
     createMovementIndicator() {
         const indicatorGroup = new THREE.Group();
         
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const sphereGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44 });
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const sphereGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const sphereMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffaa44,
+                emissive: 0x442200
+            });
             const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-            sphere.position.set(Math.cos(angle) * 4, 0.2, Math.sin(angle) * 4);
+            sphere.position.set(Math.cos(angle) * 5, 0.3, Math.sin(angle) * 5);
             indicatorGroup.add(sphere);
         }
         
@@ -589,6 +652,12 @@ class ActualViewConstructionOS {
             if (indicator) {
                 indicator.rotation.y = this.state.indicatorRotation;
             }
+        }
+        
+        // تدوير الحلقة حول الكرة
+        const torus = this.engine.scene.getObjectByName('centerTorus');
+        if (torus) {
+            torus.rotation.z += 0.005;
         }
         
         if (this.engine.renderer && this.engine.scene && this.engine.camera) {
@@ -651,8 +720,8 @@ class ActualViewConstructionOS {
         if (gcpCountEl) {
             gcpCountEl.textContent = this.engine.geoRef.gcp.length;
         }
-        
-        // تحديث مصفوفة التحويل إذا كان لدينا 3 نقاط أو أكثر
+
+    // تحديث مصفوفة التحويل إذا كان لدينا 3 نقاط أو أكثر
         if (this.engine.geoRef.gcp.length >= 3) {
             this.engine.geoRef.calculateTransform();
             this.updateTransformMatrix();
@@ -859,5 +928,4 @@ window.restartApp = () => {
     console.log('🔄 Restarting application...');
     location.reload();
 };
-
 
