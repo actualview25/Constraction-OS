@@ -196,111 +196,232 @@ class ActualConstructionOS {
         console.log('%c✅ Application Layer جاهز', 'color: #44ff44');
     }
 
-    // ========== ENGINE INITIALIZATION ==========
-    initEngine() {
-        try {
-            // المشهد الأساسي
-            this.engine.scene = new THREE.Scene();
-            this.engine.scene.background = new THREE.Color(0x111122);
-            
-            // الكاميرا
-            this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-            this.engine.camera.position.set(10, 5, 15);
-            
-            // الريندرر
-            this.engine.renderer = new THREE.WebGLRenderer({ antialias: true });
-            this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.engine.renderer.shadowMap.enabled = true;
-            document.getElementById('container').appendChild(this.engine.renderer.domElement);
-            
-            // التحكم
-            this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
-            this.engine.controls.enableDamping = true;
-            this.engine.controls.target.set(0, 1.6, 0);
-            
-            // الإضاءة الأساسية
-            const ambientLight = new THREE.AmbientLight(0x404060);
-            this.engine.scene.add(ambientLight);
-            
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-            dirLight.position.set(5, 10, 7);
-            this.engine.scene.add(dirLight);
-            
-            // ===== تهيئة الأنظمة =====
-            
-            // نظام الإسناد الجغرافي
-            this.engine.geoRef = new GeoReferencing();
-            this.engine.geoRef.setCoordinateSystem('utm');
-            
-            // مدير المشهد
-            this.engine.sceneManager = new SceneManager(this);
-            
-            // مدير المشروع
-            this.engine.projectManager = new ProjectManager();
-            this.engine.projectManager.createProject('مشروع جديد', '');
-            
-            // الرسم البياني للمشاهد
-            this.engine.sceneGraph = new SceneGraph();
-            
-            // نظام التخزين
-            this.engine.storage = new StorageManager();
-            
-            // النظام العالمي للكيانات
-            this.engine.globalSystem = new GlobalEntitySystem(this.engine.geoRef);
-            
-            // موصل المشاهد
-            this.engine.sceneConnector = new SceneConnector(this.engine.geoRef);
-            this.engine.sceneConnector.setGlobalSystem(this.engine.globalSystem);
-            
-            // محول الإحداثيات
-            this.engine.coordTransformer = new CoordinateTransformer(
-                this.engine.geoRef, 
-                this.engine.sceneConnector
-            );
-            
-            // Reality Bridge
-            this.engine.realityBridge = new RealityBridge(
-                this.engine.globalSystem, 
-                this.engine.sceneConnector, 
-                this.engine.sceneGraph
-            );
-            
-            // معالج المعايرة
-            this.engine.calibrationWizard = new CalibrationWizard(
-                this.engine.geoRef, 
-                this.engine.sceneConnector
-            );
-            
-            // مستورد CAD
-            this.engine.cadImporter = new CADImporter(
-                this.engine.geoRef, 
-                this.engine.sceneConnector
-            );
-            
-            // حاسبة الكميات
-            this.engine.boqCalculator = new BOQCalculator(this);
-            this.engine.boqReporter = new BOQReporter(this.engine.boqCalculator);
-            
-            // مكتبة المواد
-            this.engine.materialLibrary = new MaterialLibrary();
-            
-            // محمل متكامل
-            this.engine.loader = new IntegratedLoader(
-                this.engine.sceneGraph,
-                this.engine.storage,
-                this.engine.camera
-            );
-            
-            // LOD Manager
-            this.engine.lodManager = new LODManager(this.engine.camera);
-            
-            console.log('✅ Engine initialized with all systems');
-            
-        } catch (error) {
-            console.error('❌ Engine initialization failed:', error);
+  // ========== ENGINE INITIALIZATION ==========
+initEngine() {
+    try {
+        // المشهد الأساسي
+        this.engine.scene = new THREE.Scene();
+        this.engine.scene.background = new THREE.Color(0x111122);
+        this.engine.scene.fog = new THREE.Fog(0x111122, 50, 200);
+        
+        // الكاميرا
+        this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+        this.engine.camera.position.set(15, 10, 20);
+        this.engine.camera.lookAt(0, 0, 0);
+        
+        // الريندرر
+        this.engine.renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance"
+        });
+        this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.engine.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.engine.renderer.shadowMap.enabled = true;
+        this.engine.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.engine.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.engine.renderer.toneMappingExposure = 1.2;
+        document.getElementById('container').appendChild(this.engine.renderer.domElement);
+        
+        // التحكم
+        this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
+        this.engine.controls.enableDamping = true;
+        this.engine.controls.dampingFactor = 0.05;
+        this.engine.controls.screenSpacePanning = true;
+        this.engine.controls.maxPolarAngle = Math.PI / 2;
+        this.engine.controls.minDistance = 5;
+        this.engine.controls.maxDistance = 200;
+        this.engine.controls.target.set(0, 1.6, 0);
+        
+        // ===== الإضاءة المتقدمة =====
+        
+        // إضاءة محيطة
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.8);
+        this.engine.scene.add(ambientLight);
+        
+        // إضاءة شمسية رئيسية
+        const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.5);
+        sunLight.position.set(20, 30, 20);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 100;
+        sunLight.shadow.camera.left = -30;
+        sunLight.shadow.camera.right = 30;
+        sunLight.shadow.camera.top = 30;
+        sunLight.shadow.camera.bottom = -30;
+        sunLight.shadow.bias = -0.0001;
+        this.engine.scene.add(sunLight);
+        
+        // إضاءة خلفية
+        const backLight = new THREE.DirectionalLight(0x446688, 0.5);
+        backLight.position.set(-20, 10, -20);
+        this.engine.scene.add(backLight);
+        
+        // إضاءة نقطية للمساعدة
+        const fillLight = new THREE.PointLight(0x88aaff, 0.3);
+        fillLight.position.set(0, 10, 0);
+        this.engine.scene.add(fillLight);
+        
+        // ===== الأرضية والشبكة (المهمة جداً) =====
+        
+        // شبكة أرضية رئيسية واضحة
+        const mainGrid = new THREE.GridHelper(200, 40, 0x88aaff, 0x335588);
+        mainGrid.position.y = 0;
+        mainGrid.name = "mainGrid";
+        this.engine.scene.add(mainGrid);
+        
+        // شبكة ثانوية دقيقة للتفاصيل
+        const detailGrid = new THREE.GridHelper(100, 50, 0x44aaff, 0x224466);
+        detailGrid.position.y = 0.01; // ارتفاع طفيف لتجنب التداخل
+        detailGrid.name = "detailGrid";
+        this.engine.scene.add(detailGrid);
+        
+        // أرضية شبه شفافة لاستقبال الظلال
+        const floorGeometry = new THREE.CircleGeometry(150, 64);
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            color: 0x1a1a2a,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = 0;
+        floor.receiveShadow = true;
+        floor.name = "shadowFloor";
+        this.engine.scene.add(floor);
+        
+        // محاور الإحداثيات
+        const axesHelper = new THREE.AxesHelper(20);
+        axesHelper.name = "axesHelper";
+        this.engine.scene.add(axesHelper);
+        
+        // نقاط مرجعية على الأرضية
+        this.addReferencePoints();
+        
+        // ===== تهيئة الأنظمة الأساسية =====
+        
+        // نظام الإسناد الجغرافي
+        this.engine.geoRef = new GeoReferencing();
+        this.engine.geoRef.setCoordinateSystem('utm');
+        this.engine.geoRef.setOrigin(0, 0, 0);
+        this.engine.geoRef.setScale(1.0);
+        
+        // مدير المشهد
+        this.engine.sceneManager = new SceneManager(this);
+        
+        // مدير المشروع
+        this.engine.projectManager = new ProjectManager();
+        this.engine.projectManager.createProject('ACTUAL Project', 'Reality BIM Platform');
+        
+        // الرسم البياني للمشاهد
+        this.engine.sceneGraph = new SceneGraph();
+        
+        // نظام التخزين
+        this.engine.storage = new StorageManager();
+        this.engine.storage.init();
+        
+        // النظام العالمي للكيانات
+        this.engine.globalSystem = new GlobalEntitySystem(this.engine.geoRef);
+        
+        // موصل المشاهد
+        this.engine.sceneConnector = new SceneConnector(this.engine.geoRef);
+        this.engine.sceneConnector.setGlobalSystem(this.engine.globalSystem);
+        
+        // محول الإحداثيات
+        this.engine.coordTransformer = new CoordinateTransformer(
+            this.engine.geoRef, 
+            this.engine.sceneConnector
+        );
+        
+        // Reality Bridge
+        this.engine.realityBridge = new RealityBridge(
+            this.engine.globalSystem, 
+            this.engine.sceneConnector, 
+            this.engine.sceneGraph
+        );
+        
+        // معالج المعايرة
+        this.engine.calibrationWizard = new CalibrationWizard(
+            this.engine.geoRef, 
+            this.engine.sceneConnector
+        );
+        
+        // مستورد CAD
+        this.engine.cadImporter = new CADImporter(
+            this.engine.geoRef, 
+            this.engine.sceneConnector
+        );
+        
+        // حاسبة الكميات
+        this.engine.boqCalculator = new BOQCalculator(this);
+        this.engine.boqReporter = new BOQReporter(this.engine.boqCalculator);
+        
+        // مكتبة المواد
+        this.engine.materialLibrary = new MaterialLibrary();
+        
+        // محمل متكامل
+        this.engine.loader = new IntegratedLoader(
+            this.engine.sceneGraph,
+            this.engine.storage,
+            this.engine.camera
+        );
+        
+        // LOD Manager
+        this.engine.lodManager = new LODManager(this.engine.camera);
+        
+        // مصحح الأخطاء
+        this.engine.debugLayer = new DebugLayer(
+            this.engine.sceneGraph, 
+            this.engine.realityBridge, 
+            this.engine.loader, 
+            this.engine.lodManager
+        );
+        
+        console.log('✅ Engine initialized with all systems');
+        console.log('   • Scene with enhanced grid and lighting');
+        console.log('   • Reality Bridge ready for 360 images');
+        console.log('   • Calibration Wizard ready for GCP');
+        console.log('   • CAD Importer ready for DXF/DWG');
+        
+    } catch (error) {
+        console.error('❌ Engine initialization failed:', error);
+    }
+}
+
+// ===== دوال مساعدة إضافية =====
+
+addReferencePoints() {
+    // إضافة نقاط مرجعية على الأرضية كل 10 متر
+    const pointMaterial = new THREE.PointsMaterial({ color: 0xffaa44, size: 0.2 });
+    const pointGeometry = new THREE.BufferGeometry();
+    
+    const positions = [];
+    for (let x = -50; x <= 50; x += 10) {
+        for (let z = -50; z <= 50; z += 10) {
+            positions.push(x, 0.05, z);
         }
     }
+    
+    pointGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const points = new THREE.Points(pointGeometry, pointMaterial);
+    points.name = "referencePoints";
+    this.engine.scene.add(points);
+}
 
+toggleGrid(visible) {
+    const mainGrid = this.engine.scene.getObjectByName('mainGrid');
+    const detailGrid = this.engine.scene.getObjectByName('detailGrid');
+    
+    if (mainGrid) mainGrid.visible = visible;
+    if (detailGrid) detailGrid.visible = visible;
+}
+
+toggleAxes(visible) {
+    const axes = this.engine.scene.getObjectByName('axesHelper');
+    if (axes) axes.visible = visible;
+}
     // ========== UI INITIALIZATION ==========
     initUI() {
         try {
