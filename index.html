@@ -29,7 +29,7 @@
         
         body {
             overflow: hidden;
-            background: #0a0a14;
+            background: #0a0a0a;
             color: #e0e0e0;
         }
         
@@ -45,13 +45,13 @@
         /* ===== TOP BAR ===== */
         .top-bar {
             grid-column: 1 / -1;
-            background: #1a1a2a;
-            border-bottom: 1px solid #2a2a3a;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333333;
             display: flex;
             align-items: center;
             padding: 0 20px;
             gap: 30px;
-            color: #88aaff;
+            color: #cccccc;
             z-index: 100;
         }
         
@@ -61,6 +61,7 @@
             gap: 10px;
             font-weight: bold;
             font-size: 16px;
+            color: #ffffff;
         }
         
         .logo i {
@@ -80,16 +81,18 @@
             cursor: pointer;
             transition: all 0.2s;
             font-size: 14px;
+            color: #b0b0b0;
         }
         
         .menu-item:hover {
-            background: #2a2a3a;
+            background: #333333;
+            color: #ffffff;
         }
         
         .menu-item.active {
-            background: #2a2a3a;
-            color: #88aaff;
-            border-bottom: 2px solid #88aaff;
+            background: #333333;
+            color: #ffffff;
+            border-bottom: 2px solid #ffaa44;
         }
         
         .workflow-indicator {
@@ -102,11 +105,11 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            color: #6a6a8a;
+            color: #666666;
         }
         
         .workflow-step.active {
-            color: #88aaff;
+            color: #ffaa44;
         }
         
         .workflow-step i {
@@ -115,8 +118,8 @@
         
         /* ===== LEFT PANEL ===== */
         .left-panel {
-            background: #12121e;
-            border-right: 1px solid #2a2a3a;
+            background: #121212;
+            border-right: 1px solid #333333;
             overflow-y: auto;
             padding: 20px;
             z-index: 90;
@@ -132,7 +135,7 @@
             gap: 10px;
             font-size: 14px;
             font-weight: bold;
-            color: #88aaff;
+            color: #ffaa44;
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -157,20 +160,23 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #b0b0b0;
         }
         
         .scene-item:hover {
-            background: #1e1e2e;
+            background: #2a2a2a;
+            color: #ffffff;
         }
         
         .scene-item.active {
-            background: #2a2a4a;
-            border-left: 3px solid #88aaff;
+            background: #2a2a2a;
+            border-left: 3px solid #ffaa44;
+            color: #ffffff;
         }
         
         .scene-item i {
             width: 20px;
-            color: #6a6a8a;
+            color: #666666;
         }
         
         .scene-children {
@@ -183,22 +189,26 @@
             padding: 8px 12px;
             margin: 4px 0;
             border-radius: 6px;
-            background: #1a1a2a;
+            background: #1a1a1a;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            border: 1px solid #333333;
+            color: #b0b0b0;
         }
         
         .floor-level:hover {
-            background: #222232;
+            background: #2a2a2a;
+            border-color: #ffaa44;
         }
         
         .floor-badge {
-            background: #2a2a4a;
+            background: #333333;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
+            color: #ffaa44;
         }
         
         /* Links */
@@ -206,18 +216,20 @@
             padding: 8px 12px;
             margin: 4px 0;
             border-radius: 6px;
-            background: #1a1a2a;
+            background: #1a1a1a;
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 12px;
+            border: 1px solid #333333;
+            color: #b0b0b0;
         }
         
         .link-icon {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #2a2a4a;
+            background: #333333;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -226,7 +238,7 @@
         /* ===== CENTER PANEL ===== */
         .center-panel {
             position: relative;
-            background: #0a0a14;
+            background: #000000;
             overflow: hidden;
         }
         
@@ -242,10 +254,10 @@
             transform: translateX(-50%);
             display: flex;
             gap: 10px;
-            background: #1a1a2a;
+            background: #1a1a1a;
             padding: 8px 16px;
             border-radius: 30px;
-            border: 1px solid #2a2a3a;
+            border: 1px solid #333333;
             z-index: 50;
         }
         
@@ -255,21 +267,24 @@
             cursor: pointer;
             font-size: 13px;
             transition: all 0.2s;
+            color: #b0b0b0;
         }
         
         .view-btn:hover {
-            background: #2a2a3a;
+            background: #333333;
+            color: #ffffff;
         }
         
         .view-btn.active {
-            background: #2a2a4a;
-            color: #88aaff;
+            background: #333333;
+            color: #ffaa44;
+            border: 1px solid #ffaa44;
         }
         
         /* ===== RIGHT PANEL ===== */
         .right-panel {
-            background: #12121e;
-            border-left: 1px solid #2a2a3a;
+            background: #121212;
+            border-left: 1px solid #333333;
             overflow-y: auto;
             padding: 20px;
             z-index: 90;
@@ -283,35 +298,38 @@
         }
         
         .property-group {
-            background: #1a1a2a;
+            background: #1a1a1a;
             border-radius: 8px;
             padding: 12px;
+            border: 1px solid #333333;
         }
         
         .property-group-title {
             font-size: 13px;
             font-weight: bold;
-            color: #88aaff;
+            color: #ffaa44;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
+        
         .property-row {
             display: flex;
             justify-content: space-between;
             padding: 6px 0;
-            border-bottom: 1px solid #2a2a3a;
+            border-bottom: 1px solid #333333;
             font-size: 13px;
+            color: #b0b0b0;
         }
         
         .property-label {
-            color: #8a8aaa;
+            color: #888888;
         }
         
         .property-value {
             font-weight: 500;
+            color: #ffffff;
         }
         
         /* Element Library */
@@ -323,25 +341,30 @@
         }
         
         .library-item {
-            background: #1a1a2a;
+            background: #1a1a1a;
             border-radius: 6px;
             padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid #333333;
+            color: #b0b0b0;
         }
         
         .library-item:hover {
-            background: #2a2a4a;
+            background: #2a2a2a;
             transform: translateY(-2px);
+            border-color: #ffaa44;
+            color: #ffffff;
         }
         
         .library-item i {
             font-size: 24px;
             margin-bottom: 5px;
             display: block;
+            color: #ffaa44;
         }
-        
+
         .library-item span {
             font-size: 11px;
         }
@@ -353,12 +376,17 @@
             border-radius: 4px;
             margin: 5px 0;
             cursor: pointer;
+            border: 1px solid #333333;
+        }
+        
+        .material-swatch:hover {
+            border: 2px solid #ffaa44;
         }
         
         /* Buttons */
         .btn {
-            background: #2a2a4a;
-            border: 1px solid #3a3a5a;
+            background: #2a2a2a;
+            border: 1px solid #444444;
             color: #e0e0e0;
             padding: 8px 16px;
             border-radius: 6px;
@@ -371,16 +399,17 @@
         }
         
         .btn:hover {
-            background: #3a3a5a;
+            background: #3a3a3a;
+            border-color: #ffaa44;
         }
         
         .btn-primary {
-            background: #4a6c8f;
-            border-color: #5a7c9f;
+            background: #3a3a3a;
+            border-color: #ffaa44;
         }
         
         .btn-primary:hover {
-            background: #5a7c9f;
+            background: #4a4a4a;
         }
         
         /* ===== MODAL DIALOGS ===== */
@@ -390,7 +419,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -399,32 +428,52 @@
         }
         
         .modal-content {
-            background: #1a1a2a;
+            background: #1a1a1a;
             border-radius: 12px;
             width: 400px;
             max-width: 90%;
-            border: 1px solid #4a6c8f;
+            border: 1px solid #ffaa44;
         }
         
         .modal-header {
             padding: 20px;
-            border-bottom: 1px solid #2a2a3a;
+            border-bottom: 1px solid #333333;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .modal-header h3 {
-            color: #88aaff;
+            color: #ffaa44;
         }
         
         .modal-body {
             padding: 20px;
         }
         
+        .modal-body label {
+            color: #b0b0b0;
+            font-size: 13px;
+        }
+        
+        .modal-body input {
+            background: #2a2a2a;
+            border: 1px solid #444444;
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .modal-body input:focus {
+            outline: none;
+            border-color: #ffaa44;
+        }
+        
         .modal-footer {
             padding: 20px;
-            border-top: 1px solid #2a2a3a;
+            border-top: 1px solid #333333;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
@@ -436,8 +485,8 @@
             bottom: 20px;
             left: 300px;
             right: 320px;
-            background: #1a1a2a;
-            border: 1px solid #2a2a3a;
+            background: #1a1a1a;
+            border: 1px solid #333333;
             border-radius: 30px;
             padding: 8px 16px;
             font-size: 12px;
@@ -451,11 +500,12 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            color: #88aaff;
+            color: #ffaa44;
         }
         
         .status-message {
             flex: 1;
+            color: #b0b0b0;
         }
         
         /* ===== UTILITIES ===== */
@@ -464,11 +514,30 @@
         }
         
         .text-muted {
-            color: #6a6a8a;
+            color: #666666;
         }
         
         .mt-2 {
             margin-top: 10px;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #444444;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffaa44;
         }
     </style>
 </head>
@@ -559,7 +628,7 @@
                     Add Scene
                 </button>
             </div>
-            
+
             <!-- Floor Levels -->
             <div class="panel-section">
                 <div class="panel-title">
@@ -710,7 +779,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <!-- Element Library -->
             <div class="panel-section">
                 <div class="panel-title">
@@ -799,16 +868,16 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3><i class="fas fa-images"></i> Import 360 Image</h3>
-                <button onclick="hideModal('importImageModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                <button onclick="hideModal('importImageModal')" style="background:none; border:none; color:#ffaa44; cursor:pointer; font-size:20px;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Select a 360° panoramic image:</p>
-                <input type="file" id="imageInput" accept="image/*" style="width:100%; padding:10px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                <p style="color:#b0b0b0;">Select a 360° panoramic image:</p>
+                <input type="file" id="imageInput" accept="image/*">
                 <div class="mt-2">
                     <label>Scene Name:</label>
-                    <input type="text" id="sceneName" value="New Scene" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white; margin-top:5px;">
+                    <input type="text" id="sceneName" value="New Scene">
                 </div>
             </div>
             <div class="modal-footer">
@@ -817,19 +886,19 @@
             </div>
         </div>
     </div>
-    
+
     <!-- ===== MODAL: Import CAD ===== -->
     <div id="importCADModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3><i class="fas fa-draw-polygon"></i> Import CAD Drawing</h3>
-                <button onclick="hideModal('importCADModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                <button onclick="hideModal('importCADModal')" style="background:none; border:none; color:#ffaa44; cursor:pointer; font-size:20px;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Select CAD file (DXF/DWG):</p>
-                <input type="file" id="cadInput" accept=".dxf,.dwg" style="width:100%; padding:10px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                <p style="color:#b0b0b0;">Select CAD file (DXF/DWG):</p>
+                <input type="file" id="cadInput" accept=".dxf,.dwg">
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="hideModal('importCADModal')">Cancel</button>
@@ -843,30 +912,30 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3><i class="fas fa-crosshairs"></i> Add Calibration Point</h3>
-                <button onclick="hideModal('calibrationPointModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                <button onclick="hideModal('calibrationPointModal')" style="background:none; border:none; color:#ffaa44; cursor:pointer; font-size:20px;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Click on the image to select a point, then enter real-world coordinates:</p>
+                <p style="color:#b0b0b0;">Click on the image to select a point, then enter real-world coordinates:</p>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0;">
                     <div>
                         <label>Image X:</label>
-                        <input type="number" id="imgX" readonly style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                        <input type="number" id="imgX" readonly>
                     </div>
                     <div>
                         <label>Image Y:</label>
-                        <input type="number" id="imgY" readonly style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                        <input type="number" id="imgY" readonly>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div>
                         <label>Real X:</label>
-                        <input type="number" id="realX" value="0" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                        <input type="number" id="realX" value="0">
                     </div>
                     <div>
                         <label>Real Y:</label>
-                        <input type="number" id="realY" value="0" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                        <input type="number" id="realY" value="0">
                     </div>
                 </div>
             </div>
@@ -906,7 +975,7 @@
                     s.classList.remove('active');
                 }
             });
-
+            
             document.getElementById('statusMessage').innerHTML = `Step ${step}/7: ${getStepName(step)}`;
         }
         
