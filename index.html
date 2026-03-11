@@ -2,85 +2,11 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ACTUAL CONSTRUCTION OS - منصة إدارة المشاريع الهندسية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACTUAL CONSTRUCTION OS - Reality BIM Platform</title>
     
-    <!-- ===== تصحيح المسارات الأساسي ===== -->
-    <script>
-        (function fixBasePaths() {
-            console.log('🔧 بدء تصحيح المسارات الأساسية...');
-            
-            // تصحيح اسم المستودع (Constraction → Construction)
-            const wrongBase = 'Constraction-OS/';
-            const correctBase = 'Construction-OS/';
-            
-            // تصحيح حالة الأحرف (modules → Modules)
-            const wrongModules = '/Construction-OS/modules/';
-            const correctModules = '/Construction-OS/Modules/';
-            
-            // اعتراض جميع طلبات fetch
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options) {
-                if (typeof url === 'string') {
-                    let fixedUrl = url;
-                    
-                    // تصحيح اسم المستودع
-                    if (fixedUrl.includes(wrongBase)) {
-                        fixedUrl = fixedUrl.replace(wrongBase, correctBase);
-                        console.log('📁 تم تصحيح المستودع:', fixedUrl);
-                    }
-                    
-                    // تصحيح modules → Modules
-                    if (fixedUrl.includes(wrongModules)) {
-                        fixedUrl = fixedUrl.replace(wrongModules, correctModules);
-                        console.log('📁 تم تصحيح Modules:', fixedUrl);
-                    }
-                    
-                    if (fixedUrl !== url) {
-                        return originalFetch.call(this, fixedUrl, options);
-                    }
-                }
-                return originalFetch.call(this, url, options);
-            };
-            
-            // اعتراض import الديناميكي
-            const originalImport = window.import;
-            if (originalImport) {
-                window.import = function(url) {
-                    if (typeof url === 'string') {
-                        let fixedUrl = url;
-                        if (fixedUrl.includes(wrongBase)) {
-                            fixedUrl = fixedUrl.replace(wrongBase, correctBase);
-                        }
-                        if (fixedUrl.includes(wrongModules)) {
-                            fixedUrl = fixedUrl.replace(wrongModules, correctModules);
-                        }
-                        return originalImport.call(this, fixedUrl);
-                    }
-                    return originalImport.call(this, url);
-                };
-            }
-            
-            console.log('✅ نظام تصحيح المسارات جاهز');
-        })();
-    </script>
-    
-    <!-- ربط ملف CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- أيقونة الموقع -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏗️</text></svg>">
-    
-    <!-- وصف الموقع لمحركات البحث -->
-    <meta name="description" content="منصة متكاملة لتصميم وإدارة المشاريع الهندسية - ACTUAL CONSTRUCTION OS">
-    <meta name="keywords" content="هندسة, بناء, مشاريع, خرسانة, حديد, تشطيبات">
-    <meta name="author" content="مهندس سوداني">
-    
-    <!-- دعم اللغة العربية -->
-    <meta name="language" content="ar">
-    
-    <!-- ألوان الواجهة للمتصفحات الحديثة -->
-    <meta name="theme-color" content="#111122">
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- إعدادات Three.js -->
     <script type="importmap">
@@ -93,348 +19,1089 @@
     </script>
     
     <style>
-        /* أنماط أساسية */
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #111122;
+            background: #0a0a14;
+            color: #e0e0e0;
         }
         
-        #container {
-            width: 100vw;
+        /* ===== MAIN CONTAINER ===== */
+        #app {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            grid-template-rows: 48px 1fr;
             height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
+            width: 100vw;
         }
         
-        /* شاشة التحميل */
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #111122;
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            grid-column: 1 / -1;
+            background: #1a1a2a;
+            border-bottom: 1px solid #2a2a3a;
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
-            pointer-events: none;
-        }
-        
-        .loader {
-            text-align: center;
-            color: white;
-        }
-        
-        .loader h1 {
+            padding: 0 20px;
+            gap: 30px;
             color: #88aaff;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            animation: glow 2s infinite;
+            z-index: 100;
         }
         
-        .loader p {
-            color: #4a6c8f;
-            animation: pulse 1.5s infinite;
-        }
-        
-        /* شريط الحالة */
-        .status-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(20, 30, 40, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 12px;
-            border: 1px solid #4a6c8f;
-            z-index: 900;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        /* شريط الأدوات العلوي */
-        .main-toolbar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(20, 30, 40, 0.9);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid #4a6c8f;
-            border-radius: 50px;
-            padding: 8px 16px;
-            display: flex;
-            gap: 8px;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .toolbar-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-        
-        .toolbar-btn:hover {
-            background: rgba(74, 108, 143, 0.5);
-            transform: scale(1.1);
-        }
-        
-        .toolbar-btn.active {
-            background: #4a6c8f;
-            box-shadow: 0 0 15px #88aaff;
-        }
-        
-        /* لوحة التحكم الجانبية */
-        #control-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(20, 30, 40, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #4a6c8f;
-            z-index: 1000;
-            width: 280px;
-            direction: rtl;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .panel-header {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #4a6c8f;
-            padding-bottom: 10px;
-        }
-        
-        .panel-header h2 {
-            color: #88aaff;
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .panel-section {
-            margin-bottom: 20px;
-        }
-        
-        .panel-section h3 {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        /* لوحة الخصائص */
-        .properties-panel {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 280px;
-            background: rgba(20, 30, 40, 0.9);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid #4a6c8f;
-            border-radius: 12px;
-            color: white;
-            z-index: 1000;
-            padding: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .properties-panel h3 {
-            color: #88aaff;
-            margin: 0 0 15px 0;
+            gap: 10px;
+            font-weight: bold;
             font-size: 16px;
-            text-align: center;
         }
         
-        .property-item {
-            margin-bottom: 10px;
-            padding: 8px;
-            background: #1a2a3a;
-            border-radius: 4px;
+        .logo i {
+            font-size: 24px;
+            color: #ffaa44;
         }
         
-        .property-label {
-            color: #aaa;
-            font-size: 11px;
+        .main-menu {
+            display: flex;
+            gap: 20px;
+            flex: 1;
         }
         
-        .property-value {
-            color: white;
-            font-size: 14px;
-        }
-        
-        /* أزرار */
-        .btn {
-            background: #4a6c8f;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        .menu-item {
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
             font-size: 14px;
         }
         
-        .btn:hover {
-            background: #5a7c9f;
+        .menu-item:hover {
+            background: #2a2a3a;
+        }
+        
+        .menu-item.active {
+            background: #2a2a3a;
+            color: #88aaff;
+            border-bottom: 2px solid #88aaff;
+        }
+        
+        .workflow-indicator {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6a6a8a;
+        }
+        
+        .workflow-step.active {
+            color: #88aaff;
+        }
+        
+        .workflow-step i {
+            font-size: 14px;
+        }
+        
+        /* ===== LEFT PANEL ===== */
+        .left-panel {
+            background: #12121e;
+            border-right: 1px solid #2a2a3a;
+            overflow-y: auto;
+            padding: 20px;
+            z-index: 90;
+        }
+        
+        .panel-section {
+            margin-bottom: 30px;
+        }
+        
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #88aaff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .panel-title i {
+            width: 20px;
+        }
+        
+        /* Scene Explorer */
+        .scene-tree {
+            list-style: none;
+        }
+        
+        .scene-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scene-item:hover {
+            background: #1e1e2e;
+        }
+        
+        .scene-item.active {
+            background: #2a2a4a;
+            border-left: 3px solid #88aaff;
+        }
+        
+        .scene-item i {
+            width: 20px;
+            color: #6a6a8a;
+        }
+        
+        .scene-children {
+            list-style: none;
+            margin-left: 30px;
+        }
+        
+        /* Floor Levels */
+        .floor-level {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            background: #1a1a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .floor-level:hover {
+            background: #222232;
+        }
+        
+        .floor-badge {
+            background: #2a2a4a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
+        /* Links */
+        .link-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            background: #1a1a2a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .link-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ===== CENTER PANEL ===== */
+        .center-panel {
+            position: relative;
+            background: #0a0a14;
+            overflow: hidden;
+        }
+        
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .view-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: #1a1a2a;
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #2a2a3a;
+            z-index: 50;
+        }
+        
+        .view-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .view-btn:hover {
+            background: #2a2a3a;
+        }
+        
+        .view-btn.active {
+            background: #2a2a4a;
+            color: #88aaff;
+        }
+        
+        /* ===== RIGHT PANEL ===== */
+        .right-panel {
+            background: #12121e;
+            border-left: 1px solid #2a2a3a;
+            overflow-y: auto;
+            padding: 20px;
+            z-index: 90;
+        }
+        
+        /* Properties Grid */
+        .properties-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .property-group {
+            background: #1a1a2a;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .property-group-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #88aaff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .property-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a3a;
+            font-size: 13px;
+        }
+        
+        .property-label {
+            color: #8a8aaa;
+        }
+        
+        .property-value {
+            font-weight: 500;
+        }
+        
+        /* Element Library */
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .library-item {
+            background: #1a1a2a;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .library-item:hover {
+            background: #2a2a4a;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        /* تحسينات الجوال */
-        @media (max-width: 768px) {
-            .main-toolbar {
-                width: 90%;
-                overflow-x: auto;
-                justify-content: flex-start;
-            }
-            
-            #control-panel {
-                width: 90%;
-                right: 5%;
-            }
-            
-            .properties-panel {
-                width: 90%;
-                right: 5%;
-                top: auto;
-                bottom: 80px;
-                transform: none;
-            }
+        .library-item i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: block;
         }
         
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        .library-item span {
+            font-size: 11px;
         }
         
-        @keyframes glow {
-            0% { text-shadow: 0 0 10px #88aaff; }
-            50% { text-shadow: 0 0 30px #88aaff; }
-            100% { text-shadow: 0 0 10px #88aaff; }
+        /* Materials */
+        .material-swatch {
+            width: 100%;
+            height: 30px;
+            border-radius: 4px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        
+        /* Buttons */
+        .btn {
+            background: #2a2a4a;
+            border: 1px solid #3a3a5a;
+            color: #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: #3a3a5a;
+        }
+        
+        .btn-primary {
+            background: #4a6c8f;
+            border-color: #5a7c9f;
+        }
+        
+        .btn-primary:hover {
+            background: #5a7c9f;
+        }
+        .btn-primary:hover {
+            background: #5a7c9f;
+        }
+        
+        /* ===== MODAL DIALOGS ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: #1a1a2a;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            border: 1px solid #4a6c8f;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #2a2a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: #88aaff;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #2a2a3a;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 300px;
+            right: 320px;
+            background: #1a1a2a;
+            border: 1px solid #2a2a3a;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .status-progress {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #88aaff;
+        }
+        
+        .status-message {
+            flex: 1;
+        }
+        
+        /* ===== UTILITIES ===== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-muted {
+            color: #6a6a8a;
+        }
+        
+        .mt-2 {
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="loading">
-        <div class="loader">
-            <h1>🏗️ ACTUAL CONSTRUCTION OS</h1>
-            <p>جاري تحميل المنصة المتكاملة...</p>
-            <p style="font-size: 12px; margin-top: 20px;">الإصدار 3.0 | منصة إدارة المشاريع الهندسية</p>
+    <div id="app">
+        <!-- ===== TOP BAR ===== -->
+        <div class="top-bar">
+            <div class="logo">
+                <i class="fas fa-cubes"></i>
+                <span>ACTUAL CONSTRUCTION OS</span>
+            </div>
+            
+            <div class="main-menu">
+                <div class="menu-item active" data-view="project">المشروع</div>
+                <div class="menu-item" data-view="cad">CAD</div>
+                <div class="menu-item" data-view="scenes">المشاهد</div>
+                <div class="menu-item" data-view="elements">العناصر</div>
+                <div class="menu-item" data-view="boq">BOQ</div>
+                <div class="menu-item" data-view="ai">AI</div>
+            </div>
+            
+            <div class="workflow-indicator">
+                <div class="workflow-step active">
+                    <i class="fas fa-file-import"></i>
+                    <span>1. استيراد CAD</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-draw-polygon"></i>
+                    <span>2. رسم المخطط</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-images"></i>
+                    <span>3. استيراد الصور</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>4. معايرة</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-link"></i>
+                    <span>5. ربط</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-pencil-ruler"></i>
+                    <span>6. بناء</span>
+                </div>
+                <div class="workflow-step">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>7. كميات</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== LEFT PANEL ===== -->
+        <div class="left-panel">
+            <!-- Scene Explorer -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-sitemap"></i>
+                    <span>مستكشف المشاهد</span>
+                </div>
+                <ul class="scene-tree" id="sceneTree">
+                    <li class="scene-item active">
+                        <i class="fas fa-building"></i>
+                        <span>المشروع الرئيسي</span>
+                    </li>
+                    <ul class="scene-children">
+                        <li class="scene-item">
+                            <i class="fas fa-door-open"></i>
+                            <span>المدخل</span>
+                        </li>
+                        <li class="scene-item">
+                            <i class="fas fa-couch"></i>
+                            <span>غرفة المعيشة</span>
+                        </li>
+                        <li class="scene-item">
+                            <i class="fas fa-bed"></i>
+                            <span>غرفة النوم</span>
+                        </li>
+                        <li class="scene-item">
+                            <i class="fas fa-utensils"></i>
+                            <span>المطبخ</span>
+                        </li>
+                    </ul>
+                </ul>
+                <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="showImportSceneDialog()">
+                    <i class="fas fa-plus"></i>
+                    إضافة مشهد
+                </button>
+            </div>
+            
+            <!-- Floor Levels -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-layer-group"></i>
+                    <span>المستويات</span>
+                </div>
+                <div class="floor-level" data-level="ground">
+                    <span>📍 الدور الأرضي</span>
+                    <span class="floor-badge">+0.00 م</span>
+                </div>
+                <div class="floor-level" data-level="first">
+                    <span>📍 الدور الأول</span>
+                    <span class="floor-badge">+3.00 م</span>
+                </div>
+                <div class="floor-level" data-level="second">
+                    <span>📍 الدور الثاني</span>
+                    <span class="floor-badge">+6.00 م</span>
+                </div>
+                <button class="btn" style="width:100%; margin-top:10px;">
+                    <i class="fas fa-plus"></i>
+                    إضافة مستوى
+                </button>
+            </div>
+            
+            <!-- Links -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-link"></i>
+                    <span>الروابط بين المشاهد</span>
+                </div>
+                <div class="link-item">
+                    <div class="link-icon">🚪</div>
+                    <div>المدخل → غرفة المعيشة</div>
+                </div>
+                <div class="link-item">
+                    <div class="link-icon">🚶</div>
+                    <div>غرفة المعيشة → المطبخ</div>
+                </div>
+                <div class="link-item">
+                    <div class="link-icon">🪜</div>
+                    <div>الأرضي → الأول (درج)</div>
+                </div>
+                <button class="btn" style="width:100%; margin-top:10px;">
+                    <i class="fas fa-link"></i>
+                    إضافة رابط
+                </button>
+            </div>
+            
+            <!-- Calibration Points -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>نقاط المعايرة</span>
+                </div>
+                <div id="calibrationPointsList">
+                    <div class="text-muted" style="text-align:center; padding:20px;">
+                        لا توجد نقاط معايرة
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== CENTER PANEL ===== -->
+        <div class="center-panel">
+            <div id="container"></div>
+            
+            <!-- View Controls -->
+            <div class="view-controls">
+                <div class="view-btn active" data-mode="plan">
+                    <i class="fas fa-draw-polygon"></i>
+                    المخطط
+                </div>
+                <div class="view-btn" data-mode="reality">
+                    <i class="fas fa-vr-cardboard"></i>
+                    الواقع
+                </div>
+                <div class="view-btn" data-mode="construction">
+                    <i class="fas fa-hard-hat"></i>
+                    البناء
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== RIGHT PANEL ===== -->
+        <div class="right-panel">
+            <!-- Properties -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>الخصائص</span>
+                </div>
+                <div class="properties-grid" id="propertiesGrid">
+                    <div class="property-group">
+                        <div class="property-group-title">
+                            <i class="fas fa-cube"></i>
+                            معلومات العنصر
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">النوع:</span>
+                            <span class="property-value" id="propType">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">المعرف:</span>
+                            <span class="property-value" id="propId">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">المشهد:</span>
+                            <span class="property-value" id="propScene">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group">
+                        <div class="property-group-title">
+                            <i class="fas fa-ruler"></i>
+                            الأبعاد
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">الطول:</span>
+                            <span class="property-value" id="propLength">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">العرض:</span>
+                            <span class="property-value" id="propWidth">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">الارتفاع:</span>
+                            <span class="property-value" id="propHeight">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group">
+                        <div class="property-group-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            الموقع
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">X:</span>
+                            <span class="property-value" id="propX">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Y:</span>
+                            <span class="property-value" id="propY">-</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Z:</span>
+                            <span class="property-value" id="propZ">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Element Library -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-icons"></i>
+                    <span>مكتبة العناصر</span>
+                </div>
+                <div class="library-grid">
+                    <div class="library-item" onclick="startDrawWall()">
+                        <i class="fas fa-vector-square"></i>
+                        <span>جدار</span>
+                    </div>
+                    <div class="library-item" onclick="startDrawColumn()">
+                        <i class="fas fa-square-full"></i>
+                        <span>عمود</span>
+                    </div>
+                    <div class="library-item" onclick="addDoor()">
+                        <i class="fas fa-door-open"></i>
+                        <span>باب</span>
+                    </div>
+                    <div class="library-item" onclick="addWindow()">
+                        <i class="fas fa-window-maximize"></i>
+                        <span>شباك</span>
+                    </div>
+                    <div class="library-item" onclick="addBeam()">
+                        <i class="fas fa-grip-lines"></i>
+                        <span>كمرة</span>
+                    </div>
+                    <div class="library-item" onclick="addSlab()">
+                        <i class="fas fa-border-all"></i>
+                        <span>سقف</span>
+                    </div>
+                    <div class="library-item" onclick="addFoundation()">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>قاعدة</span>
+                    </div>
+                    <div class="library-item" onclick="addPipe()">
+                        <i class="fas fa-water"></i>
+                        <span>ماسورة</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Materials -->
+            <div class="panel-section">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <span>المواد</span>
+                </div>
+                <div class="material-swatch" style="background:#8B4513;" onclick="selectMaterial('wood')"></div>
+                <div class="material-swatch" style="background:#808080;" onclick="selectMaterial('concrete')"></div>
+                <div class="material-swatch" style="background:#B22222;" onclick="selectMaterial('brick')"></div>
+                <div class="material-swatch" style="background:#87CEEB;" onclick="selectMaterial('glass')"></div>
+            </div>
+            
+            <!-- Calibration Tools -->
+            <div class="panel-section" id="calibrationTools">
+                <div class="panel-title">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>أدوات المعايرة</span>
+                </div>
+                <button class="btn" style="width:100%; margin-bottom:5px;" onclick="addCalibrationPoint()">
+                    <i class="fas fa-plus-circle"></i>
+                    إضافة نقطة تحكم
+                </button>
+                <button class="btn btn-primary" style="width:100%;" onclick="runCalibration()">
+                    <i class="fas fa-calculator"></i>
+                    حساب التحويل
+                </button>
+            </div>
         </div>
     </div>
-    
-    <!-- حاوية المشهد ثلاثي الأبعاد -->
-    <div id="container"></div>
-    
-    <!-- شريط الحالة -->
+
+<!-- ===== STATUS BAR ===== -->
     <div class="status-bar" id="statusBar">
-        ⏳ جاري التحميل...
-    </div>
-    
-    <!-- شريط الأدوات العلوي -->
-    <div class="main-toolbar" id="mainToolbar">
-        <button class="toolbar-btn" onclick="window.createWall()" title="إضافة جدار">🧱</button>
-        <button class="toolbar-btn" onclick="window.createDoor()" title="إضافة باب">🚪</button>
-        <button class="toolbar-btn" onclick="window.createWindow()" title="إضافة شباك">🪟</button>
-        <button class="toolbar-btn" onclick="window.createColumn()" title="إضافة عمود">🏛️</button>
-        <button class="toolbar-btn" onclick="window.createBeam()" title="إضافة كمرة">📐</button>
-        <button class="toolbar-btn" onclick="window.createSlab()" title="إضافة سقف">🏢</button>
-        <button class="toolbar-btn" onclick="window.importImage()" title="استيراد صورة 360">📷</button>
-        <button class="toolbar-btn" onclick="window.showBOQ()" title="جدول الكميات">📊</button>
-        <button class="toolbar-btn" onclick="window.resetCamera()" title="إعادة ضبط الكاميرا">🎯</button>
-    </div>
-    
-    <!-- لوحة الخصائص -->
-    <div class="properties-panel" id="propertiesPanel">
-        <h3>📋 الخصائص</h3>
-        <div id="propertiesContent">
-            <p style="color: #aaa; text-align: center;">اختر عنصراً لعرض خصائصه</p>
+        <div class="status-progress">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>الخطوة 1/7: استيراد المخطط</span>
+        </div>
+        <div class="status-message" id="statusMessage">
+            جاري تحميل المنصة...
         </div>
     </div>
     
-    <!-- إخفاء شاشة التحميل بعد تحميل الصفحة -->
+    <!-- ===== MODAL: استيراد صورة 360 ===== -->
+    <div id="importImageModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-images"></i> استيراد صورة 360</h3>
+                <button onclick="hideModal('importImageModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>اختر صورة بانورامية 360 درجة:</p>
+                <input type="file" id="imageInput" accept="image/*" style="width:100%; padding:10px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                <div class="mt-2">
+                    <label>اسم المشهد:</label>
+                    <input type="text" id="sceneName" value="مشهد جديد" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white; margin-top:5px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="hideModal('importImageModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="importImage()">استيراد</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== MODAL: استيراد CAD ===== -->
+    <div id="importCADModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-draw-polygon"></i> استيراد مخطط CAD</h3>
+                <button onclick="hideModal('importCADModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>اختر ملف CAD (DXF/DWG):</p>
+                <input type="file" id="cadInput" accept=".dxf,.dwg" style="width:100%; padding:10px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="hideModal('importCADModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="importCAD()">استيراد</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== MODAL: إضافة نقطة معايرة ===== -->
+    <div id="calibrationPointModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crosshairs"></i> إضافة نقطة معايرة</h3>
+                <button onclick="hideModal('calibrationPointModal')" style="background:none; border:none; color:white; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>انقر على الصورة لتحديد نقطة، ثم أدخل الإحداثيات الحقيقية:</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0;">
+                    <div>
+                        <label>إحداثيات الصورة X:</label>
+                        <input type="number" id="imgX" readonly style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                    </div>
+                    <div>
+                        <label>إحداثيات الصورة Y:</label>
+                        <input type="number" id="imgY" readonly style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <label>الإحداثي الحقيقي X:</label>
+                        <input type="number" id="realX" value="0" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                    </div>
+                    <div>
+                        <label>الإحداثي الحقيقي Y:</label>
+                        <input type="number" id="realY" value="0" style="width:100%; padding:8px; background:#2a2a3a; border:1px solid #4a6c8f; border-radius:6px; color:white;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="hideModal('calibrationPointModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="addCalibrationPointToScene()">إضافة</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== SCRIPT ===== -->
     <script>
-        // تحديث شريط الحالة
-        window.updateStatus = function(message, type = 'info') {
-            const bar = document.getElementById('statusBar');
-            if (bar) {
-                const icons = {
-                    info: 'ℹ️',
-                    success: '✅',
-                    warning: '⚠️',
-                    error: '❌'
-                };
-                bar.innerHTML = `${icons[type] || 'ℹ️'} ${message}`;
+        // ===== UI CONTROLS =====
+        function showModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        
+        function showImportSceneDialog() {
+            showModal('importImageModal');
+        }
+        
+        // تحديث حالة شريط التقدم
+        function updateWorkflow(step) {
+            const steps = document.querySelectorAll('.workflow-step');
+            steps.forEach((s, i) => {
+                if (i < step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            document.getElementById('statusMessage').innerHTML = `الخطوة ${step}/7: ${getStepName(step)}`;
+        }
+        
+        function getStepName(step) {
+            const names = ['', 'استيراد CAD', 'رسم المخطط', 'استيراد الصور', 'معايرة', 'ربط المشاهد', 'بناء', 'استخراج الكميات'];
+            return names[step];
+        }
+        
+        // تغيير وضع العرض
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
                 
-                // العودة للحالة الافتراضية بعد 5 ثوان
-                setTimeout(() => {
-                    bar.innerHTML = '✅ النظام جاهز';
-                }, 5000);
+                const mode = this.dataset.mode;
+                if (window.app) {
+                    window.app.setViewMode(mode);
+                }
+            });
+        });
+
+        // تغيير القائمة العلوية
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // تحديث الخصائص
+        function updateProperties(props) {
+            document.getElementById('propType').textContent = props.type || '-';
+            document.getElementById('propId').textContent = props.id || '-';
+            document.getElementById('propScene').textContent = props.scene || '-';
+            document.getElementById('propLength').textContent = props.length || '-';
+            document.getElementById('propWidth').textContent = props.width || '-';
+            document.getElementById('propHeight').textContent = props.height || '-';
+            document.getElementById('propX').textContent = props.x || '-';
+            document.getElementById('propY').textContent = props.y || '-';
+            document.getElementById('propZ').textContent = props.z || '-';
+        }
+        
+        // ===== دوال استيراد الصور و CAD =====
+        window.importImage = function() {
+            const fileInput = document.getElementById('imageInput');
+            const sceneName = document.getElementById('sceneName').value;
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const url = URL.createObjectURL(file);
+                
+                if (window.app) {
+                    window.app.import360Image(url, sceneName);
+                }
+                
+                hideModal('importImageModal');
+                updateWorkflow(3); // انتقل للخطوة 3
+            } else {
+                alert('الرجاء اختيار صورة');
             }
         };
         
-        // إخفاء شاشة التحميل
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loading = document.getElementById('loading');
-                if (loading) {
-                    loading.style.opacity = '0';
-                    setTimeout(() => {
-                        loading.style.display = 'none';
-                    }, 500);
+        window.importCAD = function() {
+            const fileInput = document.getElementById('cadInput');
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                if (window.app) {
+                    window.app.importCAD(file);
                 }
-                window.updateStatus('✅ النظام جاهز', 'success');
-            }, 2500);
-        });
+                
+                hideModal('importCADModal');
+                updateWorkflow(2); // انتقل للخطوة 2
+            } else {
+                alert('الرجاء اختيار ملف CAD');
+            }
+        };
         
-        // معالج الأخطاء العام
-        window.addEventListener('error', (e) => {
-            console.error('خطأ في التحميل:', e.message);
-            window.updateStatus('⚠️ خطأ في تحميل بعض الملفات', 'warning');
-        }, true);
+        // ===== دوال إنشاء العناصر (سيتم استبدالها من main.js) =====
+        window.startDrawWall = function() {
+            if (window.app) {
+                window.app.startDrawing('wall');
+                window.updateStatus('ابدأ برسم الجدار على المخطط', 'info');
+            }
+        };
         
-        // دوال مساعدة للواجهة (سيتم استبدالها من main.js)
-        window.createWall = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.createDoor = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.createWindow = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.createColumn = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.createBeam = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.createSlab = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.importImage = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.showBOQ = () => window.updateStatus('جاري تحميل النظام...', 'info');
-        window.resetCamera = () => window.updateStatus('جاري تحميل النظام...', 'info');
+        window.startDrawColumn = function() {
+            if (window.app) {
+                window.app.startDrawing('column');
+                window.updateStatus('انقر لوضع العمود', 'info');
+            }
+        };
+        
+        window.addDoor = function() {
+            if (window.app) {
+                window.app.startDrawing('door');
+                window.updateStatus('اختر موقع الباب', 'info');
+            }
+        };
+        
+        window.addWindow = function() {
+            if (window.app) {
+                window.app.startDrawing('window');
+                window.updateStatus('اختر موقع الشباك', 'info');
+            }
+        };
+        
+        window.addBeam = function() {
+            if (window.app) {
+                window.app.startDrawing('beam');
+                window.updateStatus('ارسم مسار الكمرة', 'info');
+            }
+        };
+        
+        window.addSlab = function() {
+            if (window.app) {
+                window.app.startDrawing('slab');
+                window.updateStatus('ارسم حدود السقف', 'info');
+            }
+        };
+        
+        window.addFoundation = function() {
+            if (window.app) {
+                window.app.startDrawing('foundation');
+                window.updateStatus('اختر موقع القاعدة', 'info');
+            }
+        };
+        
+        window.addPipe = function() {
+            if (window.app) {
+                window.app.startDrawing('pipe');
+                window.updateStatus('ارسم مسار الماسورة', 'info');
+            }
+        };
+        
+        // ===== دوال المعايرة =====
+        window.addCalibrationPoint = function() {
+            if (window.app) {
+                window.app.startCalibrationPoint();
+                showModal('calibrationPointModal');
+            }
+        };
+        
+        window.runCalibration = function() {
+            if (window.app) {
+                window.app.runCalibration();
+                updateWorkflow(4);
+                window.updateStatus('تمت المعايرة بنجاح', 'success');
+            }
+        };
+        
+        window.addCalibrationPointToScene = function() {
+            const imgX = document.getElementById('imgX').value;
+            const imgY = document.getElementById('imgY').value;
+            const realX = document.getElementById('realX').value;
+            const realY = document.getElementById('realY').value;
+            
+            if (window.app) {
+                window.app.addCalibrationPoint({
+                    imageX: parseFloat(imgX),
+                    imageY: parseFloat(imgY),
+                    realX: parseFloat(realX),
+                    realY: parseFloat(realY)
+                });
+            }
+            
+            hideModal('calibrationPointModal');
+        };
+        
+        window.selectMaterial = function(material) {
+            if (window.app) {
+                window.app.selectMaterial(material);
+                window.updateStatus(`تم اختيار مادة: ${material}`, 'success');
+            }
+        };
+        
+        // تحديث شريط الحالة
+        window.updateStatus = function(message, type = 'info') {
+            document.getElementById('statusMessage').innerHTML = message;
+            
+            if (type === 'success') {
+                console.log('✅', message);
+            } else if (type === 'error') {
+                console.error('❌', message);
+            } else {
+                console.log('ℹ️', message);
+            }
+        };
+        
+        // بداية التحميل
+        window.updateStatus('جاري تحميل المحرك...', 'info');
     </script>
     
-    <!-- استيراد الملف الرئيسي (يجب أن يكون في النهاية) -->
+    <!-- استيراد main.js (سيتم تحميله بعد) -->
     <script type="module" src="./main.js"></script>
 </body>
 </html>
+    
