@@ -155,6 +155,58 @@ import { ForemanMode } from './player/ForemanMode.js';
 import { MobileWorkerMode } from './player/MobileWorkerMode.js';
 import { WorkerMarkers } from './player/WorkerMarkers.js';
 
+// ========== LANDSCAPING MODULES ==========
+import { Plant } from './Modules/Landscaping/Plant.js';
+import { Grass } from './Modules/Landscaping/Grass.js';
+import { Tree } from './Modules/Landscaping/Tree.js';
+import { Palm } from './Modules/Landscaping/Palm.js';
+import { Fountain } from './Modules/Landscaping/Fountain.js';
+import { GardenLight } from './Modules/Landscaping/GardenLight.js';
+import { GardenPath } from './Modules/Landscaping/GardenPath.js';
+import { LandscapingMaterial } from './Modules/Landscaping/Material.js';
+
+// ========== STONE & BRICK MODULES ==========
+import { Stone } from './Modules/StoneBrick/Stone.js';
+import { Brick } from './Modules/StoneBrick/Brick.js';
+import { Tile } from './Modules/StoneBrick/Tile.js';
+import { Marble } from './Modules/StoneBrick/Marble.js';
+import { Granite } from './Modules/StoneBrick/Granite.js';
+import { Cladding } from './Modules/StoneBrick/Cladding.js';
+import { Pavement } from './Modules/StoneBrick/Pavement.js';
+import { StoneBrickMaterial } from './Modules/StoneBrick/Material.js';
+
+// ========== GLASS MODULES ==========
+import { Glass } from './Modules/Glass/Glass.js';
+import { WindowGlass } from './Modules/Glass/WindowGlass.js';
+import { CurtainWall } from './Modules/Glass/CurtainWall.js';
+import { GlassPartition } from './Modules/Glass/GlassPartition.js';
+import { Skylight } from './Modules/Glass/Skylight.js';
+import { GlassFloor } from './Modules/Glass/GlassFloor.js';
+import { GlassRailing } from './Modules/Glass/GlassRailing.js';
+import { StainedGlass } from './Modules/Glass/StainedGlass.js';
+import { SmartGlass } from './Modules/Glass/SmartGlass.js';
+import { GlassBlock } from './Modules/Glass/GlassBlock.js';
+import { GlassMaterial } from './Modules/Glass/Material.js';
+
+// ========== LANDSCAPING GLOBAL MODULES ==========
+import { GlobalPlant } from './Modules/Landscaping/global/GlobalPlant.js';
+import { GlobalTree } from './Modules/Landscaping/global/GlobalTree.js';
+import { GlobalFountain } from './Modules/Landscaping/global/GlobalFountain.js';
+import { GlobalGardenPath } from './Modules/Landscaping/global/GlobalGardenPath.js';
+
+// ========== STONE & BRICK GLOBAL MODULES ==========
+import { GlobalStone } from './Modules/StoneBrick/global/GlobalStone.js';
+import { GlobalBrick } from './Modules/StoneBrick/global/GlobalBrick.js';
+import { GlobalMarble } from './Modules/StoneBrick/global/GlobalMarble.js';
+import { GlobalCladding } from './Modules/StoneBrick/global/GlobalCladding.js';
+import { GlobalPavement } from './Modules/StoneBrick/global/GlobalPavement.js';
+
+// ========== GLASS GLOBAL MODULES ==========
+import { GlobalGlass } from './Modules/Glass/global/GlobalGlass.js';
+import { GlobalCurtainWall } from './Modules/Glass/global/GlobalCurtainWall.js';
+import { GlobalGlassPartition } from './Modules/Glass/global/GlobalGlassPartition.js';
+import { GlobalSkylight } from './Modules/Glass/global/GlobalSkylight.js';
+
 // =======================================
 // 🎯 MAIN CLASS - ACTUAL VIEW CONSTRUCTION OS
 // =======================================
@@ -201,6 +253,16 @@ class ActualViewConstructionOS {
         this.initDebugSystems();
         this.initWorkerModes();
         
+        // ===== تهيئة الأنظمة الجديدة =====
+        this.initLandscapingModules();
+        this.initStoneBrickModules();
+        this.initGlassModules();
+        
+        // ===== تهيئة الأنظمة العالمية الجديدة =====
+        this.initGlobalLandscaping();
+        this.initGlobalStoneBrick();
+        this.initGlobalGlass();
+        
         // ===== تجهيز المشهد الأساسي =====
         this.setupScene();
         
@@ -214,29 +276,21 @@ class ActualViewConstructionOS {
     // ========== THREE.JS INIT ==========
     initThree() {
         try {
-            // المشهد
             this.engine.scene = new THREE.Scene();
             this.engine.scene.background = new THREE.Color(0x111122);
-            
-            // الكاميرا
             this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
             this.engine.camera.position.set(15, 10, 20);
             this.engine.camera.lookAt(0, 0, 0);
-            
-            // الريندرر الرئيسي
             this.engine.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
             this.engine.renderer.shadowMap.enabled = true;
             document.getElementById('container').appendChild(this.engine.renderer.domElement);
-            
-            // التحكم
             this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
             this.engine.controls.enableDamping = true;
             this.engine.controls.dampingFactor = 0.05;
             this.engine.controls.screenSpacePanning = true;
             this.engine.controls.maxPolarAngle = Math.PI / 2;
             this.engine.controls.target.set(0, 1.6, 0);
-            
             console.log('✅ Three.js initialized');
         } catch (error) {
             console.error('❌ Three.js init failed:', error);
@@ -250,15 +304,12 @@ class ActualViewConstructionOS {
             this.engine.geoRef.setCoordinateSystem('utm');
             this.engine.geoRef.setOrigin(0, 0, 0);
             this.engine.geoRef.setScale(1.0);
-            
             this.engine.sceneManager = new SceneManager(this);
             this.engine.projectManager = new ProjectManager();
             this.engine.projectManager.createProject('ACTUAL Project', 'Reality BIM Platform');
-            
             this.engine.sceneGraph = new SceneGraph();
             this.engine.storage = new StorageManager();
             this.engine.storage.init();
-            
             console.log('✅ Core systems initialized');
         } catch (error) {
             console.error('❌ Core init failed:', error);
@@ -272,7 +323,6 @@ class ActualViewConstructionOS {
             this.engine.sceneConnector = new SceneConnector(this.engine.geoRef);
             this.engine.sceneConnector.setGlobalSystem(this.engine.globalSystem);
             this.engine.coordTransformer = new CoordinateTransformer(this.engine.geoRef, this.engine.sceneConnector);
-            
             console.log('✅ Global systems initialized');
         } catch (error) {
             console.error('❌ Global systems init failed:', error);
@@ -287,12 +337,10 @@ class ActualViewConstructionOS {
                 this.engine.sceneConnector, 
                 this.engine.sceneGraph
             );
-            
             this.engine.syncManager = new SyncManager(this.engine.realityBridge);
             this.engine.sceneAnchor = new SceneAnchor(this.engine.geoRef, this.engine.sceneConnector);
             this.engine.entityMarker = new EntityMarker(this.engine.scene);
             this.engine.sceneLink = new SceneLink(this.engine.realityBridge);
-            
             console.log('✅ Reality Bridge initialized');
         } catch (error) {
             console.error('❌ Reality Bridge init failed:', error);
@@ -309,7 +357,6 @@ class ActualViewConstructionOS {
             this.engine.priorityQueue = new PriorityQueue(this);
             this.engine.tileLODManager = new TileLODManager(this.engine.camera);
             this.engine.lodManager = new LODManager(this.engine.camera);
-            
             console.log('✅ Loading systems initialized');
         } catch (error) {
             console.error('❌ Loading systems init failed:', error);
@@ -357,20 +404,18 @@ class ActualViewConstructionOS {
             this.engine.calibrationWizard = new CalibrationWizard(this.engine.geoRef, this.engine.sceneConnector);
             this.engine.dwgParser = new DWGParser();
             this.engine.dxfParser = new DXFParser();
-            
             console.log('✅ CAD tools initialized');
         } catch (error) {
             console.error('❌ CAD tools init failed:', error);
         }
     }
 
-// ========== MEASUREMENT TOOLS ==========
+    // ========== MEASUREMENT TOOLS ==========
     initMeasurementTools() {
         try {
             this.engine.distanceTool = new DistanceTool(this);
             this.engine.areaTool = new AreaTool(this);
             this.engine.volumeTool = new VolumeTool(this);
-            
             console.log('✅ Measurement tools initialized');
         } catch (error) {
             console.error('❌ Measurement tools init failed:', error);
@@ -382,7 +427,6 @@ class ActualViewConstructionOS {
         try {
             this.engine.constructionExporter = new ConstructionExporter(this);
             this.engine.globalDataExporter = new GlobalDataExporter(this);
-            
             console.log('✅ Export tools initialized');
         } catch (error) {
             console.error('❌ Export tools init failed:', error);
@@ -395,11 +439,9 @@ class ActualViewConstructionOS {
             this.engine.boqCalculator = new BOQCalculator(this);
             this.engine.boqReporter = new BOQReporter(this.engine.boqCalculator);
             this.engine.boqExporter = new BOQExporter(this.engine.boqReporter);
-            
             this.engine.globalBOQ = new GlobalBOQCalculator(this.engine.globalSystem);
             this.engine.globalReporter = new GlobalReporter(this.engine.globalBOQ);
             this.engine.globalEarthworksBOQ = new GlobalEarthworksBOQ(this.engine.globalSystem);
-            
             console.log('✅ BOQ systems initialized');
         } catch (error) {
             console.error('❌ BOQ init failed:', error);
@@ -410,7 +452,6 @@ class ActualViewConstructionOS {
     initMaterials() {
         try {
             this.engine.materialLibrary = new MaterialLibrary();
-            
             console.log('✅ Materials library initialized');
         } catch (error) {
             console.error('❌ Materials init failed:', error);
@@ -429,7 +470,6 @@ class ActualViewConstructionOS {
                 sceneConnectorUI: new SceneConnectorUI(this),
                 calibrationUI: new CalibrationUI(this, this.engine.calibrationWizard)
             };
-            
             console.log('✅ UI systems initialized');
         } catch (error) {
             console.error('❌ UI init failed:', error);
@@ -449,7 +489,6 @@ class ActualViewConstructionOS {
             );
             this.engine.debugLayer.setupKeyboardShortcut();
             this.engine.analytics.startTracking();
-            
             console.log('✅ Debug systems initialized');
         } catch (error) {
             console.error('❌ Debug init failed:', error);
@@ -463,33 +502,129 @@ class ActualViewConstructionOS {
             this.engine.foremanMode = new ForemanMode(this);
             this.engine.mobileWorkerMode = new MobileWorkerMode(this);
             this.engine.workerMarkers = new WorkerMarkers(this.engine.scene);
-            
             console.log('✅ Worker modes initialized');
         } catch (error) {
             console.warn('⚠️ Worker modes not available');
         }
     }
 
+    // ========== LANDSCAPING MODULES ==========
+    initLandscapingModules() {
+        try {
+            // يمكن تخزين الكلاسات للاستخدام لاحقاً
+            this.landscaping = {
+                Plant,
+                Grass,
+                Tree,
+                Palm,
+                Fountain,
+                GardenLight,
+                GardenPath,
+                LandscapingMaterial
+            };
+            console.log('✅ Landscaping modules initialized');
+        } catch (error) {
+            console.error('❌ Landscaping modules init failed:', error);
+        }
+    }
+
+    // ========== STONE & BRICK MODULES ==========
+    initStoneBrickModules() {
+        try {
+            this.stoneBrick = {
+                Stone,
+                Brick,
+                Tile,
+                Marble,
+                Granite,
+                Cladding,
+                Pavement,
+                StoneBrickMaterial
+            };
+            console.log('✅ Stone & Brick modules initialized');
+        } catch (error) {
+            console.error('❌ Stone & Brick modules init failed:', error);
+        }
+    }
+
+    // ========== GLASS MODULES ==========
+    initGlassModules() {
+        try {
+            this.glass = {
+                Glass,
+                WindowGlass,
+                CurtainWall,
+                GlassPartition,
+                Skylight,
+                GlassFloor,
+                GlassRailing,
+                StainedGlass,
+                SmartGlass,
+                GlassBlock,
+                GlassMaterial
+            };
+            console.log('✅ Glass modules initialized');
+        } catch (error) {
+            console.error('❌ Glass modules init failed:', error);
+        }
+    }
+
+    // ========== GLOBAL LANDSCAPING ==========
+    initGlobalLandscaping() {
+        try {
+            this.globalPlant = new GlobalPlant(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalTree = new GlobalTree(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalFountain = new GlobalFountain(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalGardenPath = new GlobalGardenPath(this.engine.globalSystem, this.engine.sceneConnector);
+            console.log('✅ Global landscaping systems initialized');
+        } catch (error) {
+            console.error('❌ Global landscaping init failed:', error);
+        }
+    }
+
+    // ========== GLOBAL STONE & BRICK ==========
+    initGlobalStoneBrick() {
+        try {
+            this.globalStone = new GlobalStone(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalBrick = new GlobalBrick(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalMarble = new GlobalMarble(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalCladding = new GlobalCladding(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalPavement = new GlobalPavement(this.engine.globalSystem, this.engine.sceneConnector);
+            console.log('✅ Global stone & brick systems initialized');
+        } catch (error) {
+            console.error('❌ Global stone & brick init failed:', error);
+        }
+    }
+
+    // ========== GLOBAL GLASS ==========
+    initGlobalGlass() {
+        try {
+            this.globalGlass = new GlobalGlass(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalCurtainWall = new GlobalCurtainWall(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalGlassPartition = new GlobalGlassPartition(this.engine.globalSystem, this.engine.sceneConnector);
+            this.globalSkylight = new GlobalSkylight(this.engine.globalSystem, this.engine.sceneConnector);
+            console.log('✅ Global glass systems initialized');
+        } catch (error) {
+            console.error('❌ Global glass init failed:', error);
+        }
+    }
+
     // ========== SCENE SETUP ==========
     setupScene() {
         try {
-            // إضاءة محيطة
+            // إضاءة
             const ambientLight = new THREE.AmbientLight(0x404060);
             this.engine.scene.add(ambientLight);
-            
-            // إضاءة شمسية
             const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
             sunLight.position.set(20, 30, 20);
             sunLight.castShadow = true;
             this.engine.scene.add(sunLight);
             
-            // شبكة أرضية رئيسية
+            // شبكات أرضية
             const mainGrid = new THREE.GridHelper(100, 50, 0x88aaff, 0x335588);
             mainGrid.position.y = 0;
             mainGrid.name = "mainGrid";
             this.engine.scene.add(mainGrid);
-            
-            // شبكة ثانوية دقيقة
             const detailGrid = new THREE.GridHelper(50, 50, 0x44aaff, 0x224466);
             detailGrid.position.y = 0.01;
             detailGrid.name = "detailGrid";
@@ -497,10 +632,7 @@ class ActualViewConstructionOS {
             
             // كرة مركزية
             const sphereGeo = new THREE.SphereGeometry(0.8, 32, 32);
-            const sphereMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffaa44,
-                emissive: 0x442200
-            });
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
             const centerSphere = new THREE.Mesh(sphereGeo, sphereMat);
             centerSphere.position.set(0, 0.8, 0);
             centerSphere.name = "centerSphere";
@@ -508,17 +640,14 @@ class ActualViewConstructionOS {
             
             // حلقة حول الكرة
             const torusGeo = new THREE.TorusGeometry(1.2, 0.05, 16, 100);
-            const torusMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffaa44,
-                emissive: 0x442200
-            });
+            const torusMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
             const torus = new THREE.Mesh(torusGeo, torusMat);
             torus.rotation.x = Math.PI / 2;
             torus.position.set(0, 0.8, 0);
             torus.name = "centerTorus";
             this.engine.scene.add(torus);
             
-            // محاور إحداثية
+            // محاور
             const axesHelper = new THREE.AxesHelper(15);
             axesHelper.name = "axesHelper";
             this.engine.scene.add(axesHelper);
@@ -532,37 +661,30 @@ class ActualViewConstructionOS {
                     positions.push(x, 0.02, z);
                 }
             }
-            pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+           pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             const points = new THREE.Points(pointsGeo, pointsMat);
             points.name = "referencePoints";
             this.engine.scene.add(points);
             
-            // مؤشرات حركة
+            // مؤشر حركة
             this.createMovementIndicator();
-            
             console.log('✅ Scene setup complete');
-            
         } catch (error) {
             console.error('❌ Scene setup failed:', error);
         }
     }
 
-    // ===== مؤشر الحركة =====
     createMovementIndicator() {
         const group = new THREE.Group();
-        
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const sphereGeo = new THREE.SphereGeometry(0.15, 8, 8);
-            const sphereMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffaa44,
-                emissive: 0x442200
-            });
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
             const sphere = new THREE.Mesh(sphereGeo, sphereMat);
             sphere.position.set(Math.cos(angle) * 5, 0.3, Math.sin(angle) * 5);
             group.add(sphere);
         }
-        
         group.name = "movementIndicator";
         this.engine.scene.add(group);
     }
@@ -570,25 +692,15 @@ class ActualViewConstructionOS {
     // ========== ANIMATION LOOP ==========
     animate() {
         requestAnimationFrame(() => this.animate());
-        
         if (this.engine.controls) this.engine.controls.update();
         if (this.engine.lodManager) this.engine.lodManager.update();
-        
-        // تدوير مؤشر الحركة
         if (this.state.indicatorRotation !== undefined) {
             this.state.indicatorRotation += 0.01;
             const indicator = this.engine.scene.getObjectByName('movementIndicator');
-            if (indicator) {
-                indicator.rotation.y = this.state.indicatorRotation;
-            }
+            if (indicator) indicator.rotation.y = this.state.indicatorRotation;
         }
-        
-        // تدوير الحلقة
         const torus = this.engine.scene.getObjectByName('centerTorus');
-        if (torus) {
-            torus.rotation.z += 0.005;
-        }
-        
+        if (torus) torus.rotation.z += 0.005;
         if (this.engine.renderer && this.engine.scene && this.engine.camera) {
             this.engine.renderer.render(this.engine.scene, this.engine.camera);
         }
@@ -599,16 +711,13 @@ class ActualViewConstructionOS {
         try {
             const sceneId = `scene-${Date.now()}`;
             this.engine.sceneConnector.addScene(sceneId, { x: 0, y: 0, z: 0 }, 0);
-            
             const texture = await this.loadTexture(url);
             const geometry = new THREE.SphereGeometry(500, 60, 40);
             const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
             const sphere = new THREE.Mesh(geometry, material);
             sphere.userData = { type: '360image', sceneId, sceneName };
-            
             this.engine.scene.add(sphere);
             this.state.scenes.set(sceneId, { id: sceneId, name: sceneName, sphere, texture, elements: [], anchors: [] });
-            
             this.updateSceneExplorer();
             console.log(`✅ Imported 360 image: ${sceneName}`);
             return sceneId;
@@ -618,7 +727,7 @@ class ActualViewConstructionOS {
         }
     }
 
-loadTexture(url) {
+    loadTexture(url) {
         return new Promise((resolve, reject) => {
             new THREE.TextureLoader().load(url, resolve, undefined, reject);
         });
@@ -642,12 +751,8 @@ loadTexture(url) {
         );
         this.state.calibrationPoints.push(point);
         this.updateCalibrationPointsList();
-        
         const gcpCountEl = document.getElementById('gcpCount');
-        if (gcpCountEl) {
-            gcpCountEl.textContent = this.engine.geoRef.gcp.length;
-        }
-        
+        if (gcpCountEl) gcpCountEl.textContent = this.engine.geoRef.gcp.length;
         if (this.engine.geoRef.gcp.length >= 3) {
             this.engine.geoRef.calculateTransform();
             this.updateTransformMatrix();
@@ -657,13 +762,10 @@ loadTexture(url) {
     updateTransformMatrix() {
         const matrixEl = document.getElementById('transformMatrix');
         if (!matrixEl) return;
-        
         const matrix = this.engine.geoRef.transformMatrix;
         if (matrix) {
             let matrixText = '';
-            matrix.forEach(row => {
-                matrixText += row.map(v => v.toFixed(3)).join('  ') + '\n';
-            });
+            matrix.forEach(row => matrixText += row.map(v => v.toFixed(3)).join('  ') + '\n');
             matrixEl.innerHTML = matrixText.replace(/\n/g, '<br>');
         }
     }
@@ -682,10 +784,8 @@ loadTexture(url) {
     // ========== CLASH DETECTION ==========
     runClashDetection() {
         if (!this.engine.advancedClashDetection) return;
-        
         const report = this.engine.advancedClashDetection.runFullCheck(this.state.scenes);
         this.state.clashes = report.clashes || [];
-        
         console.log(`🔍 Clash detection: ${this.state.clashes.length} clashes found`);
         return report;
     }
@@ -704,13 +804,11 @@ loadTexture(url) {
     updateSceneExplorer() {
         const treeEl = document.getElementById('sceneTree');
         if (!treeEl) return;
-        
         let html = '<li class="scene-item active"><i class="fas fa-building"></i><span>Main Project</span></li><ul class="scene-children">';
         this.state.scenes.forEach((scene, id) => {
             html += `<li class="scene-item" onclick="window.app.selectScene('${id}')"><i class="fas fa-image"></i><span>${scene.name}</span></li>`;
         });
         html += '</ul>';
-        
         treeEl.innerHTML = html;
     }
 
@@ -727,12 +825,10 @@ loadTexture(url) {
     updateCalibrationPointsList() {
         const listEl = document.getElementById('calibrationPointsList');
         if (!listEl) return;
-        
         if (this.state.calibrationPoints.length === 0) {
             listEl.innerHTML = '<div class="text-muted" style="text-align:center; padding:20px;">No calibration points</div>';
             return;
         }
-        
         let html = '';
         this.state.calibrationPoints.forEach((point, i) => {
             html += `<div class="property-row"><span class="property-label">Point ${i+1}:</span><span class="property-value">(${point.imageX},${point.imageY}) → (${point.realX},${point.realY})</span></div>`;
@@ -804,6 +900,7 @@ window.addEventListener('load', () => {
         }
     };
     
+    // ===== ARCHITECTURE =====
     window.startDrawWall = () => window.app?.startDrawing('wall');
     window.startDrawColumn = () => window.app?.startDrawing('column');
     window.addDoor = () => window.app?.startDrawing('door');
@@ -813,6 +910,158 @@ window.addEventListener('load', () => {
     window.addFoundation = () => window.app?.startDrawing('foundation');
     window.addPipe = () => window.app?.startDrawing('pipe');
     
+    // ===== LANDSCAPING =====
+    window.addPlant = (options) => {
+        if (!window.app) return;
+        const plant = new window.app.landscaping.Plant(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(plant.createMesh());
+        window.app.updateStatus('🌱 Plant added', 'success');
+    };
+    window.addGrass = (options) => {
+        if (!window.app) return;
+        const grass = new window.app.landscaping.Grass(options || { area: 10, position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(grass.createMesh());
+        window.app.updateStatus('🌿 Grass added', 'success');
+    };
+    window.addTree = (options) => {
+        if (!window.app) return;
+        const tree = new window.app.landscaping.Tree(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(tree.createMesh());
+        window.app.updateStatus('🌳 Tree added', 'success');
+    };
+    window.addPalm = (options) => {
+        if (!window.app) return;
+        const palm = new window.app.landscaping.Palm(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(palm.createMesh());
+        window.app.updateStatus('🌴 Palm added', 'success');
+    };
+    window.addFountain = (options) => {
+        if (!window.app) return;
+        const fountain = new window.app.landscaping.Fountain(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(fountain.createMesh());
+        window.app.updateStatus('⛲ Fountain added', 'success');
+    };
+    window.addGardenLight = (options) => {
+        if (!window.app) return;
+        const light = new window.app.landscaping.GardenLight(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(light.createMesh());
+        window.app.updateStatus('💡 Garden light added', 'success');
+    };
+    window.addGardenPath = (points, options) => {
+        if (!window.app) return;
+        const path = new window.app.landscaping.GardenPath({ points: points || [{x:-2,z:-2},{x:2,z:2}], ...options });
+        window.app.engine.scene.add(path.createMesh());
+        window.app.updateStatus('🛤️ Garden path added', 'success');
+    };
+    
+    // ===== STONE & BRICK =====
+    window.addStone = (options) => {
+        if (!window.app) return;
+        const stone = new window.app.stoneBrick.Stone(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(stone.createMesh());
+        window.app.updateStatus('🪨 Stone added', 'success');
+    };
+    window.addBrick = (options) => {
+        if (!window.app) return;
+        const brick = new window.app.stoneBrick.Brick(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(brick.createMesh());
+        window.app.updateStatus('🧱 Brick added', 'success');
+    };
+    window.addMarble = (options) => {
+        if (!window.app) return;
+        const marble = new window.app.stoneBrick.Marble(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(marble.createMesh());
+        window.app.updateStatus('✨ Marble added', 'success');
+    };
+    window.addGranite = (options) => {
+        if (!window.app) return;
+        const granite = new window.app.stoneBrick.Granite(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(granite.createMesh());
+        window.app.updateStatus('⛰️ Granite added', 'success');
+    };
+    window.addCladding = (options) => {
+        if (!window.app) return;
+        const cladding = new window.app.stoneBrick.Cladding(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(cladding.createMesh());
+        window.app.updateStatus('🏛️ Cladding added', 'success');
+    };
+    window.addPavement = (options) => {
+        if (!window.app) return;
+        const pavement = new window.app.stoneBrick.Pavement(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(pavement.createMesh());
+        window.app.updateStatus('🛤️ Pavement added', 'success');
+    };
+    
+    // ===== GLASS =====
+    window.addGlass = (options) => {
+        if (!window.app) return;
+        const glass = new window.app.glass.Glass(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(glass.createMesh());
+        window.app.updateStatus('🪟 Glass added', 'success');
+    };
+    window.addWindowGlass = (options) => {
+        if (!window.app) return;
+        const wg = new window.app.glass.WindowGlass(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(wg.createMesh());
+        window.app.updateStatus('🪟 Window added', 'success');
+    };
+    window.addCurtainWall = (options) => {
+        if (!window.app) return;
+        const cw = new window.app.glass.CurtainWall(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(cw.createMesh());
+        window.app.updateStatus('🏢 Curtain wall added', 'success');
+    };
+    window.addGlassPartition = (options) => {
+        if (!window.app) return;
+        const gp = new window.app.glass.GlassPartition(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(gp.createMesh());
+        window.app.updateStatus('🚪 Glass partition added', 'success');
+    };
+    window.addSkylight = (options) => {
+        if (!window.app) return;
+        const sl = new window.app.glass.Skylight(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(sl.createMesh());
+        window.app.updateStatus('☀️ Skylight added', 'success');
+    };
+    window.addGlassFloor = (options) => {
+        if (!window.app) return;
+        const gf = new window.app.glass.GlassFloor(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(gf.createMesh());
+        window.app.updateStatus('✨ Glass floor added', 'success');
+    };
+    window.addGlassRailing = (options) => {
+        if (!window.app) return;
+        const gr = new window.app.glass.GlassRailing(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(gr.createMesh());
+        window.app.updateStatus('🪢 Glass railing added', 'success');
+    };
+    window.addStainedGlass = (options) => {
+        if (!window.app) return;
+        const sg = new window.app.glass.StainedGlass(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(sg.createMesh());
+        window.app.updateStatus('🎨 Stained glass added', 'success');
+    };
+    window.addSmartGlass = (options) => {
+        if (!window.app) return;
+        const smg = new window.app.glass.SmartGlass(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(smg.createMesh());
+        window.app.updateStatus('🔮 Smart glass added', 'success');
+    };
+    window.addGlassBlock = (options) => {
+        if (!window.app) return;
+        const gb = new window.app.glass.GlassBlock(options || { position: { x: 0, y: 0, z: 0 } });
+        window.app.engine.scene.add(gb.createMesh());
+        window.app.updateStatus('🧊 Glass block added', 'success');
+    };
+    
+    // ===== GLOBAL FUNCTIONS (يمكن استدعاؤها لاحقاً) =====
+    window.createGlobalForest = (sceneId, center, radius, count) => {
+        if (window.app?.globalTree) {
+            return window.app.globalTree.createForest(sceneId, center, radius, count);
+        }
+    };
+
+    // ===== CALIBRATION =====
     window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
     window.runCalibration = () => window.app?.runCalibration();
     window.runClashDetection = () => window.app?.runClashDetection();
@@ -847,4 +1096,3 @@ window.restartApp = () => {
     console.log('🔄 Restarting application...');
     location.reload();
 };
-
