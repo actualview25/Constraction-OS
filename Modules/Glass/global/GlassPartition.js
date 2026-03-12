@@ -22,12 +22,12 @@ export class GlassPartition {
         const group = new THREE.Group();
         const frameMat = new THREE.MeshStandardMaterial({ color: this.frameColor });
 
-        // إطار سفلي
+        // Base frame
         const base = new THREE.Mesh(new THREE.BoxGeometry(this.length, 0.05, 0.1), frameMat);
         base.position.y = 0.025;
         group.add(base);
 
-        // أعمدة جانبية
+        // Side posts
         const left = new THREE.Mesh(new THREE.BoxGeometry(0.05, this.height, 0.1), frameMat);
         left.position.set(-this.length/2 + 0.025, this.height/2, 0);
         group.add(left);
@@ -36,21 +36,13 @@ export class GlassPartition {
         right.position.set(this.length/2 - 0.025, this.height/2, 0);
         group.add(right);
 
-        // إطار علوي
+        // Top frame
         const top = new THREE.Mesh(new THREE.BoxGeometry(this.length, 0.05, 0.1), frameMat);
         top.position.y = this.height - 0.025;
         group.add(top);
 
-        // الألواح الزجاجية
-        this.createGlassPanels(group);
-
-        group.position.set(this.position.x, this.position.y, this.position.z);
-        this.mesh = group;
-        return group;
-    }
-
-    createGlassPanels(group) {
-        const panelCount = Math.floor(this.length / 1.0);
+        // Glass panels
+        const panelCount = Math.floor(this.length / 1.0) || 1;
         const panelWidth = this.length / panelCount;
         const glassMat = new THREE.MeshStandardMaterial({
             color: 0xffffff,
@@ -69,6 +61,10 @@ export class GlassPartition {
             group.add(panel);
             this.panels.push(panel);
         }
+
+        group.position.set(this.position.x, this.position.y, this.position.z);
+        this.mesh = group;
+        return group;
     }
 
     getBOQ() {
