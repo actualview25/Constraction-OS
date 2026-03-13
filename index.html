@@ -78,8 +78,8 @@
             color: #fff;
         }
         
-        .logo i {
-            font-size: 22px;
+        .logo span:first-child {
+            font-size: 24px;
             color: #ffaa44;
         }
         
@@ -137,31 +137,32 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 8px;
+            gap: 10px;
             background: #1a1a1a;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 30px;
-            border: 1px solid #333;
-            z-index: 200;
+            border: 1px solid #ffaa44;
+            z-index: 1000;
         }
         
         .view-btn {
-            padding: 5px 10px;
+            padding: 5px 15px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
-            color: #b0b0b0;
-            transition: 0.2s;
+            background: #333;
+            color: white;
+            border: none;
+        }
+        
+        .view-btn.full-btn {
+            background: #ffaa44;
+            color: black;
+            font-weight: bold;
         }
         
         .view-btn:hover {
-            background: #333;
-        }
-        
-        .view-btn.active {
-            background: #333;
-            color: #ffaa44;
-            border: 1px solid #ffaa44;
+            opacity: 0.9;
         }
         
         /* ===== LEFT PANEL ===== */
@@ -400,6 +401,7 @@
         .btn-primary:hover {
             background: #4a4a4a;
         }
+        
         /* ===== MODAL DIALOGS ===== */
         .modal {
             position: fixed;
@@ -523,13 +525,14 @@
     </style>
 </head>
 <body>
-    <div id="app" class="">
- <div class="top-bar">
-    <div class="logo">
-        <span style="font-size: 24px; margin-right: 5px;">🏗️</span>
-        <span>ACTUAL VIEW CONSTRUCTION OS</span>
-    </div>
-   
+    <div id="app">
+        <!-- ===== TOP BAR ===== -->
+        <div class="top-bar">
+            <div class="logo">
+                <span>🏗️</span>
+                <span>ACTUAL VIEW CONSTRUCTION OS</span>
+            </div>
+            
             <div class="main-menu">
                 <div class="menu-item active" data-view="project">PROJECT</div>
                 <div class="menu-item" data-view="cad">CAD</div>
@@ -551,22 +554,11 @@
         
         <!-- ===== VIEW CONTROLS ===== -->
         <div class="view-controls">
-            <div class="view-btn" onclick="toggleLeftPanel()"><i class="fas fa-chevron-left"></i> Left</div>
-            <div class="view-btn active" onclick="setFullView()"><i class="fas fa-expand"></i> Full</div>
-            <div class="view-btn" onclick="toggleRightPanel()">Right <i class="fas fa-chevron-right"></i></div>
+            <button class="view-btn" onclick="toggleLeftPanel()"><i class="fas fa-chevron-left"></i> Left</button>
+            <button class="view-btn full-btn" onclick="toggleFullView()"><i class="fas fa-expand"></i> Full</button>
+            <button class="view-btn" onclick="toggleRightPanel()">Right <i class="fas fa-chevron-right"></i></button>
         </div>
-        <!-- ===== VIEW CONTROLS ===== -->
-<div style="position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: #1a1a1a; padding: 8px 16px; border-radius: 30px; border: 1px solid #ffaa44; z-index: 1000;">
-    <button onclick="toggleLeftPanel()" style="background: #333; color: white; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer;">
-        <i class="fas fa-chevron-left"></i> Left
-    </button>
-    <button onclick="setFullView()" style="background: #ffaa44; color: black; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;">
-        <i class="fas fa-expand"></i> Full
-    </button>
-    <button onclick="toggleRightPanel()" style="background: #333; color: white; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer;">
-        Right <i class="fas fa-chevron-right"></i>
-    </button>
-</div>
+        
         <!-- ===== LEFT PANEL ===== -->
         <div class="left-panel">
             <!-- Scene Explorer -->
@@ -644,7 +636,7 @@
                 </div>
             </div>
             
-            <!-- Element Library (Hidden by default) -->
+           <!-- Element Library (Hidden by default) -->
             <div class="panel-section element-library" id="elementLibrary">
                 <div class="panel-title"><i class="fas fa-icons"></i><span>ELEMENT LIBRARY</span></div>
                 <div class="library-grid">
@@ -691,6 +683,7 @@
                 <div class="material-swatch" style="background:#87CEEB;" onclick="selectMaterial('glass')"></div>
                 <div class="material-swatch" style="background:#D2B48C;" onclick="selectMaterial('stone')"></div>
             </div>
+            
             <!-- GeoReferencing Tools -->
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-crosshairs"></i><span>GEO REFERENCING</span></div>
@@ -772,8 +765,8 @@
             </div>
         </div>
     </div>
-    
-    <!-- Add Calibration Point Modal -->
+
+   <!-- Add Calibration Point Modal -->
     <div id="calibrationPointModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header"><h3><i class="fas fa-crosshairs"></i> Add GCP</h3></div>
@@ -799,18 +792,26 @@
         // ===== VIEW CONTROLS =====
         function toggleLeftPanel() {
             const app = document.getElementById('app');
+            app.classList.remove('view-mode-right', 'view-mode-full');
             app.classList.toggle('view-mode-left');
         }
         
         function toggleRightPanel() {
             const app = document.getElementById('app');
+            app.classList.remove('view-mode-left', 'view-mode-full');
             app.classList.toggle('view-mode-right');
         }
         
-        function setFullView() {
+        function toggleFullView() {
             const app = document.getElementById('app');
-            app.classList.remove('view-mode-left', 'view-mode-right');
-            app.classList.add('view-mode-full');
+            // إذا كان في وضع Full، نرجع للوضع الطبيعي
+            if (app.classList.contains('view-mode-full')) {
+                app.classList.remove('view-mode-left', 'view-mode-right', 'view-mode-full');
+            } else {
+                // إذا كان في وضع آخر، ننظف ونضيف Full
+                app.classList.remove('view-mode-left', 'view-mode-right');
+                app.classList.add('view-mode-full');
+            }
         }
         
         // ===== ELEMENT LIBRARY TOGGLE =====
@@ -843,6 +844,7 @@
             if (input.files.length && window.app) {
                 window.app.import360Image(URL.createObjectURL(input.files[0]), name);
                 hideModal('importImageModal');
+                updateWorkflow(3);
             }
         };
         
@@ -851,6 +853,7 @@
             if (input.files.length && window.app) {
                 window.app.importCAD(input.files[0]);
                 hideModal('importCADModal');
+                updateWorkflow(2);
             }
         };
         
@@ -917,13 +920,13 @@
         
         window.selectMaterial = (m) => window.app?.updateStatus(`Material: ${m}`, 'success');
         
-        // ===== VIEW CONTROLS SETUP =====
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // ===== WORKFLOW UPDATE =====
+        window.updateWorkflow = (step) => {
+            const steps = document.querySelectorAll('.workflow-step');
+            steps.forEach((s, i) => s.classList.toggle('active', i < step));
+            document.getElementById('statusMessage').innerHTML = 
+                `Step ${step}/7: ${['','Import CAD','Draw Plan','Import 360','Calibrate','Link','Build','BOQ'][step]}`;
+        };
         
         // ===== MENU CONTROLS =====
         document.querySelectorAll('.menu-item').forEach(item => {
@@ -933,17 +936,10 @@
             });
         });
         
-        // ===== WORKFLOW UPDATE =====
-        window.updateWorkflow = (step) => {
-            const steps = document.querySelectorAll('.workflow-step');
-            steps.forEach((s, i) => s.classList.toggle('active', i < step));
-            document.getElementById('statusMessage').innerHTML = 
-                `Step ${step}/7: ${['','Import CAD','Draw Plan','Import 360','Calibrate','Link','Build','BOQ'][step]}`;
-        };
-        
+        // بدء العمل
         window.updateWorkflow(1);
     </script>
     
     <script type="module" src="./main.js"></script>
 </body>
-</html>
+</html> 
