@@ -233,7 +233,7 @@ class ActualViewConstructionOS {
             indicatorRotation: 0
         };
         
-        // ===== تهيئة Three.js أولاً =====
+        // ===== تهيئة Three.js مع إعدادات Core i7 =====
         this.initThree();
         
         // ===== تهيئة الأنظمة الأساسية =====
@@ -263,38 +263,217 @@ class ActualViewConstructionOS {
         this.initGlobalStoneBrick();
         this.initGlobalGlass();
         
-        // ===== تجهيز المشهد الأساسي =====
+        // ===== تجهيز المشهد الأساسي مع إضاءة متقدمة =====
+        this.setupLights();
         this.setupScene();
         
-        // ===== بدء الحركة =====
+        // ===== بدء الحركة وتفعيل الوضع عالي الأداء =====
         this.animate();
+        this.enableHighPerformanceMode();
         
         console.log('%c✅ ACTUAL VIEW CONSTRUCTION OS جاهز', 'color: #44ff44; font-size: 16px;');
         console.log('📊 جميع الأنظمة:', Object.keys(this.engine).length);
     }
 
-    // ========== THREE.JS INIT ==========
+    // ========== THREE.JS INIT مع إعدادات Core i7 ==========
     initThree() {
         try {
+            // المشهد
             this.engine.scene = new THREE.Scene();
             this.engine.scene.background = new THREE.Color(0x111122);
-            this.engine.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-            this.engine.camera.position.set(15, 10, 20);
-            this.engine.camera.lookAt(0, 0, 0);
-            this.engine.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.engine.scene.fog = new THREE.Fog(0x111122, 150, 800); // ضباب خفيف للمدى البعيد
+            
+            // كاميرا بزاوية واسعة
+            this.engine.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 5000);
+            this.engine.camera.position.set(25, 15, 35);
+            
+            // ===== ريندرر عالي الأداء لـ Core i7 =====
+            this.engine.renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: "high-performance",
+                precision: "highp",
+                stencil: true,
+                depth: true,
+                alpha: false
+            });
+            
+            // استخدام قوة Core i7
             this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.engine.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // وضوح عالي
+            
+            // ===== ظلال عالية الجودة =====
             this.engine.renderer.shadowMap.enabled = true;
+            this.engine.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            this.engine.renderer.shadowMap.autoUpdate = true;
+            
+            // ===== تحسين الألوان =====
+            this.engine.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            this.engine.renderer.toneMappingExposure = 1.4;
+            
             document.getElementById('container').appendChild(this.engine.renderer.domElement);
+            
+            // ===== تحكم سلس =====
             this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
             this.engine.controls.enableDamping = true;
-            this.engine.controls.dampingFactor = 0.05;
-            this.engine.controls.screenSpacePanning = true;
+            this.engine.controls.dampingFactor = 0.04;
+            this.engine.controls.rotateSpeed = 0.8;
+            this.engine.controls.zoomSpeed = 1.2;
+            this.engine.controls.panSpeed = 0.8;
             this.engine.controls.maxPolarAngle = Math.PI / 2;
+            this.engine.controls.minDistance = 3;
+            this.engine.controls.maxDistance = 1000;
             this.engine.controls.target.set(0, 1.6, 0);
-            console.log('✅ Three.js initialized');
+            
+            console.log('✅ Three.js initialized with Core i7 optimization');
         } catch (error) {
             console.error('❌ Three.js init failed:', error);
         }
+    }
+
+// ========== إضاءة متقدمة ==========
+    setupLights() {
+        try {
+            // إضاءة محيطة
+            const ambientLight = new THREE.AmbientLight(0x404060, 1.0);
+            this.engine.scene.add(ambientLight);
+            
+            // إضاءة شمسية رئيسية
+            const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.8);
+            sunLight.position.set(30, 50, 30);
+            sunLight.castShadow = true;
+            
+            // ظلال عالية الدقة
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 200;
+            sunLight.shadow.camera.left = -50;
+            sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50;
+            sunLight.shadow.camera.bottom = -50;
+            sunLight.shadow.bias = -0.0005;
+            
+            this.engine.scene.add(sunLight);
+            
+            // إضاءة خلفية
+            const backLight = new THREE.DirectionalLight(0x446688, 0.6);
+            backLight.position.set(-20, 20, -30);
+            this.engine.scene.add(backLight);
+            
+            // نقاط إضاءة إضافية للتفاصيل
+            const pointLight1 = new THREE.PointLight(0xffaa44, 0.8, 50);
+            pointLight1.position.set(10, 10, 10);
+            this.engine.scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0x88aaff, 0.5, 50);
+            pointLight2.position.set(-10, 5, -10);
+            this.engine.scene.add(pointLight2);
+            
+            console.log('✅ Advanced lighting setup');
+        } catch (error) {
+            console.error('❌ Lighting setup failed:', error);
+        }
+    }
+
+    // ========== SCENE SETUP ==========
+    setupScene() {
+        try {
+            // شبكات أرضية
+            const mainGrid = new THREE.GridHelper(200, 50, 0x88aaff, 0x335588);
+            mainGrid.position.y = 0;
+            mainGrid.name = "mainGrid";
+            this.engine.scene.add(mainGrid);
+            
+            const detailGrid = new THREE.GridHelper(100, 50, 0x44aaff, 0x224466);
+            detailGrid.position.y = 0.01;
+            detailGrid.name = "detailGrid";
+            this.engine.scene.add(detailGrid);
+            
+            // كرة مركزية
+            const sphereGeo = new THREE.SphereGeometry(0.8, 32, 32);
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
+            const centerSphere = new THREE.Mesh(sphereGeo, sphereMat);
+            centerSphere.position.set(0, 0.8, 0);
+            centerSphere.name = "centerSphere";
+            this.engine.scene.add(centerSphere);
+            
+            // حلقة حول الكرة
+            const torusGeo = new THREE.TorusGeometry(1.2, 0.05, 16, 100);
+            const torusMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
+            const torus = new THREE.Mesh(torusGeo, torusMat);
+            torus.rotation.x = Math.PI / 2;
+            torus.position.set(0, 0.8, 0);
+            torus.name = "centerTorus";
+            this.engine.scene.add(torus);
+            
+            // محاور
+            const axesHelper = new THREE.AxesHelper(15);
+            axesHelper.name = "axesHelper";
+            this.engine.scene.add(axesHelper);
+            
+            // نقاط مرجعية
+            const pointsMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.15 });
+            const pointsGeo = new THREE.BufferGeometry();
+            const positions = [];
+            for (let x = -20; x <= 20; x += 2) {
+                for (let z = -20; z <= 20; z += 2) {
+                    positions.push(x, 0.02, z);
+                }
+            }
+            pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const points = new THREE.Points(pointsGeo, pointsMat);
+            points.name = "referencePoints";
+            this.engine.scene.add(points);
+            
+            // مؤشر حركة
+            this.createMovementIndicator();
+            
+            console.log('✅ Scene setup complete');
+        } catch (error) {
+            console.error('❌ Scene setup failed:', error);
+        }
+    }
+
+    // ===== مؤشر الحركة =====
+    createMovementIndicator() {
+        const group = new THREE.Group();
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const sphereGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            sphere.position.set(Math.cos(angle) * 5, 0.3, Math.sin(angle) * 5);
+            group.add(sphere);
+        }
+        group.name = "movementIndicator";
+        this.engine.scene.add(group);
+    }
+
+    // ========== إعدادات إضافية لاستغلال Core i7 =====
+    enableHighPerformanceMode() {
+        // زيادة تفاصيل الأرضية
+        const mainGrid = this.engine.scene.getObjectByName('mainGrid');
+        if (mainGrid) {
+            mainGrid.material.opacity = 0.9;
+        }
+        
+        // زيادة عدد النقاط المرجعية
+        const points = this.engine.scene.getObjectByName('referencePoints');
+        if (points) {
+            points.material.size = 0.2;
+        }
+        
+        // زيادة تفاصيل المؤشرات
+        const indicator = this.engine.scene.getObjectByName('movementIndicator');
+        if (indicator) {
+            indicator.children.forEach(child => {
+                if (child.material) {
+                    child.material.emissive.setHex(0x884422);
+                }
+            });
+        }
+        
+        console.log('⚡ High performance mode activated');
     }
 
     // ========== CORE SYSTEMS ==========
@@ -304,12 +483,15 @@ class ActualViewConstructionOS {
             this.engine.geoRef.setCoordinateSystem('utm');
             this.engine.geoRef.setOrigin(0, 0, 0);
             this.engine.geoRef.setScale(1.0);
+            
             this.engine.sceneManager = new SceneManager(this);
             this.engine.projectManager = new ProjectManager();
             this.engine.projectManager.createProject('ACTUAL Project', 'Reality BIM Platform');
+            
             this.engine.sceneGraph = new SceneGraph();
             this.engine.storage = new StorageManager();
             this.engine.storage.init();
+            
             console.log('✅ Core systems initialized');
         } catch (error) {
             console.error('❌ Core init failed:', error);
@@ -508,10 +690,9 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== LANDSCAPING MODULES ==========
+// ========== LANDSCAPING MODULES ==========
     initLandscapingModules() {
         try {
-            // يمكن تخزين الكلاسات للاستخدام لاحقاً
             this.landscaping = {
                 Plant,
                 Grass,
@@ -609,98 +790,24 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== SCENE SETUP ==========
-    setupScene() {
-        try {
-            // إضاءة
-            const ambientLight = new THREE.AmbientLight(0x404060);
-            this.engine.scene.add(ambientLight);
-            const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
-            sunLight.position.set(20, 30, 20);
-            sunLight.castShadow = true;
-            this.engine.scene.add(sunLight);
-            
-            // شبكات أرضية
-            const mainGrid = new THREE.GridHelper(100, 50, 0x88aaff, 0x335588);
-            mainGrid.position.y = 0;
-            mainGrid.name = "mainGrid";
-            this.engine.scene.add(mainGrid);
-            const detailGrid = new THREE.GridHelper(50, 50, 0x44aaff, 0x224466);
-            detailGrid.position.y = 0.01;
-            detailGrid.name = "detailGrid";
-            this.engine.scene.add(detailGrid);
-            
-            // كرة مركزية
-            const sphereGeo = new THREE.SphereGeometry(0.8, 32, 32);
-            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
-            const centerSphere = new THREE.Mesh(sphereGeo, sphereMat);
-            centerSphere.position.set(0, 0.8, 0);
-            centerSphere.name = "centerSphere";
-            this.engine.scene.add(centerSphere);
-            
-            // حلقة حول الكرة
-            const torusGeo = new THREE.TorusGeometry(1.2, 0.05, 16, 100);
-            const torusMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
-            const torus = new THREE.Mesh(torusGeo, torusMat);
-            torus.rotation.x = Math.PI / 2;
-            torus.position.set(0, 0.8, 0);
-            torus.name = "centerTorus";
-            this.engine.scene.add(torus);
-            
-            // محاور
-            const axesHelper = new THREE.AxesHelper(15);
-            axesHelper.name = "axesHelper";
-            this.engine.scene.add(axesHelper);
-            
-            // نقاط مرجعية
-            const pointsMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.15 });
-            const pointsGeo = new THREE.BufferGeometry();
-            const positions = [];
-            for (let x = -20; x <= 20; x += 2) {
-                for (let z = -20; z <= 20; z += 2) {
-                    positions.push(x, 0.02, z);
-                }
-            }
-
-           pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            const points = new THREE.Points(pointsGeo, pointsMat);
-            points.name = "referencePoints";
-            this.engine.scene.add(points);
-            
-            // مؤشر حركة
-            this.createMovementIndicator();
-            console.log('✅ Scene setup complete');
-        } catch (error) {
-            console.error('❌ Scene setup failed:', error);
-        }
-    }
-
-    createMovementIndicator() {
-        const group = new THREE.Group();
-        for (let i = 0; i < 12; i++) {
-            const angle = (i / 12) * Math.PI * 2;
-            const sphereGeo = new THREE.SphereGeometry(0.15, 8, 8);
-            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
-            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-            sphere.position.set(Math.cos(angle) * 5, 0.3, Math.sin(angle) * 5);
-            group.add(sphere);
-        }
-        group.name = "movementIndicator";
-        this.engine.scene.add(group);
-    }
-
     // ========== ANIMATION LOOP ==========
     animate() {
         requestAnimationFrame(() => this.animate());
         if (this.engine.controls) this.engine.controls.update();
         if (this.engine.lodManager) this.engine.lodManager.update();
+        if (this.engine.tileLODManager) this.engine.tileLODManager.update();
+        
+        // تدوير مؤشر الحركة
         if (this.state.indicatorRotation !== undefined) {
             this.state.indicatorRotation += 0.01;
             const indicator = this.engine.scene.getObjectByName('movementIndicator');
             if (indicator) indicator.rotation.y = this.state.indicatorRotation;
         }
+        
+        // تدوير الحلقة
         const torus = this.engine.scene.getObjectByName('centerTorus');
         if (torus) torus.rotation.z += 0.005;
+        
         if (this.engine.renderer && this.engine.scene && this.engine.camera) {
             this.engine.renderer.render(this.engine.scene, this.engine.camera);
         }
@@ -759,7 +866,7 @@ class ActualViewConstructionOS {
         }
     }
 
-    updateTransformMatrix() {
+updateTransformMatrix() {
         const matrixEl = document.getElementById('transformMatrix');
         if (!matrixEl) return;
         const matrix = this.engine.geoRef.transformMatrix;
@@ -971,7 +1078,7 @@ window.addEventListener('load', () => {
         this.updateStatus('✨ Marble added', 'success');
         return marble;
     };
-    
+
     window.app.addGranite = function(options) {
         if (!this.stoneBrick?.Granite) return;
         const granite = new this.stoneBrick.Granite(options || { position: { x: 0, y: 0, z: 0 } });
@@ -1173,203 +1280,6 @@ window.addEventListener('load', () => {
         }
     };
     
-    window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
-    window.runCalibration = () => window.app?.runCalibration();
-    window.runClashDetection = () => window.app?.runClashDetection();
-    
-    window.addCalibrationPointToScene = () => {
-        window.app?.addCalibrationPoint({
-            imageX: parseFloat(document.getElementById('imgX').value) || 0,
-            imageY: parseFloat(document.getElementById('imgY').value) || 0,
-            realX: parseFloat(document.getElementById('realX').value) || 0,
-            realY: parseFloat(document.getElementById('realY').value) || 0
-        });
-        document.getElementById('calibrationPointModal').classList.add('hidden');
-    };
-    
-    window.selectMaterial = (m) => window.app?.updateStatus(`Selected material: ${m}`, 'success');
-    window.updateStatus = (msg, type) => window.app?.updateStatus(msg, type);
-    window.getSystemStatus = () => window.app?.getSystemStatus();
-    
-    window.updateWorkflow = (step) => {
-        const steps = document.querySelectorAll('.workflow-step');
-        steps.forEach((s, i) => s.classList.toggle('active', i < step));
-        document.getElementById('statusMessage').innerHTML = `Step ${step}/7: ${['','Import CAD','Draw Plan','Import 360','Calibrate','Link','Build','BOQ'][step]}`;
-    };
-    
-    window.updateWorkflow(1);
-    window.app.updateStatus('All systems ready', 'success');
-    
-    console.log('📌 Commands: window.app, getSystemStatus(), updateWorkflow()');
-});
-
-window.restartApp = () => {
-    console.log('🔄 Restarting application...');
-    location.reload();
-};
-    
-    // ===== ARCHITECTURE =====
-    window.startDrawWall = () => window.app?.startDrawing('wall');
-    window.startDrawColumn = () => window.app?.startDrawing('column');
-    window.addDoor = () => window.app?.startDrawing('door');
-    window.addWindow = () => window.app?.startDrawing('window');
-    window.addBeam = () => window.app?.startDrawing('beam');
-    window.addSlab = () => window.app?.startDrawing('slab');
-    window.addFoundation = () => window.app?.startDrawing('foundation');
-    window.addPipe = () => window.app?.startDrawing('pipe');
-    
-    // ===== LANDSCAPING =====
-    window.addPlant = (options) => {
-        if (!window.app) return;
-        const plant = new window.app.landscaping.Plant(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(plant.createMesh());
-        window.app.updateStatus('🌱 Plant added', 'success');
-    };
-    window.addGrass = (options) => {
-        if (!window.app) return;
-        const grass = new window.app.landscaping.Grass(options || { area: 10, position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(grass.createMesh());
-        window.app.updateStatus('🌿 Grass added', 'success');
-    };
-    window.addTree = (options) => {
-        if (!window.app) return;
-        const tree = new window.app.landscaping.Tree(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(tree.createMesh());
-        window.app.updateStatus('🌳 Tree added', 'success');
-    };
-    window.addPalm = (options) => {
-        if (!window.app) return;
-        const palm = new window.app.landscaping.Palm(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(palm.createMesh());
-        window.app.updateStatus('🌴 Palm added', 'success');
-    };
-    window.addFountain = (options) => {
-        if (!window.app) return;
-        const fountain = new window.app.landscaping.Fountain(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(fountain.createMesh());
-        window.app.updateStatus('⛲ Fountain added', 'success');
-    };
-    window.addGardenLight = (options) => {
-        if (!window.app) return;
-        const light = new window.app.landscaping.GardenLight(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(light.createMesh());
-        window.app.updateStatus('💡 Garden light added', 'success');
-    };
-    window.addGardenPath = (points, options) => {
-        if (!window.app) return;
-        const path = new window.app.landscaping.GardenPath({ points: points || [{x:-2,z:-2},{x:2,z:2}], ...options });
-        window.app.engine.scene.add(path.createMesh());
-        window.app.updateStatus('🛤️ Garden path added', 'success');
-    };
-    
-    // ===== STONE & BRICK =====
-    window.addStone = (options) => {
-        if (!window.app) return;
-        const stone = new window.app.stoneBrick.Stone(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(stone.createMesh());
-        window.app.updateStatus('🪨 Stone added', 'success');
-    };
-    window.addBrick = (options) => {
-        if (!window.app) return;
-        const brick = new window.app.stoneBrick.Brick(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(brick.createMesh());
-        window.app.updateStatus('🧱 Brick added', 'success');
-    };
-    window.addMarble = (options) => {
-        if (!window.app) return;
-        const marble = new window.app.stoneBrick.Marble(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(marble.createMesh());
-        window.app.updateStatus('✨ Marble added', 'success');
-    };
-    window.addGranite = (options) => {
-        if (!window.app) return;
-        const granite = new window.app.stoneBrick.Granite(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(granite.createMesh());
-        window.app.updateStatus('⛰️ Granite added', 'success');
-    };
-    window.addCladding = (options) => {
-        if (!window.app) return;
-        const cladding = new window.app.stoneBrick.Cladding(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(cladding.createMesh());
-        window.app.updateStatus('🏛️ Cladding added', 'success');
-    };
-    window.addPavement = (options) => {
-        if (!window.app) return;
-        const pavement = new window.app.stoneBrick.Pavement(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(pavement.createMesh());
-        window.app.updateStatus('🛤️ Pavement added', 'success');
-    };
-    
-    // ===== GLASS =====
-    window.addGlass = (options) => {
-        if (!window.app) return;
-        const glass = new window.app.glass.Glass(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(glass.createMesh());
-        window.app.updateStatus('🪟 Glass added', 'success');
-    };
-    window.addWindowGlass = (options) => {
-        if (!window.app) return;
-        const wg = new window.app.glass.WindowGlass(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(wg.createMesh());
-        window.app.updateStatus('🪟 Window added', 'success');
-    };
-    window.addCurtainWall = (options) => {
-        if (!window.app) return;
-        const cw = new window.app.glass.CurtainWall(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(cw.createMesh());
-        window.app.updateStatus('🏢 Curtain wall added', 'success');
-    };
-    window.addGlassPartition = (options) => {
-        if (!window.app) return;
-        const gp = new window.app.glass.GlassPartition(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(gp.createMesh());
-        window.app.updateStatus('🚪 Glass partition added', 'success');
-    };
-    window.addSkylight = (options) => {
-        if (!window.app) return;
-        const sl = new window.app.glass.Skylight(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(sl.createMesh());
-        window.app.updateStatus('☀️ Skylight added', 'success');
-    };
-    window.addGlassFloor = (options) => {
-        if (!window.app) return;
-        const gf = new window.app.glass.GlassFloor(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(gf.createMesh());
-        window.app.updateStatus('✨ Glass floor added', 'success');
-    };
-    window.addGlassRailing = (options) => {
-        if (!window.app) return;
-        const gr = new window.app.glass.GlassRailing(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(gr.createMesh());
-        window.app.updateStatus('🪢 Glass railing added', 'success');
-    };
-    window.addStainedGlass = (options) => {
-        if (!window.app) return;
-        const sg = new window.app.glass.StainedGlass(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(sg.createMesh());
-        window.app.updateStatus('🎨 Stained glass added', 'success');
-    };
-    window.addSmartGlass = (options) => {
-        if (!window.app) return;
-        const smg = new window.app.glass.SmartGlass(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(smg.createMesh());
-        window.app.updateStatus('🔮 Smart glass added', 'success');
-    };
-    window.addGlassBlock = (options) => {
-        if (!window.app) return;
-        const gb = new window.app.glass.GlassBlock(options || { position: { x: 0, y: 0, z: 0 } });
-        window.app.engine.scene.add(gb.createMesh());
-        window.app.updateStatus('🧊 Glass block added', 'success');
-    };
-    
-    // ===== GLOBAL FUNCTIONS (يمكن استدعاؤها لاحقاً) =====
-    window.createGlobalForest = (sceneId, center, radius, count) => {
-        if (window.app?.globalTree) {
-            return window.app.globalTree.createForest(sceneId, center, radius, count);
-        }
-    };
-
-    // ===== CALIBRATION =====
     window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
     window.runCalibration = () => window.app?.runCalibration();
     window.runClashDetection = () => window.app?.runClashDetection();
