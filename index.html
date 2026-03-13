@@ -33,7 +33,7 @@
         }
         
         /* ===== MAIN CONTAINER ===== */
-        #app {
+        #app-container {
             display: grid;
             grid-template-columns: 280px 1fr 300px;
             height: 100vh;
@@ -41,15 +41,15 @@
             transition: grid-template-columns 0.3s ease;
         }
         
-        #app.view-mode-left {
+        #app-container.view-mode-left {
             grid-template-columns: 0 1fr 300px;
         }
         
-        #app.view-mode-right {
+        #app-container.view-mode-right {
             grid-template-columns: 280px 1fr 0;
         }
         
-        #app.view-mode-full {
+        #app-container.view-mode-full {
             grid-template-columns: 0 1fr 0;
         }
         
@@ -275,7 +275,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         /* ===== RIGHT PANEL ===== */
         .right-panel {
             background: #121212;
@@ -635,8 +635,8 @@
                     </div>
                 </div>
             </div>
-            
-           <!-- Element Library (Hidden by default) -->
+
+            <!-- Element Library (Hidden by default) -->
             <div class="panel-section element-library" id="elementLibrary">
                 <div class="panel-title"><i class="fas fa-icons"></i><span>ELEMENT LIBRARY</span></div>
                 <div class="library-grid">
@@ -725,8 +725,8 @@
             </div>
         </div>
     </div>
-    
-    <!-- ===== STATUS BAR ===== -->
+
+ <!-- ===== STATUS BAR ===== -->
     <div class="status-bar" id="statusBar">
         <div class="status-progress"><i class="fas fa-spinner fa-spin"></i><span>Step 1/7: Import CAD</span></div>
         <div class="status-message" id="statusMessage">Loading platform...</div>
@@ -765,8 +765,8 @@
             </div>
         </div>
     </div>
-
-   <!-- Add Calibration Point Modal -->
+    
+    <!-- Add Calibration Point Modal -->
     <div id="calibrationPointModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header"><h3><i class="fas fa-crosshairs"></i> Add GCP</h3></div>
@@ -788,29 +788,40 @@
         </div>
     </div>
     
+    <!-- Global Error Handler -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('🔥 Global error:', e.message);
+            console.error('  at:', e.filename, 'line:', e.lineno);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🔥 Unhandled Promise rejection:', e.reason);
+        });
+    </script>
+    
+    <!-- UI Functions -->
     <script>
         // ===== VIEW CONTROLS =====
         function toggleLeftPanel() {
-            const app = document.getElementById('app');
-            app.classList.remove('view-mode-right', 'view-mode-full');
-            app.classList.toggle('view-mode-left');
+            const container = document.getElementById('app-container');
+            container.classList.remove('view-mode-right', 'view-mode-full');
+            container.classList.toggle('view-mode-left');
         }
         
         function toggleRightPanel() {
-            const app = document.getElementById('app');
-            app.classList.remove('view-mode-left', 'view-mode-full');
-            app.classList.toggle('view-mode-right');
+            const container = document.getElementById('app-container');
+            container.classList.remove('view-mode-left', 'view-mode-full');
+            container.classList.toggle('view-mode-right');
         }
         
         function toggleFullView() {
-            const app = document.getElementById('app');
-            // إذا كان في وضع Full، نرجع للوضع الطبيعي
-            if (app.classList.contains('view-mode-full')) {
-                app.classList.remove('view-mode-left', 'view-mode-right', 'view-mode-full');
+            const container = document.getElementById('app-container');
+            if (container.classList.contains('view-mode-full')) {
+                container.classList.remove('view-mode-left', 'view-mode-right', 'view-mode-full');
             } else {
-                // إذا كان في وضع آخر، ننظف ونضيف Full
-                app.classList.remove('view-mode-left', 'view-mode-right');
-                app.classList.add('view-mode-full');
+                container.classList.remove('view-mode-left', 'view-mode-right');
+                container.classList.add('view-mode-full');
             }
         }
         
@@ -841,22 +852,35 @@
         window.importImage = function() {
             const input = document.getElementById('imageInput');
             const name = document.getElementById('sceneName').value;
-            if (input.files.length && window.app) {
-                window.app.import360Image(URL.createObjectURL(input.files[0]), name);
-                hideModal('importImageModal');
-                updateWorkflow(3);
+            if (input.files.length) {
+                if (window.app && typeof window.app.import360Image === 'function') {
+                    window.app.import360Image(URL.createObjectURL(input.files[0]), name);
+                    hideModal('importImageModal');
+                    updateWorkflow(3);
+                } else {
+                    console.error('❌ import360Image not ready yet');
+                    alert('Application not fully loaded. Please wait a moment and try again.');
+                }
+            } else {
+                alert('Please select an image');
             }
         };
         
         window.importCAD = function() {
             const input = document.getElementById('cadInput');
-            if (input.files.length && window.app) {
-                window.app.importCAD(input.files[0]);
-                hideModal('importCADModal');
-                updateWorkflow(2);
+            if (input.files.length) {
+                if (window.app && typeof window.app.importCAD === 'function') {
+                    window.app.importCAD(input.files[0]);
+                    hideModal('importCADModal');
+                    updateWorkflow(2);
+                } else {
+                    console.error('❌ importCAD not ready yet');
+                    alert('Application not fully loaded. Please wait a moment and try again.');
+                }
+            } else {
+                alert('Please select a CAD file');
             }
         };
-        
         // ===== ELEMENT FUNCTIONS =====
         window.addWall = () => window.app?.startDrawing('wall');
         window.addColumn = () => window.app?.startDrawing('column');
@@ -903,17 +927,21 @@
         
         // ===== GEO REFERENCING FUNCTIONS =====
         window.setCoordSystem = function(system) {
-            if (window.app) {
+            if (window.app && window.app.engine && window.app.engine.geoRef) {
                 window.app.engine.geoRef.setCoordinateSystem(system);
                 document.getElementById('coordSystem').textContent = system.toUpperCase();
                 window.app.updateStatus(`System: ${system}`, 'success');
+            } else {
+                console.warn('⚠️ GeoRef not ready');
             }
         };
         
         window.calculateTransform = function() {
-            if (window.app) {
+            if (window.app && window.app.engine && window.app.engine.geoRef) {
                 window.app.engine.geoRef.calculateTransform();
-                window.app.updateTransformMatrix();
+                if (window.app.updateTransformMatrix) {
+                    window.app.updateTransformMatrix();
+                }
                 window.app.updateStatus('Transform calculated', 'success');
             }
         };
@@ -936,22 +964,24 @@
             });
         });
         
+        // ===== CHECK APP READINESS =====
+        function checkAppReady() {
+            if (window.app) {
+                console.log('✅ App instance ready:', window.app);
+                console.log('📌 Methods:', Object.keys(window.app).filter(k => typeof window.app[k] === 'function'));
+                document.getElementById('statusMessage').innerHTML = 'App ready';
+            } else {
+                console.log('⏳ Waiting for app...');
+                setTimeout(checkAppReady, 500);
+            }
+        }
+        
         // بدء العمل
         window.updateWorkflow(1);
+        setTimeout(checkAppReady, 1000);
     </script>
     
+    <!-- Import main.js -->
     <script type="module" src="./main.js"></script>
-
-<script>
-// تأخير الدوال حتى يتم تحميل التطبيق
-window.addEventListener('load', function() {
-    // انتظر حتى يتم تهيئة التطبيق
-    setTimeout(function() {
-        if (window.app) {
-            console.log('✅ App loaded, functions ready');
-        }
-    }, 1000);
-});
-</script>
 </body>
-</html> 
+</html>
