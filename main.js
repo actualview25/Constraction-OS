@@ -42,7 +42,7 @@ import { TileLODManager } from './core/loading/TileLODManager.js';
 
 // ========== RENDERING SYSTEMS ==========
 import { HybridRenderer } from './core/rendering/HybridRenderer.js';
-import { LODManager } from './core/rendering/LODManager.js';
+import { LODManager } from './core/rendering/LODManager.js'; // ✅ المسار صحيح
 
 // ========== CLASH DETECTION ==========
 import { ClashDetection } from './core/clash/ClashDetection.js';
@@ -281,7 +281,7 @@ class ActualViewConstructionOS {
             // المشهد
             this.engine.scene = new THREE.Scene();
             this.engine.scene.background = new THREE.Color(0x111122);
-            this.engine.scene.fog = new THREE.Fog(0x111122, 150, 800); // ضباب خفيف للمدى البعيد
+            this.engine.scene.fog = new THREE.Fog(0x111122, 150, 800);
             
             // كاميرا بزاوية واسعة
             this.engine.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 5000);
@@ -297,22 +297,18 @@ class ActualViewConstructionOS {
                 alpha: false
             });
             
-            // استخدام قوة Core i7
             this.engine.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.engine.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // وضوح عالي
+            this.engine.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             
-            // ===== ظلال عالية الجودة =====
             this.engine.renderer.shadowMap.enabled = true;
             this.engine.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             this.engine.renderer.shadowMap.autoUpdate = true;
             
-            // ===== تحسين الألوان =====
             this.engine.renderer.toneMapping = THREE.ACESFilmicToneMapping;
             this.engine.renderer.toneMappingExposure = 1.4;
             
             document.getElementById('container').appendChild(this.engine.renderer.domElement);
             
-            // ===== تحكم سلس =====
             this.engine.controls = new OrbitControls(this.engine.camera, this.engine.renderer.domElement);
             this.engine.controls.enableDamping = true;
             this.engine.controls.dampingFactor = 0.04;
@@ -330,19 +326,16 @@ class ActualViewConstructionOS {
         }
     }
 
-// ========== إضاءة متقدمة ==========
+    // ========== إضاءة متقدمة ==========
     setupLights() {
         try {
-            // إضاءة محيطة
             const ambientLight = new THREE.AmbientLight(0x404060, 1.0);
             this.engine.scene.add(ambientLight);
             
-            // إضاءة شمسية رئيسية
             const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.8);
             sunLight.position.set(30, 50, 30);
             sunLight.castShadow = true;
             
-            // ظلال عالية الدقة
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
@@ -355,12 +348,10 @@ class ActualViewConstructionOS {
             
             this.engine.scene.add(sunLight);
             
-            // إضاءة خلفية
             const backLight = new THREE.DirectionalLight(0x446688, 0.6);
             backLight.position.set(-20, 20, -30);
             this.engine.scene.add(backLight);
             
-            // نقاط إضاءة إضافية للتفاصيل
             const pointLight1 = new THREE.PointLight(0xffaa44, 0.8, 50);
             pointLight1.position.set(10, 10, 10);
             this.engine.scene.add(pointLight1);
@@ -451,29 +442,33 @@ class ActualViewConstructionOS {
 
     // ========== إعدادات إضافية لاستغلال Core i7 =====
     enableHighPerformanceMode() {
-        // زيادة تفاصيل الأرضية
-        const mainGrid = this.engine.scene.getObjectByName('mainGrid');
-        if (mainGrid) {
-            mainGrid.material.opacity = 0.9;
+        try {
+            // زيادة تفاصيل الأرضية
+            const mainGrid = this.engine.scene.getObjectByName('mainGrid');
+            if (mainGrid) {
+                mainGrid.material.opacity = 0.9;
+            }
+            
+            // زيادة عدد النقاط المرجعية
+            const points = this.engine.scene.getObjectByName('referencePoints');
+            if (points) {
+                points.material.size = 0.2;
+            }
+            
+            // زيادة تفاصيل المؤشرات
+            const indicator = this.engine.scene.getObjectByName('movementIndicator');
+            if (indicator) {
+                indicator.children.forEach(child => {
+                    if (child.material) {
+                        child.material.emissive.setHex(0x884422);
+                    }
+                });
+            }
+            
+            console.log('⚡ High performance mode activated');
+        } catch (error) {
+            console.warn('⚠️ High performance mode error:', error);
         }
-        
-        // زيادة عدد النقاط المرجعية
-        const points = this.engine.scene.getObjectByName('referencePoints');
-        if (points) {
-            points.material.size = 0.2;
-        }
-        
-        // زيادة تفاصيل المؤشرات
-        const indicator = this.engine.scene.getObjectByName('movementIndicator');
-        if (indicator) {
-            indicator.children.forEach(child => {
-                if (child.material) {
-                    child.material.emissive.setHex(0x884422);
-                }
-            });
-        }
-        
-        console.log('⚡ High performance mode activated');
     }
 
     // ========== CORE SYSTEMS ==========
@@ -545,7 +540,7 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== CLASH DETECTION ==========
+// ========== CLASH DETECTION ==========
     initClashDetection() {
         try {
             this.engine.clashDetection = new ClashDetection(this.engine.globalSystem, this.engine.sceneConnector);
@@ -690,7 +685,7 @@ class ActualViewConstructionOS {
         }
     }
 
-// ========== LANDSCAPING MODULES ==========
+    // ========== LANDSCAPING MODULES ==========
     initLandscapingModules() {
         try {
             this.landscaping = {
@@ -813,7 +808,7 @@ class ActualViewConstructionOS {
         }
     }
 
-    // ========== IMPORT 360 IMAGE ==========
+// ========== IMPORT 360 IMAGE ==========
     async import360Image(url, sceneName) {
         try {
             const sceneId = `scene-${Date.now()}`;
@@ -866,7 +861,7 @@ class ActualViewConstructionOS {
         }
     }
 
-updateTransformMatrix() {
+    updateTransformMatrix() {
         const matrixEl = document.getElementById('transformMatrix');
         if (!matrixEl) return;
         const matrix = this.engine.geoRef.transformMatrix;
@@ -1280,7 +1275,7 @@ window.addEventListener('load', () => {
         }
     };
     
-    window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
+   window.addCalibrationPoint = () => window.app?.startCalibrationPoint();
     window.runCalibration = () => window.app?.runCalibration();
     window.runClashDetection = () => window.app?.runClashDetection();
     
