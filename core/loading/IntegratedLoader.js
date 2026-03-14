@@ -12,7 +12,7 @@
 
 import { LazySceneLoader } from './LazySceneLoader.js';
 import { SegmentedSceneLoader } from './SegmentedSceneLoader.js';
-import { LODManager } from './LODManager.js';
+import { LODManager } from '../rendering/LODManager.js';
 import { PriorityQueue } from './PriorityQueue.js';
 import { TileLODManager } from './TileLODManager.js';
 
