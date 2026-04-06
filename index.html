@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACTUAL VIEW CONSTRUCTION OS - Professional BIM Platform</title>
     
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -22,574 +18,125 @@
     </script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0a0a0f;
-            color: #e8edf2;
-            overflow: hidden;
-        }
-
-        /* ===== Custom Scrollbar ===== */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a24;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a4a;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ffaa44;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e8edf2; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a24; }
+        ::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffaa44; }
 
         /* ===== TOP BAR ===== */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: rgba(18, 18, 26, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 170, 68, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            z-index: 1000;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            font-size: 28px;
-            color: #ffaa44;
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-        }
-
-        .logo-text span {
-            color: #ffaa44;
-        }
-
-        .main-menu {
-            display: flex;
-            gap: 8px;
-            background: rgba(26, 26, 36, 0.8);
-            padding: 4px;
-            border-radius: 40px;
-        }
-
-        .menu-item {
-            padding: 8px 20px;
-            border-radius: 32px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            color: #a0a0b0;
-        }
-
-        .menu-item:hover {
-            background: rgba(255, 170, 68, 0.15);
-            color: #ffaa44;
-        }
-
-        .menu-item.active {
-            background: #ffaa44;
-            color: #12121a;
-        }
-
-        .workflow-indicator {
-            display: flex;
-            gap: 16px;
-            background: rgba(26, 26, 36, 0.6);
-            padding: 6px 16px;
-            border-radius: 40px;
-        }
-
-        .workflow-step {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: #5a5a6a;
-            transition: all 0.2s;
-        }
-
-        .workflow-step.active {
-            color: #ffaa44;
-        }
-
-        .workflow-step .step-num {
-            width: 22px;
-            height: 22px;
-            background: #2a2a3a;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .workflow-step.active .step-num {
-            background: #ffaa44;
-            color: #12121a;
-        }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(18, 18, 26, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 170, 68, 0.2); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { font-size: 28px; color: #ffaa44; }
+        .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
+        .logo-text span { color: #ffaa44; }
+        .main-menu { display: flex; gap: 8px; background: rgba(26, 26, 36, 0.8); padding: 4px; border-radius: 40px; }
+        .menu-item { padding: 8px 20px; border-radius: 32px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; color: #a0a0b0; }
+        .menu-item:hover { background: rgba(255, 170, 68, 0.15); color: #ffaa44; }
+        .menu-item.active { background: #ffaa44; color: #12121a; }
+        .workflow-indicator { display: flex; gap: 16px; background: rgba(26, 26, 36, 0.6); padding: 6px 16px; border-radius: 40px; }
+        .workflow-step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #5a5a6a; transition: all 0.2s; }
+        .workflow-step.active { color: #ffaa44; }
+        .workflow-step .step-num { width: 22px; height: 22px; background: #2a2a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+        .workflow-step.active .step-num { background: #ffaa44; color: #12121a; }
 
         /* ===== VIEW CONTROLS ===== */
-        .view-controls {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 12px;
-            background: rgba(18, 18, 26, 0.9);
-            backdrop-filter: blur(12px);
-            padding: 8px 20px;
-            border-radius: 48px;
-            border: 1px solid rgba(255, 170, 68, 0.3);
-            z-index: 100;
-        }
+        .view-controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; background: rgba(18, 18, 26, 0.9); backdrop-filter: blur(12px); padding: 8px 20px; border-radius: 48px; border: 1px solid rgba(255, 170, 68, 0.3); z-index: 100; }
+        .view-btn { padding: 8px 20px; border-radius: 32px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; background: transparent; color: #a0a0b0; }
+        .view-btn:hover { background: rgba(255, 170, 68, 0.15); color: #ffaa44; }
+        .view-btn.active { background: #ffaa44; color: #12121a; }
 
-        .view-btn {
-            padding: 8px 20px;
-            border-radius: 32px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            background: transparent;
-            color: #a0a0b0;
-        }
+        /* ===== PANELS ===== */
+        .left-panel { position: fixed; top: 56px; left: 0; bottom: 0; width: 280px; background: rgba(18, 18, 26, 0.92); backdrop-filter: blur(12px); border-right: 1px solid rgba(255, 255, 255, 0.05); transform: translateX(0); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 90; display: flex; flex-direction: column; overflow-y: auto; }
+        .left-panel.collapsed { transform: translateX(-280px); }
+        .panel-toggle { position: fixed; left: 280px; top: 70px; width: 28px; height: 48px; background: rgba(26, 26, 36, 0.9); border: 1px solid rgba(255, 170, 68, 0.3); border-left: none; border-radius: 0 8px 8px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 95; color: #ffaa44; }
+        .left-panel.collapsed + .panel-toggle { left: 0; }
 
-       .view-btn:hover {
-            background: rgba(255, 170, 68, 0.15);
-            color: #ffaa44;
-        }
+        .right-panel { position: fixed; top: 56px; right: 0; bottom: 0; width: 380px; background: rgba(18, 18, 26, 0.92); backdrop-filter: blur(12px); border-left: 1px solid rgba(255, 255, 255, 0.05); transform: translateX(0); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 90; display: flex; flex-direction: column; overflow-y: auto; }
+        .right-panel.collapsed { transform: translateX(380px); }
+        .right-panel-toggle { position: fixed; right: 380px; top: 70px; width: 28px; height: 48px; background: rgba(26, 26, 36, 0.9); border: 1px solid rgba(255, 170, 68, 0.3); border-right: none; border-radius: 8px 0 0 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 95; color: #ffaa44; }
+        .right-panel.collapsed + .right-panel-toggle { right: 0; }
 
-        .view-btn.active {
-            background: #ffaa44;
-            color: #12121a;
-        }
+        /* ===== CENTER PANEL ===== */
+        .center-panel { position: fixed; top: 56px; left: 280px; right: 380px; bottom: 0; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); background: #000000; }
+        .left-panel.collapsed ~ .center-panel { left: 0 !important; }
+        .right-panel.collapsed ~ .center-panel { right: 0 !important; }
+        #container { width: 100%; height: 100%; display: block; background: #000000; }
 
-        /* ===== LEFT PANEL (Scene Explorer) ===== */
-        .left-panel {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            bottom: 0;
-            width: 280px;
-            background: rgba(18, 18, 26, 0.92);
-            backdrop-filter: blur(12px);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            transform: translateX(0);
-            transition: transform 0.3s ease;
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+        /* ===== PANEL SECTIONS ===== */
+        .panel-section { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .panel-title { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #ffaa44; margin-bottom: 16px; }
+        
+        /* Scene Explorer */
+        .scene-tree { list-style: none; }
+        .scene-item { padding: 8px 12px; margin: 4px 0; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px; color: #b0b0c0; transition: all 0.2s; }
+        .scene-item:hover { background: rgba(255, 170, 68, 0.1); color: #ffaa44; }
+        .scene-item.active { background: rgba(255, 170, 68, 0.15); border-left: 3px solid #ffaa44; }
+        .floor-level { padding: 8px 12px; margin: 4px 0; background: rgba(26, 26, 36, 0.6); border-radius: 8px; display: flex; justify-content: space-between; font-size: 13px; cursor: pointer; }
+        .floor-level:hover { background: rgba(255, 170, 68, 0.1); }
+        .floor-badge { background: #2a2a3a; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #ffaa44; }
+        .link-item { padding: 8px 12px; margin: 4px 0; background: rgba(26, 26, 36, 0.6); border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 12px; }
 
-        .left-panel.collapsed {
-            transform: translateX(-280px);
-        }
+        /* ===== ELEMENT LIBRARY - FULL VERSION ===== */
+        .lib-category { margin-bottom: 20px; }
+        .lib-category-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; cursor: pointer; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 10px; }
+        .lib-category-header:hover { color: #ffaa44; }
+        .lib-category-title { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+        .lib-category-title i { width: 20px; }
+        .lib-category-toggle { font-size: 12px; transition: transform 0.2s; }
+        .lib-category.collapsed .lib-category-toggle { transform: rotate(-90deg); }
+        .lib-category.collapsed .library-grid { display: none; }
+        
+        .library-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; margin-bottom: 8px; }
+        .library-item { background: rgba(26, 26, 36, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .library-item:hover { background: rgba(255, 170, 68, 0.15); border-color: rgba(255, 170, 68, 0.3); transform: translateY(-2px); }
+        .library-item i { font-size: 18px; color: #ffaa44; margin-bottom: 4px; display: block; }
+        .library-item span { font-size: 10px; font-weight: 500; }
+        
+        /* Search Bar */
+        .lib-search { margin-bottom: 15px; }
+        .lib-search input { width: 100%; padding: 8px 12px; background: #2a2a3a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; font-size: 12px; }
+        .lib-search input:focus { outline: none; border-color: #ffaa44; }
+        .lib-search input::placeholder { color: #6a6a7a; }
 
-        .panel-toggle {
-            position: fixed;
-            left: 280px;
-            top: 70px;
-            width: 28px;
-            height: 48px;
-            background: rgba(26, 26, 36, 0.9);
-            border: 1px solid rgba(255, 170, 68, 0.3);
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: left 0.3s ease;
-            z-index: 95;
-            color: #ffaa44;
-        }
-
-        .left-panel.collapsed + .panel-toggle {
-            left: 0;
-        }
-
-        .panel-section {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #ffaa44;
-            margin-bottom: 16px;
-        }
-
-        .scene-tree {
-            list-style: none;
-        }
-
-        .scene-item {
-            padding: 8px 12px;
-            margin: 4px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #b0b0c0;
-            transition: all 0.2s;
-        }
-
-        .scene-item:hover {
-            background: rgba(255, 170, 68, 0.1);
-            color: #ffaa44;
-        }
-
-        .scene-item.active {
-            background: rgba(255, 170, 68, 0.15);
-            border-left: 3px solid #ffaa44;
-        }
-
-        .floor-level {
-            padding: 8px 12px;
-            margin: 4px 0;
-            background: rgba(26, 26, 36, 0.6);
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .floor-level:hover {
-            background: rgba(255, 170, 68, 0.1);
-        }
-
-        .floor-badge {
-            background: #2a2a3a;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            color: #ffaa44;
-        }
-
-        .link-item {
-            padding: 8px 12px;
-            margin: 4px 0;
-            background: rgba(26, 26, 36, 0.6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 12px;
-        }
-
-        /* ===== RIGHT PANEL (Tools & Properties) ===== */
-        .right-panel {
-            position: fixed;
-            top: 56px;
-            right: 0;
-            bottom: 0;
-            width: 320px;
-            background: rgba(18, 18, 26, 0.92);
-            backdrop-filter: blur(12px);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            transform: translateX(0);
-            transition: transform 0.3s ease;
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .right-panel.collapsed {
-            transform: translateX(320px);
-        }
-
-        .right-panel-toggle {
-            position: fixed;
-            right: 320px;
-            top: 70px;
-            width: 28px;
-            height: 48px;
-            background: rgba(26, 26, 36, 0.9);
-            border: 1px solid rgba(255, 170, 68, 0.3);
-            border-right: none;
-            border-radius: 8px 0 0 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: right 0.3s ease;
-            z-index: 95;
-            color: #ffaa44;
-        }
-
-        .right-panel.collapsed + .right-panel-toggle {
-            right: 0;
-        }
-
-        /* Element Library Grid */
-        .library-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .library-item {
-            background: rgba(26, 26, 36, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 12px 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .library-item:hover {
-            background: rgba(255, 170, 68, 0.15);
-            border-color: rgba(255, 170, 68, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .library-item i {
-            font-size: 24px;
-            color: #ffaa44;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .library-item span {
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* Property Groups */
-        .property-group {
-            background: rgba(26, 26, 36, 0.6);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .property-group-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #ffaa44;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .property-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            font-size: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .property-label {
-            color: #8a8a9a;
-        }
-
-        .property-value {
-            font-weight: 500;
-            color: #fff;
-        }
+        /* Properties */
+        .property-group { background: rgba(26, 26, 36, 0.6); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .property-group-title { font-size: 12px; font-weight: 600; color: #ffaa44; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .property-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .property-label { color: #8a8a9a; }
+        .property-value { font-weight: 500; color: #fff; }
 
         /* Materials */
-        .material-swatch {
-            width: 100%;
-            height: 32px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
-        }
-
-        .material-swatch:hover {
-            border-color: #ffaa44;
-            transform: scale(1.02);
-        }
+        .material-swatch { width: 100%; height: 32px; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s; }
+        .material-swatch:hover { border-color: #ffaa44; transform: scale(1.02); }
 
         /* Buttons */
-        .btn {
-            background: rgba(42, 42, 58, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #e0e0e0;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 0.2s;
-            width: 100%;
-        }
-
-        .btn:hover {
-            background: rgba(255, 170, 68, 0.2);
-            border-color: #ffaa44;
-        }
-
-        .btn-primary {
-            background: #ffaa44;
-            color: #12121a;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: #ffbb55;
-            transform: translateY(-1px);
-        }
+        .btn { background: rgba(42, 42, 58, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); color: #e0e0e0; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s; width: 100%; }
+        .btn:hover { background: rgba(255, 170, 68, 0.2); border-color: #ffaa44; }
+        .btn-primary { background: #ffaa44; color: #12121a; border: none; }
+        .btn-primary:hover { background: #ffbb55; transform: translateY(-1px); }
 
         /* Status Bar */
-        .status-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 300px;
-            right: 340px;
-            background: rgba(18, 18, 26, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 170, 68, 0.2);
-            border-radius: 40px;
-            padding: 8px 20px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            z-index: 95;
-        }
-
-        .status-progress {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #ffaa44;
-        }
+        .status-bar { position: fixed; bottom: 20px; left: 300px; right: 400px; background: rgba(18, 18, 26, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255, 170, 68, 0.2); border-radius: 40px; padding: 8px 20px; font-size: 12px; display: flex; align-items: center; gap: 16px; z-index: 95; }
+        .status-progress { display: flex; align-items: center; gap: 8px; color: #ffaa44; }
 
         /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content {
-            background: #1a1a24;
-            border-radius: 20px;
-            width: 450px;
-            max-width: 90%;
-            border: 1px solid rgba(255, 170, 68, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            color: #ffaa44;
-            font-size: 18px;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-body input, .modal-body select {
-            width: 100%;
-            padding: 10px 12px;
-            background: #2a2a3a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Center Panel */
-        .center-panel {
-            position: fixed;
-            top: 56px;
-            left: 280px;
-            right: 320px;
-            bottom: 0;
-            transition: all 0.3s ease;
-        }
-
-        #container {
-            width: 100%;
-            height: 100%;
-        }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-content { background: #1a1a24; border-radius: 20px; width: 450px; max-width: 90%; border: 1px solid rgba(255, 170, 68, 0.3); }
+        .modal-header { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { color: #ffaa44; font-size: 18px; }
+        .modal-body { padding: 20px; }
+        .modal-body input, .modal-body select { width: 100%; padding: 10px 12px; background: #2a2a3a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; margin-bottom: 15px; }
+        .modal-footer { padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end; gap: 12px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div id="app-container">
         <!-- TOP BAR -->
         <div class="top-bar">
-            <div class="logo">
-                <div class="logo-icon">🏗️</div>
-                <div class="logo-text">ACTUAL VIEW <span>CONSTRUCTION</span> OS</div>
-            </div>
-            
+            <div class="logo"><div class="logo-icon">🏗️</div><div class="logo-text">ACTUAL VIEW <span>CONSTRUCTION</span> OS</div></div>
             <div class="main-menu">
                 <div class="menu-item active" data-view="project">PROJECT</div>
                 <div class="menu-item" data-view="cad">CAD</div>
@@ -597,7 +144,6 @@
                 <div class="menu-item" data-view="elements">ELEMENTS</div>
                 <div class="menu-item" data-view="boq">BOQ</div>
             </div>
-            
             <div class="workflow-indicator">
                 <div class="workflow-step active"><span class="step-num">1</span><span>Import CAD</span></div>
                 <div class="workflow-step"><span class="step-num">2</span><span>Draw Plan</span></div>
@@ -608,18 +154,11 @@
                 <div class="workflow-step"><span class="step-num">7</span><span>BOQ</span></div>
             </div>
         </div>
-
-        <!-- VIEW CONTROLS -->
+<!-- VIEW CONTROLS -->
         <div class="view-controls">
-            <div class="view-btn" data-mode="plan" onclick="setViewMode('plan')">
-                <i class="fas fa-draw-polygon"></i> PLAN
-            </div>
-            <div class="view-btn" data-mode="reality" onclick="setViewMode('reality')">
-                <i class="fas fa-vr-cardboard"></i> REALITY
-            </div>
-            <div class="view-btn" data-mode="construction" onclick="setViewMode('construction')">
-                <i class="fas fa-hard-hat"></i> CONSTRUCTION
-            </div>
+            <div class="view-btn" data-mode="plan" onclick="setViewMode('plan')"><i class="fas fa-draw-polygon"></i> PLAN</div>
+            <div class="view-btn" data-mode="reality" onclick="setViewMode('reality')"><i class="fas fa-vr-cardboard"></i> REALITY</div>
+            <div class="view-btn" data-mode="construction" onclick="setViewMode('construction')"><i class="fas fa-hard-hat"></i> CONSTRUCTION</div>
         </div>
 
         <!-- LEFT PANEL -->
@@ -628,49 +167,42 @@
                 <div class="panel-title"><i class="fas fa-sitemap"></i> SCENE EXPLORER</div>
                 <ul class="scene-tree" id="sceneTree">
                     <li class="scene-item active"><i class="fas fa-building"></i> Main Project</li>
-                    <ul class="scene-children" style="list-style: none; margin-left: 24px;">
+                    <ul style="list-style: none; margin-left: 24px;">
                         <li class="scene-item"><i class="fas fa-door-open"></i> Entrance</li>
                         <li class="scene-item"><i class="fas fa-couch"></i> Living Room</li>
                         <li class="scene-item"><i class="fas fa-bed"></i> Bedroom</li>
                         <li class="scene-item"><i class="fas fa-utensils"></i> Kitchen</li>
                     </ul>
                 </ul>
-                <button class="btn btn-primary" style="margin-top: 12px;" onclick="showImportSceneDialog()">
-                    <i class="fas fa-plus"></i> Add Scene
-                </button>
+                <button class="btn btn-primary" style="margin-top: 12px;" onclick="showImportSceneDialog()"><i class="fas fa-plus"></i> Add Scene</button>
             </div>
-
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-layer-group"></i> FLOOR LEVELS</div>
                 <div class="floor-level"><span>📍 Ground Floor</span><span class="floor-badge">±0.00 m</span></div>
                 <div class="floor-level"><span>📍 First Floor</span><span class="floor-badge">+3.00 m</span></div>
                 <div class="floor-level"><span>📍 Second Floor</span><span class="floor-badge">+6.00 m</span></div>
             </div>
-            
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-link"></i> SCENE LINKS</div>
-                <div class="link-item"><span class="link-icon">🚪</span> Entrance → Living Room</div>
-                <div class="link-item"><span class="link-icon">🚶</span> Living Room → Kitchen</div>
+                <div class="link-item"><span>🚪</span> Entrance → Living Room</div>
+                <div class="link-item"><span>🚶</span> Living Room → Kitchen</div>
                 <button class="btn" style="margin-top: 8px;"><i class="fas fa-plus"></i> Add Link</button>
             </div>
-            
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-crosshairs"></i> CALIBRATION POINTS</div>
                 <div id="calibrationPointsList" style="color: #8a8a9a; text-align: center; padding: 12px;">No calibration points</div>
             </div>
         </div>
-        <div class="panel-toggle" onclick="toggleLeftPanel()">
-            <i class="fas fa-chevron-left"></i>
-        </div>
+        <div class="panel-toggle" onclick="toggleLeftPanel()"><i class="fas fa-chevron-left"></i></div>
 
         <!-- CENTER PANEL -->
-        <div class="center-panel">
+        <div class="center-panel" id="centerPanel">
             <div id="container"></div>
         </div>
 
-        <!-- RIGHT PANEL -->
+        <!-- RIGHT PANEL - ELEMENT LIBRARY FULL -->
         <div class="right-panel" id="rightPanel">
-            <!-- Properties -->
+            <!-- Properties (مختصرة في الأعلى) -->
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-sliders-h"></i> PROPERTIES</div>
                 <div class="property-group">
@@ -693,22 +225,139 @@
                 </div>
             </div>
 
-            <!-- Element Library -->
+            <!-- ELEMENT LIBRARY FULL -->
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-icons"></i> ELEMENT LIBRARY</div>
-                <div class="library-grid">
-                    <div class="library-item" onclick="addWall()"><i class="fas fa-vector-square"></i><span>Wall</span></div>
-                    <div class="library-item" onclick="addColumn()"><i class="fas fa-square-full"></i><span>Column</span></div>
-                    <div class="library-item" onclick="addDoor()"><i class="fas fa-door-open"></i><span>Door</span></div>
-                    <div class="library-item" onclick="addWindow()"><i class="fas fa-window-maximize"></i><span>Window</span></div>
-                    <div class="library-item" onclick="addBeam()"><i class="fas fa-grip-lines"></i><span>Beam</span></div>
-                    <div class="library-item" onclick="addSlab()"><i class="fas fa-border-all"></i><span>Slab</span></div>
-                    <div class="library-item" onclick="addFoundation()"><i class="fas fa-arrow-down"></i><span>Foundation</span></div>
-                    <div class="library-item" onclick="addPipe()"><i class="fas fa-water"></i><span>Pipe</span></div>
-                    <div class="library-item" onclick="addTree()"><i class="fas fa-tree"></i><span>Tree</span></div>
-                    <div class="library-item" onclick="addStone()"><i class="fas fa-mountain"></i><span>Stone</span></div>
-                    <div class="library-item" onclick="addGlass()"><i class="fas fa-window-maximize"></i><span>Glass</span></div>
-                    <div class="library-item" onclick="runClashDetection()"><i class="fas fa-exclamation-triangle"></i><span>Clash</span></div>
+                
+                <!-- Search Bar -->
+                <div class="lib-search">
+                    <input type="text" id="elementSearch" placeholder="🔍 Search elements..." onkeyup="filterElements()">
+                </div>
+                
+                <!-- Architecture Category -->
+                <div class="lib-category" data-category="architecture">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-building"></i> ARCHITECTURE</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="architecture">
+                        <div class="library-item" onclick="addWall()"><i class="fas fa-vector-square"></i><span>Wall</span></div>
+                        <div class="library-item" onclick="addDoor()"><i class="fas fa-door-open"></i><span>Door</span></div>
+                        <div class="library-item" onclick="addWindow()"><i class="fas fa-window-maximize"></i><span>Window</span></div>
+                        <div class="library-item" onclick="addFloor()"><i class="fas fa-border-all"></i><span>Floor</span></div>
+                        <div class="library-item" onclick="addFinish()"><i class="fas fa-paint-roller"></i><span>Finish</span></div>
+                        <div class="library-item" onclick="addOpening()"><i class="fas fa-square"></i><span>Opening</span></div>
+                    </div>
+                </div>
+
+                <!-- Concrete Category -->
+                <div class="lib-category" data-category="concrete">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-hard-hat"></i> CONCRETE</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="concrete">
+                        <div class="library-item" onclick="addColumn()"><i class="fas fa-square-full"></i><span>Column</span></div>
+                        <div class="library-item" onclick="addBeam()"><i class="fas fa-grip-lines"></i><span>Beam</span></div>
+                        <div class="library-item" onclick="addSlab()"><i class="fas fa-border-all"></i><span>Slab</span></div>
+                        <div class="library-item" onclick="addFoundation()"><i class="fas fa-arrow-down"></i><span>Foundation</span></div>
+                        <div class="library-item" onclick="addRebar()"><i class="fas fa-chart-line"></i><span>Rebar</span></div>
+                        <div class="library-item" onclick="addConcreteMaterial()"><i class="fas fa-cube"></i><span>Concrete Mat</span></div>
+                    </div>
+                </div>
+
+                <!-- Earthworks Category -->
+                <div class="lib-category" data-category="earthworks">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-mountain"></i> EARTHWORKS</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="earthworks">
+                        <div class="library-item" onclick="addExcavation()"><i class="fas fa-fill-drip"></i><span>Excavation</span></div>
+                        <div class="library-item" onclick="addCompaction()"><i class="fas fa-compress"></i><span>Compaction</span></div>
+                        <div class="library-item" onclick="addLayer()"><i class="fas fa-layer-group"></i><span>Layer</span></div>
+                        <div class="library-item" onclick="addSoilMaterial()"><i class="fas fa-seedling"></i><span>Soil Material</span></div>
+                    </div>
+                </div>
+
+                <!-- Landscaping Category -->
+                <div class="lib-category" data-category="landscaping">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-tree"></i> LANDSCAPING</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="landscaping">
+                        <div class="library-item" onclick="addTree()"><i class="fas fa-tree"></i><span>Tree</span></div>
+                        <div class="library-item" onclick="addPalm()"><i class="fas fa-palm-tree"></i><span>Palm</span></div>
+                        <div class="library-item" onclick="addGrass()"><i class="fas fa-leaf"></i><span>Grass</span></div>
+                        <div class="library-item" onclick="addPlant()"><i class="fas fa-seedling"></i><span>Plant</span></div>
+                        <div class="library-item" onclick="addFountain()"><i class="fas fa-fountain"></i><span>Fountain</span></div>
+                        <div class="library-item" onclick="addGardenLight()"><i class="fas fa-lightbulb"></i><span>Garden Light</span></div>
+                    </div>
+                </div>
+
+                <!-- Stone & Brick Category -->
+                <div class="lib-category" data-category="stonebrick">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-gem"></i> STONE & BRICK</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="stonebrick">
+                        <div class="library-item" onclick="addStone()"><i class="fas fa-mountain"></i><span>Stone</span></div>
+                        <div class="library-item" onclick="addBrick()"><i class="fas fa-cubes"></i><span>Brick</span></div>
+                        <div class="library-item" onclick="addMarble()"><i class="fas fa-gem"></i><span>Marble</span></div>
+                        <div class="library-item" onclick="addGranite()"><i class="fas fa-mountain"></i><span>Granite</span></div>
+                        <div class="library-item" onclick="addCladding()"><i class="fas fa-border-all"></i><span>Cladding</span></div>
+                        <div class="library-item" onclick="addPavement()"><i class="fas fa-road"></i><span>Pavement</span></div>
+                    </div>
+                </div>
+
+                <!-- Glass Category -->
+                <div class="lib-category" data-category="glass">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-window-maximize"></i> GLASS</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="glass">
+                        <div class="library-item" onclick="addGlass()"><i class="fas fa-window-maximize"></i><span>Glass</span></div>
+                        <div class="library-item" onclick="addWindowGlass()"><i class="fas fa-window-restore"></i><span>Window Glass</span></div>
+                        <div class="library-item" onclick="addCurtainWall()"><i class="fas fa-building"></i><span>Curtain Wall</span></div>
+                        <div class="library-item" onclick="addGlassPartition()"><i class="fas fa-columns"></i><span>Glass Partition</span></div>
+                        <div class="library-item" onclick="addSkylight()"><i class="fas fa-sun"></i><span>Skylight</span></div>
+                        <div class="library-item" onclick="addSmartGlass()"><i class="fas fa-microchip"></i><span>Smart Glass</span></div>
+                    </div>
+                </div>
+
+                <!-- MEP Category -->
+                <div class="lib-category" data-category="mep">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-bolt"></i> MEP</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="mep">
+                        <div class="library-item" onclick="addElectrical()"><i class="fas fa-bolt"></i><span>Electrical</span></div>
+                        <div class="library-item" onclick="addPlumbing()"><i class="fas fa-water"></i><span>Plumbing</span></div>
+                        <div class="library-item" onclick="addHVAC()"><i class="fas fa-wind"></i><span>HVAC</span></div>
+                        <div class="library-item" onclick="addDrainage()"><i class="fas fa-tint"></i><span>Drainage</span></div>
+                        <div class="library-item" onclick="addPipe()"><i class="fas fa-water"></i><span>Pipe</span></div>
+                        <div class="library-item" onclick="addCable()"><i class="fas fa-bolt"></i><span>Cable</span></div>
+                    </div>
+                </div>
+
+                <!-- Tools Category -->
+                <div class="lib-category" data-category="tools">
+                    <div class="lib-category-header" onclick="toggleCategory(this)">
+                        <div class="lib-category-title"><i class="fas fa-tools"></i> TOOLS</div>
+                        <div class="lib-category-toggle"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="library-grid" data-grid="tools">
+                        <div class="library-item" onclick="runDistanceTool()"><i class="fas fa-ruler"></i><span>Distance</span></div>
+                        <div class="library-item" onclick="runAreaTool()"><i class="fas fa-draw-polygon"></i><span>Area</span></div>
+                        <div class="library-item" onclick="runVolumeTool()"><i class="fas fa-cube"></i><span>Volume</span></div>
+                        <div class="library-item" onclick="runClashDetection()"><i class="fas fa-exclamation-triangle"></i><span>Clash</span></div>
+                        <div class="library-item" onclick="runCalibration()"><i class="fas fa-crosshairs"></i><span>Calibrate</span></div>
+                        <div class="library-item" onclick="showBOQ()"><i class="fas fa-chart-bar"></i><span>BOQ</span></div>
+                    </div>
                 </div>
             </div>
 
@@ -720,45 +369,28 @@
                 <div class="material-swatch" style="background: #B22222;" onclick="selectMaterial('brick')"></div>
                 <div class="material-swatch" style="background: #87CEEB;" onclick="selectMaterial('glass')"></div>
                 <div class="material-swatch" style="background: #D2B48C;" onclick="selectMaterial('stone')"></div>
+                <div class="material-swatch" style="background: #C0C0C0;" onclick="selectMaterial('metal')"></div>
+                <div class="material-swatch" style="background: #A0522D;" onclick="selectMaterial('ceramic')"></div>
             </div>
 
             <!-- GeoReferencing -->
             <div class="panel-section">
                 <div class="panel-title"><i class="fas fa-crosshairs"></i> GEO REFERENCING</div>
                 <div style="background: #1a1a24; border-radius: 10px; padding: 12px; margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: #8a8a9a;">System:</span>
-                        <span style="color: #ffaa44; font-weight: bold;" id="coordSystem">UTM</span>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn" style="flex:1;" onclick="setCoordSystem('utm')">UTM</button>
-                        <button class="btn" style="flex:1;" onclick="setCoordSystem('local')">Local</button>
-                        <button class="btn" style="flex:1;" onclick="setCoordSystem('wgs84')">WGS84</button>
-                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: #8a8a9a;">System:</span><span style="color: #ffaa44; font-weight: bold;" id="coordSystem">UTM</span></div>
+                    <div style="display: flex; gap: 8px;"><button class="btn" style="flex:1;" onclick="setCoordSystem('utm')">UTM</button><button class="btn" style="flex:1;" onclick="setCoordSystem('local')">Local</button><button class="btn" style="flex:1;" onclick="setCoordSystem('wgs84')">WGS84</button></div>
                 </div>
                 <div style="margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: #8a8a9a;">GCP Points:</span>
-                        <span style="color: #ffaa44; font-weight: bold;" id="gcpCount">0</span>
-                    </div>
-                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="addCalibrationPoint()">
-                        <i class="fas fa-plus-circle"></i> Add GCP
-                    </button>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: #8a8a9a;">GCP Points:</span><span style="color: #ffaa44; font-weight: bold;" id="gcpCount">0</span></div>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="addCalibrationPoint()"><i class="fas fa-plus-circle"></i> Add GCP</button>
                 </div>
                 <div style="background: #1a1a24; border-radius: 10px; padding: 12px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: #8a8a9a;">Transform Matrix:</span>
-                        <button class="btn" style="padding:4px 12px;" onclick="calculateTransform()">Calc</button>
-                    </div>
-                    <div id="transformMatrix" style="font-family: monospace; font-size: 11px; background: #2a2a3a; padding: 8px; border-radius: 6px;">
-                        Not calculated
-                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="color: #8a8a9a;">Transform Matrix:</span><button class="btn" style="padding:4px 12px;" onclick="calculateTransform()">Calc</button></div>
+                    <div id="transformMatrix" style="font-family: monospace; font-size: 11px; background: #2a2a3a; padding: 8px; border-radius: 6px;">Not calculated</div>
                 </div>
             </div>
         </div>
-        <div class="right-panel-toggle" onclick="toggleRightPanel()">
-            <i class="fas fa-chevron-right"></i>
-        </div>
+        <div class="right-panel-toggle" onclick="toggleRightPanel()"><i class="fas fa-chevron-right"></i></div>
 
         <!-- STATUS BAR -->
         <div class="status-bar" id="statusBar">
@@ -768,128 +400,153 @@
     </div>
 
     <!-- MODALS -->
-    <div id="importImageModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fas fa-images"></i> Import 360 Image</h3><button onclick="hideModal('importImageModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div>
-            <div class="modal-body">
-                <input type="file" id="imageInput" accept="image/*">
-                <label>Scene Name:</label>
-                <input type="text" id="sceneName" value="New Scene">
-            </div>
-            <div class="modal-footer"><button class="btn" onclick="hideModal('importImageModal')">Cancel</button><button class="btn btn-primary" onclick="importImage()">Import</button></div>
-        </div>
-    </div>
-
-    <div id="importCADModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fas fa-draw-polygon"></i> Import CAD</h3><button onclick="hideModal('importCADModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div>
-            <div class="modal-body"><input type="file" id="cadInput" accept=".dxf,.dwg"></div>
-            <div class="modal-footer"><button class="btn" onclick="hideModal('importCADModal')">Cancel</button><button class="btn btn-primary" onclick="importCAD()">Import</button></div>
-        </div>
-    </div>
-
-    <div id="calibrationPointModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fas fa-crosshairs"></i> Add GCP</h3><button onclick="hideModal('calibrationPointModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div>
-            <div class="modal-body">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Image X:</label><input type="number" id="imgX" readonly></div><div><label>Image Y:</label><input type="number" id="imgY" readonly></div></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Real X:</label><input type="number" id="realX" value="0"></div><div><label>Real Y:</label><input type="number" id="realY" value="0"></div></div>
-            </div>
-            <div class="modal-footer"><button class="btn" onclick="hideModal('calibrationPointModal')">Cancel</button><button class="btn btn-primary" onclick="addCalibrationPointToScene()">Add</button></div>
-        </div>
-    </div>
+    <div id="importImageModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-images"></i> Import 360 Image</h3><button onclick="hideModal('importImageModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div><div class="modal-body"><input type="file" id="imageInput" accept="image/*"><label>Scene Name:</label><input type="text" id="sceneName" value="New Scene"></div><div class="modal-footer"><button class="btn" onclick="hideModal('importImageModal')">Cancel</button><button class="btn btn-primary" onclick="importImage()">Import</button></div></div></div>
+    <div id="importCADModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-draw-polygon"></i> Import CAD</h3><button onclick="hideModal('importCADModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div><div class="modal-body"><input type="file" id="cadInput" accept=".dxf,.dwg"></div><div class="modal-footer"><button class="btn" onclick="hideModal('importCADModal')">Cancel</button><button class="btn btn-primary" onclick="importCAD()">Import</button></div></div></div>
+    <div id="calibrationPointModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-crosshairs"></i> Add GCP</h3><button onclick="hideModal('calibrationPointModal')" style="background:none; border:none; color:#ffaa44; font-size:24px;">&times;</button></div><div class="modal-body"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Image X:</label><input type="number" id="imgX" readonly></div><div><label>Image Y:</label><input type="number" id="imgY" readonly></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Real X:</label><input type="number" id="realX" value="0"></div><div><label>Real Y:</label><input type="number" id="realY" value="0"></div></div></div><div class="modal-footer"><button class="btn" onclick="hideModal('calibrationPointModal')">Cancel</button><button class="btn btn-primary" onclick="addCalibrationPointToScene()">Add</button></div></div></div>
 
     <script>
         // Panel Toggles
-        function toggleLeftPanel() {
-            document.getElementById('leftPanel').classList.toggle('collapsed');
+        function toggleLeftPanel() { document.getElementById('leftPanel').classList.toggle('collapsed'); }
+        function toggleRightPanel() { document.getElementById('rightPanel').classList.toggle('collapsed'); }
+        function setViewMode(mode) { if(window.app) window.app.setViewMode(mode); document.querySelectorAll('.view-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+        
+        // Category Toggle
+        function toggleCategory(header) {
+            const category = header.closest('.lib-category');
+            category.classList.toggle('collapsed');
         }
-        function toggleRightPanel() {
-            document.getElementById('rightPanel').classList.toggle('collapsed');
-        }
-        function setViewMode(mode) {
-            if (window.app) window.app.setViewMode(mode);
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.mode === mode);
+        
+        // Search Filter
+        function filterElements() {
+            const searchTerm = document.getElementById('elementSearch').value.toLowerCase();
+            const categories = document.querySelectorAll('.lib-category');
+            
+            categories.forEach(category => {
+                const items = category.querySelectorAll('.library-item');
+                let hasMatch = false;
+                
+                items.forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    if (searchTerm === '' || text.includes(searchTerm)) {
+                        item.style.display = '';
+                        hasMatch = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // إذا كان هناك نتائج، تأكد أن القسم مفتوح
+                if (hasMatch && searchTerm !== '') {
+                    category.classList.remove('collapsed');
+                }
             });
         }
 
-        // Modal Controls
+       // Modal Controls
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
         function showImportSceneDialog() { showModal('importImageModal'); }
-        function showImportCADDialog() { showModal('importCADModal'); }
-
+        
         // Import Functions
         window.importImage = function() {
-            const input = document.getElementById('imageInput');
-            const name = document.getElementById('sceneName').value;
-            if (input.files.length && window.app) {
-                window.app.import360Image(URL.createObjectURL(input.files[0]), name);
-                hideModal('importImageModal');
-                updateWorkflow(3);
-            }
+            const input = document.getElementById('imageInput'), name = document.getElementById('sceneName').value;
+            if(input.files.length && window.app) { window.app.import360Image(URL.createObjectURL(input.files[0]), name); hideModal('importImageModal'); updateWorkflow(3); }
         };
         window.importCAD = function() {
             const input = document.getElementById('cadInput');
-            if (input.files.length && window.app) {
-                window.app.importCAD(input.files[0]);
-                hideModal('importCADModal');
-                updateWorkflow(2);
-            }
+            if(input.files.length && window.app) { window.app.importCAD(input.files[0]); hideModal('importCADModal'); updateWorkflow(2); }
         };
-
-        // Element Functions
+        
+        // Element Functions (Architecture)
         window.addWall = () => window.app?.startDrawing('wall');
-        window.addColumn = () => window.app?.startDrawing('column');
         window.addDoor = () => window.app?.startDrawing('door');
         window.addWindow = () => window.app?.startDrawing('window');
+        window.addFloor = () => window.app?.startDrawing('floor');
+        window.addFinish = () => window.app?.startDrawing('finish');
+        window.addOpening = () => window.app?.startDrawing('opening');
+        
+        // Concrete
+        window.addColumn = () => window.app?.startDrawing('column');
         window.addBeam = () => window.app?.startDrawing('beam');
         window.addSlab = () => window.app?.startDrawing('slab');
         window.addFoundation = () => window.app?.startDrawing('foundation');
-        window.addPipe = () => window.app?.startDrawing('pipe');
+        window.addRebar = () => window.app?.startDrawing('rebar');
+        window.addConcreteMaterial = () => window.app?.startDrawing('concreteMaterial');
+        
+        // Earthworks
+        window.addExcavation = () => window.app?.startDrawing('excavation');
+        window.addCompaction = () => window.app?.startDrawing('compaction');
+        window.addLayer = () => window.app?.startDrawing('layer');
+        window.addSoilMaterial = () => window.app?.startDrawing('soilMaterial');
+        
+        // Landscaping
         window.addTree = () => window.app?.startDrawing('tree');
+        window.addPalm = () => window.app?.startDrawing('palm');
+        window.addGrass = () => window.app?.startDrawing('grass');
+        window.addPlant = () => window.app?.startDrawing('plant');
+        window.addFountain = () => window.app?.startDrawing('fountain');
+        window.addGardenLight = () => window.app?.startDrawing('gardenLight');
+        
+        // Stone & Brick
         window.addStone = () => window.app?.startDrawing('stone');
+        window.addBrick = () => window.app?.startDrawing('brick');
+        window.addMarble = () => window.app?.startDrawing('marble');
+        window.addGranite = () => window.app?.startDrawing('granite');
+        window.addCladding = () => window.app?.startDrawing('cladding');
+        window.addPavement = () => window.app?.startDrawing('pavement');
+        
+        // Glass
         window.addGlass = () => window.app?.startDrawing('glass');
+        window.addWindowGlass = () => window.app?.startDrawing('windowGlass');
+        window.addCurtainWall = () => window.app?.startDrawing('curtainWall');
+        window.addGlassPartition = () => window.app?.startDrawing('glassPartition');
+        window.addSkylight = () => window.app?.startDrawing('skylight');
+        window.addSmartGlass = () => window.app?.startDrawing('smartGlass');
+        
+        // MEP
+        window.addElectrical = () => window.app?.startDrawing('electrical');
+        window.addPlumbing = () => window.app?.startDrawing('plumbing');
+        window.addHVAC = () => window.app?.startDrawing('hvac');
+        window.addDrainage = () => window.app?.startDrawing('drainage');
+        window.addPipe = () => window.app?.startDrawing('pipe');
+        window.addCable = () => window.app?.startDrawing('cable');
+        
+        // Tools
+        window.runDistanceTool = () => window.app?.engine?.distanceTool?.activate();
+        window.runAreaTool = () => window.app?.engine?.areaTool?.activate();
+        window.runVolumeTool = () => window.app?.engine?.volumeTool?.activate();
         window.runClashDetection = () => window.app?.runClashDetection();
-
+        window.runCalibration = () => window.app?.runCalibration();
+        window.showBOQ = () => window.app?.generateBOQ?.();
+        
         // Calibration Functions
         window.addCalibrationPoint = () => { if(window.app) { window.app.startCalibrationPoint(); showModal('calibrationPointModal'); } };
-        window.runCalibration = () => window.app?.runCalibration();
         window.addCalibrationPointToScene = () => {
-            if(window.app) window.app.addCalibrationPoint({
-                imageX: parseFloat(document.getElementById('imgX').value) || 0,
-                imageY: parseFloat(document.getElementById('imgY').value) || 0,
-                realX: parseFloat(document.getElementById('realX').value) || 0,
-                realY: parseFloat(document.getElementById('realY').value) || 0
-            });
+            if(window.app) window.app.addCalibrationPoint({ imageX: parseFloat(document.getElementById('imgX').value)||0, imageY: parseFloat(document.getElementById('imgY').value)||0, realX: parseFloat(document.getElementById('realX').value)||0, realY: parseFloat(document.getElementById('realY').value)||0 });
             hideModal('calibrationPointModal');
         };
-
+        
         // GeoReferencing
-        window.setCoordSystem = (system) => {
-            if(window.app) { window.app.engine.geoRef.setCoordinateSystem(system); document.getElementById('coordSystem').textContent = system.toUpperCase(); window.app.updateStatus(`System: ${system}`, 'success'); }
-        };
+        window.setCoordSystem = (system) => { if(window.app) { window.app.engine.geoRef.setCoordinateSystem(system); document.getElementById('coordSystem').textContent = system.toUpperCase(); window.app.updateStatus(`System: ${system}`, 'success'); } };
         window.calculateTransform = () => { if(window.app) { window.app.engine.geoRef.calculateTransform(); window.app.updateTransformMatrix(); window.app.updateStatus('Transform calculated', 'success'); } };
         window.selectMaterial = (m) => window.app?.updateStatus(`Material: ${m}`, 'success');
-
+        
         // Workflow Update
         window.updateWorkflow = (step) => {
             const steps = document.querySelectorAll('.workflow-step');
-            steps.forEach((s, i) => s.classList.toggle('active', i < step));
+            steps.forEach((s,i) => s.classList.toggle('active', i < step));
             document.getElementById('statusMessage').innerHTML = `Step ${step}/7: ${['','Import CAD','Draw Plan','Import 360','Calibrate','Link','Build','BOQ'][step]}`;
         };
-
+        
         // Menu
         document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-                this.classList.add('active');
-            });
+            item.addEventListener('click', function() { document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); this.classList.add('active'); });
         });
-
+        
         updateWorkflow(1);
     </script>
     <script type="module" src="./main.js"></script>
 </body>
 </html>
+
+        
